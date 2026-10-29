@@ -201,7 +201,8 @@ function OfficialForm({
         >
           {examsOfYear.map((e) => (
             <option key={e.id} value={e.id}>
-              {e.institution} - {examLabel(e)}
+              {e.label.startsWith(e.institution) ? '' : `${e.institution} - `}
+              {examLabel(e)}
             </option>
           ))}
         </Select>

@@ -236,7 +236,7 @@ function QuestionsPage() {
                       <ChevronLeft className="size-5" aria-hidden />
                       Anterior
                     </Button>
-                    <span className="text-sm font-semibold tabular-nums">
+                    <span className="text-sm font-semibold whitespace-nowrap tabular-nums">
                       {cursor + 1} de {total.toLocaleString('pt-BR')}
                     </span>
                     <Button

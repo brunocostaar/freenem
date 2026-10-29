@@ -39,3 +39,62 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm build
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: check
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: freenem
+          POSTGRES_USER: freenem
+          POSTGRES_PASSWORD: freenem
+        ports:
+          - 5442:5432
+        options: >-
+          --health-cmd "pg_isready -U freenem -d freenem"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgres://freenem:freenem@127.0.0.1:5442/freenem
+      BETTER_AUTH_SECRET: ci-secret-ci-secret-ci-secret-ci-secret
+      ADMIN_EMAIL: admin@freenem.local
+      ADMIN_PASSWORD: freenem-admin
+      RATE_LIMIT_ENABLED: 'false'
+      CI: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Banco (migrate, seed e questões de fixture)
+        run: |
+          pnpm db:migrate
+          pnpm db:seed
+          pnpm --filter @freenem/api db:seed:fixtures
+      - name: Subir API e web
+        run: |
+          pnpm --filter @freenem/api dev > api.log 2>&1 &
+          pnpm --filter @freenem/web dev > web.log 2>&1 &
+          npx --yes wait-on@8 -t 120000 http://localhost:3340/health http://localhost:5173
+      - name: Instalar Chromium
+        run: pnpm --filter @freenem/e2e exec playwright install --with-deps chromium
+      - name: Testes e2e
+        run: pnpm e2e
+      - name: Logs dos servidores
+        if: failure()
+        run: tail -n 100 api.log web.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: |
+            apps/e2e/test-results
+            apps/e2e/screenshots
+          if-no-files-found: ignore

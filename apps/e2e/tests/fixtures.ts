@@ -3,7 +3,8 @@ import { test as base, expect, type Page } from '@playwright/test';
 
 export { expect };
 
-const API = 'http://localhost:3340';
+const BASE = process.env.E2E_BASE_URL ?? 'http://localhost:5173';
+const API = process.env.E2E_API_URL ?? 'http://localhost:3340';
 export const SCREENSHOT_DIR = new URL('../screenshots/', import.meta.url).pathname;
 
 export interface Guard {
@@ -31,7 +32,7 @@ export const test = base.extend<{ guard: Guard }>({
       page.on('response', (r) => {
         const url = r.url();
         if (r.status() < 400) return;
-        if (!url.startsWith(API) && !url.includes('localhost:5173')) return;
+        if (!url.startsWith(API) && !url.startsWith(BASE)) return;
         if (allowed.some((a) => a.pattern.test(url) && (!a.status || a.status === r.status())))
           return;
         errors.push(`HTTP ${r.status()} ${r.request().method()} ${url}`);
@@ -99,5 +100,9 @@ export async function expectNoHorizontalOverflow(page: Page) {
 export async function shot(page: Page, project: string, name: string) {
   mkdirSync(`${SCREENSHOT_DIR}${project}`, { recursive: true });
   await page.waitForTimeout(250);
-  await page.screenshot({ path: `${SCREENSHOT_DIR}${project}/${name}.png`, fullPage: true });
+  await page.screenshot({
+    path: `${SCREENSHOT_DIR}${project}/${name}.png`,
+    fullPage: true,
+    scale: 'css',
+  });
 }

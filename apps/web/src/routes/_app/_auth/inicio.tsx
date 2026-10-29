@@ -91,7 +91,7 @@ function Inicio() {
           <Badge tone={stats.streakDays > 0 ? 'accent' : 'neutral'} className="px-3 py-1.5 text-sm">
             <Flame className="size-4" aria-hidden />
             {stats.streakDays > 0
-              ? `${stats.streakDays} ${stats.streakDays === 1 ? 'dia' : 'dias'} seguidos`
+              ? `${stats.streakDays} ${stats.streakDays === 1 ? 'dia seguido' : 'dias seguidos'}`
               : 'Comece sua sequência hoje'}
           </Badge>
         )}

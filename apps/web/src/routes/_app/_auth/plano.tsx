@@ -462,8 +462,8 @@ function PlanItemCard({
         <k.icon className="size-5" aria-hidden />
       </div>
       <div className="min-w-0 flex-1">
-        <p className={cn('truncate font-semibold', item.done && 'line-through')}>{title}</p>
-        <p className="truncate text-sm text-muted">
+        <p className={cn('font-semibold break-words', item.done && 'line-through')}>{title}</p>
+        <p className="text-sm break-words text-muted">
           {k.label}
           {item.subjectName ? ` · ${item.subjectName}` : ''} · {formatMinutes(item.minutes)}
           {item.auto ? ' · automático' : ''}

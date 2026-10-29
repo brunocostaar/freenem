@@ -17,7 +17,7 @@ Tudo abaixo depende de contas, chaves ou decisões suas. O app roda 100% localme
 ## 3. Banco + API no Railway
 
 1. Novo projeto → **Add Postgres**.
-2. **New service → GitHub repo** (este repositório). Em *Settings*:
+2. **New service → GitHub repo** (este repositório). Em _Settings_:
    - Root directory: `/` (o Dockerfile usa a raiz como contexto)
    - Builder: Dockerfile, caminho `apps/api/Dockerfile` (o `railway.json` já configura isso, o pre-deploy `node dist/migrate.js` e o healthcheck `/health`).
 3. Variáveis do serviço:

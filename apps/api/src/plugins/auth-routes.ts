@@ -8,7 +8,17 @@ export default fp(
     app.route({
       method: ['GET', 'POST'],
       url: '/api/auth/*',
-      config: env.RATE_LIMIT_ENABLED ? { rateLimit: { max: 60, timeWindow: '1 minute' } } : {},
+      // Limite estrito só para POST (login, cadastro, reset). GET /get-session é chamado a cada
+      // navegação do app e não pode estourar o limite de um uso normal.
+      config: env.RATE_LIMIT_ENABLED
+        ? {
+            rateLimit: {
+              max: (req: { method: string }) => (req.method === 'GET' ? 600 : 60),
+              timeWindow: '1 minute',
+              keyGenerator: (req: { ip: string; method: string }) => `${req.ip}:${req.method}`,
+            },
+          }
+        : {},
       handler: async (request, reply) => {
         const url = new URL(request.url, `http://${request.headers.host ?? 'localhost'}`);
         const headers = new Headers();
