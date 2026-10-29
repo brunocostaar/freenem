@@ -20,7 +20,7 @@ COPY --from=build /deploy/node_modules ./node_modules
 COPY --from=build /repo/apps/api/dist ./dist
 COPY --from=build /repo/apps/api/drizzle ./drizzle
 COPY --from=build /repo/apps/api/package.json ./package.json
-EXPOSE 3333
-HEALTHCHECK CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||3333)+'/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+EXPOSE 3340
+HEALTHCHECK CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||3340)+'/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 # Migrations rodam no preDeployCommand (railway.json); `node dist/migrate.js` também está disponível.
 CMD ["node", "dist/server.js"]

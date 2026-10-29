@@ -9,3 +9,4 @@ coverage
 apps/api/storage
 .turbo
 *.tsbuildinfo
+.claude/worktrees/
