@@ -21,6 +21,7 @@ const envSchema = z.object({
   ANTHROPIC_API_KEY: optionalString,
   ANTHROPIC_MODEL: z.string().default('claude-sonnet-5-5'),
   STORAGE_DRIVER: z.enum(['local', 'r2']).default('local'),
+  STORAGE_DIR: z.string().default('./storage'),
   R2_ACCOUNT_ID: optionalString,
   R2_ACCESS_KEY_ID: optionalString,
   R2_SECRET_ACCESS_KEY: optionalString,

@@ -1,1 +1,13 @@
-{ "extends": "../../tsconfig.base.json", "compilerOptions": { "types": [] }, "include": ["src"] }
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    // O ingest reutiliza o schema/storage da API: força uma única instância do drizzle-orm
+    // (o pnpm cria variantes por peer deps, o que quebra a compatibilidade de tipos).
+    "paths": {
+      "drizzle-orm": ["../../apps/api/node_modules/drizzle-orm"],
+      "drizzle-orm/*": ["../../apps/api/node_modules/drizzle-orm/*"]
+    }
+  },
+  "include": ["src"]
+}

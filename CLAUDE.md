@@ -21,6 +21,11 @@ Plataforma de estudos ENEM/vestibulares. UI em português do Brasil; código e i
 5. Erros: lance `app.httpErrors.notFound(...)` etc.; o handler global responde `{ error: { code, message } }`.
 6. Teste de integração em `apps/api/test/*.test.ts` usando `buildTestApp()` e `createAuthedUser(app, { role })` de `test/helpers.ts` (banco real `freenem_test`, migrado automaticamente no globalSetup).
 
+## Banco de questões
+
+- Importação: `pnpm ingest:enem` (questões + imagens + classificação) e `pnpm ingest:tri` (parâmetros a/b/c); detalhes em `packages/ingest/README.md`. Imagens ficam no storage (`apps/api/src/lib/storage.ts`, driver `local` ou `r2`); no banco as URLs são `storage://chave` e a API converte em URL pública (`publicUrls`). Nunca envie o gabarito em listagens/detalhes: ele só sai em `/answers`, `/questions/:id/check` e `/review/*`.
+- Web: `QuestionCard`/`AlternativeOption`/`usePractice` em `apps/web/src/components/question/` (modo `select` = sem revelar gabarito, para simulados).
+
 ## Banco
 
 - Schema em `apps/api/src/db/schema/*.ts` (reexportado em `index.ts`). Após alterar: `pnpm db:generate` e comitar a migration em `apps/api/drizzle/`. Nunca edite migrations já aplicadas.

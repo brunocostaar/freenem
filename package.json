@@ -17,7 +17,9 @@
     "test": "pnpm -r test",
     "db:generate": "pnpm --filter @freenem/api db:generate",
     "db:migrate": "pnpm --filter @freenem/api db:migrate",
-    "db:seed": "pnpm --filter @freenem/api db:seed"
+    "db:seed": "pnpm --filter @freenem/api db:seed",
+    "ingest:enem": "pnpm --filter @freenem/ingest run import:enem",
+    "ingest:tri": "pnpm --filter @freenem/ingest run import:tri"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.0",
