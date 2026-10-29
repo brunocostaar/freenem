@@ -40,6 +40,16 @@ export function rangeStart(range: StatsRange, today: string): string | null {
 const sinceCond = (since: string | null): SQL | undefined =>
   since ? gte(answers.answeredAt, sql`(${since}::date)::timestamp AT TIME ZONE ${TZ}`) : undefined;
 
+/**
+ * Respostas do usuário que contam nas estatísticas: as avulsas e as de simulados finalizados.
+ * O autosave do simulado grava em `answers` durante a prova; essas linhas parciais ficam de fora.
+ */
+const ownAnswers = (userId: string): SQL =>
+  sql`${answers.userId} = ${userId} and (${answers.simuladoAttemptId} is null or exists (
+    select 1 from ${schema.simuladoAttempts}
+    where ${schema.simuladoAttempts.id} = ${answers.simuladoAttemptId}
+      and ${schema.simuladoAttempts.status} = 'finished'))`;
+
 const timeSum = sql<number>`coalesce(sum(least(coalesce(${answers.timeSpentMs}, 0), ${MAX_TIME_PER_ANSWER_MS})), 0)::float8`;
 const correctCount = sql<number>`(count(*) filter (where ${answers.isCorrect}))::int`;
 const avgTime = sql<number | null>`avg(${answers.timeSpentMs})::float8`;
@@ -49,7 +59,7 @@ const ratio = (c: number, t: number) => (t > 0 ? c / t : 0);
 export async function getOverview(userId: string, range: StatsRange): Promise<StatsOverview> {
   const today = saoPauloDate();
   const since = rangeStart(range, today);
-  const where = and(eq(answers.userId, userId), sinceCond(since));
+  const where = and(ownAnswers(userId), sinceCond(since));
   const dayExpr = sql<string>`to_char((${answers.answeredAt} AT TIME ZONE ${TZ})::date, 'YYYY-MM-DD')`;
 
   const [totalsRows, lifetimeRows, dayRows, subjectRows, topicRows, simuladoRows, essayRows] =
@@ -63,7 +73,7 @@ export async function getOverview(userId: string, range: StatsRange): Promise<St
         })
         .from(answers)
         .where(where),
-      db.select({ total: count() }).from(answers).where(eq(answers.userId, userId)),
+      db.select({ total: count() }).from(answers).where(ownAnswers(userId)),
       db
         .select({
           date: dayExpr,
@@ -71,9 +81,7 @@ export async function getOverview(userId: string, range: StatsRange): Promise<St
           correct: correctCount,
         })
         .from(answers)
-        .where(
-          and(eq(answers.userId, userId), sinceCond(shiftDate(today, -(STREAK_LOOKBACK_DAYS - 1)))),
-        )
+        .where(and(ownAnswers(userId), sinceCond(shiftDate(today, -(STREAK_LOOKBACK_DAYS - 1)))))
         .groupBy(dayExpr)
         .orderBy(dayExpr),
       db
@@ -229,7 +237,7 @@ export async function topicStats(
       answers,
       and(
         eq(answers.questionId, questionTopics.questionId),
-        eq(answers.userId, userId),
+        ownAnswers(userId),
         sinceCond(opts.since ?? null),
       ),
     )
