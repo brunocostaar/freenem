@@ -2,6 +2,7 @@ import { Link, Outlet, useNavigate } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   BarChart3,
+  Home,
   BookOpenCheck,
   CalendarCheck,
   ClipboardList,
@@ -19,12 +20,20 @@ import { Logo } from './Logo';
 import { ThemeToggle } from './ThemeToggle';
 
 interface NavItem {
-  to: '/questoes' | '/simulados' | '/redacao' | '/desempenho' | '/plano' | '/admin/revisao';
+  to:
+    | '/inicio'
+    | '/questoes'
+    | '/simulados'
+    | '/redacao'
+    | '/desempenho'
+    | '/plano'
+    | '/admin/revisao';
   label: string;
   icon: LucideIcon;
 }
 
 const NAV: NavItem[] = [
+  { to: '/inicio', label: 'Início', icon: Home },
   { to: '/questoes', label: 'Questões', icon: BookOpenCheck },
   { to: '/simulados', label: 'Simulados', icon: ClipboardList },
   { to: '/redacao', label: 'Redação', icon: PenLine },

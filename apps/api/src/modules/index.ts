@@ -3,6 +3,8 @@ import health from './health/routes.js';
 import me from './me/routes.js';
 import config from './config/routes.js';
 import simulados from './simulados/routes.js';
+import stats from './stats/routes.js';
+import studyPlan from './study-plan/routes.js';
 
 /** Registrados na raiz (ex.: /health). */
 export const rootModules = [health];
@@ -11,7 +13,7 @@ export const rootModules = [health];
  * Registrados sob /api/v1. Para adicionar um módulo: crie
  * `src/modules/<nome>/{routes.ts,service.ts}` e acrescente UMA linha aqui.
  */
-export const v1Modules = [me, config, simulados];
+export const v1Modules = [me, config, simulados, stats, studyPlan];
 
 export async function registerModules(app: FastifyInstance) {
   for (const m of rootModules) await app.register(m);

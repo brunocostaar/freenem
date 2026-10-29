@@ -1,4 +1,4 @@
-import { Link, createFileRoute } from '@tanstack/react-router';
+import { Link, createFileRoute, redirect } from '@tanstack/react-router';
 import {
   ArrowRight,
   BookOpenCheck,
@@ -12,12 +12,19 @@ import { Badge, buttonClasses, Card } from '@/components/ui';
 import { RichText } from '@/components/RichText';
 import { Logo } from '@/components/layout/Logo';
 import { ThemeToggle } from '@/components/layout/ThemeToggle';
-import { useSession } from '@/lib/auth-client';
+import { authClient, useSession } from '@/lib/auth-client';
 import { cn } from '@/lib/cn';
 
 export const GITHUB_URL = 'https://github.com/SEU-USUARIO/freenem';
 
-export const Route = createFileRoute('/')({ component: Landing });
+export const Route = createFileRoute('/')({
+  // Quem já está logado vai direto para o painel pessoal; a landing é só para visitantes.
+  beforeLoad: async () => {
+    const { data } = await authClient.getSession();
+    if (data) throw redirect({ to: '/inicio' });
+  },
+  component: Landing,
+});
 
 const FEATURES = [
   {
