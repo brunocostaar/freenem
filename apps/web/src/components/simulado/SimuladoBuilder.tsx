@@ -6,6 +6,7 @@ import {
   simuladoSchema,
   type EnemArea,
   type SimuladoCreate,
+  type SimuladoLanguage,
   type SimuladoOptions,
 } from '@freenem/shared';
 import { z } from 'zod';
@@ -133,13 +134,22 @@ function OfficialForm({
   const [examId, setExamId] = useState<string>(examsOfYear[0]?.id ?? '');
   const [area, setArea] = useState<EnemArea | ''>('');
   const [noLimit, setNoLimit] = useState(false);
+  const [language, setLanguage] = useState<SimuladoLanguage>('ingles');
 
   const exam = options.exams.find((e) => e.id === examId);
-  const count = exam
+  // Provas com Inglês e Espanhol (números 1–5 repetidos): o aluno escolhe uma língua.
+  const hasLanguageChoice = Boolean(
+    exam && exam.languageCounts.ingles > 0 && exam.languageCounts.espanhol > 0,
+  );
+  const droppedLanguage: SimuladoLanguage = language === 'ingles' ? 'espanhol' : 'ingles';
+  const languageDiscount = hasLanguageChoice && exam ? exam.languageCounts[droppedLanguage] : 0;
+  const rawCount = exam
     ? area
       ? (exam.areas.find((a) => a.area === area)?.count ?? 0)
       : exam.questionCount
     : 0;
+  // a língua só pesa na prova completa ou na área de Linguagens
+  const count = rawCount - (area === '' || area === 'linguagens' ? languageDiscount : 0);
 
   if (options.exams.length === 0) {
     return (
@@ -159,11 +169,12 @@ function OfficialForm({
           mode: 'official',
           examId: exam.id,
           ...(area ? { area } : {}),
+          ...(hasLanguageChoice ? { language } : {}),
           ...(noLimit ? { timeLimitMinutes: null } : {}),
         });
       }}
     >
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className={cn('grid gap-4', hasLanguageChoice ? 'sm:grid-cols-2' : 'sm:grid-cols-3')}>
         <Select
           label="Ano"
           value={year ?? ''}
@@ -202,10 +213,21 @@ function OfficialForm({
           <option value="">Prova completa</option>
           {exam?.areas.map((a) => (
             <option key={a.area} value={a.area}>
-              {AREA_SHORT[a.area]} ({a.count})
+              {AREA_SHORT[a.area]} ({a.area === 'linguagens' ? a.count - languageDiscount : a.count}
+              )
             </option>
           ))}
         </Select>
+        {hasLanguageChoice && (
+          <Select
+            label="Língua estrangeira"
+            value={language}
+            onChange={(e) => setLanguage(e.target.value as SimuladoLanguage)}
+          >
+            <option value="ingles">Inglês</option>
+            <option value="espanhol">Espanhol</option>
+          </Select>
+        )}
       </div>
       <label className="flex items-center gap-2 text-sm font-medium">
         <input

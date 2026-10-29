@@ -8,6 +8,7 @@ import {
   type EnemArea,
   type Simulado,
   type SimuladoCreate,
+  type SimuladoLanguage,
   type SimuladoOptions,
 } from '@freenem/shared';
 import { db, schema, type Db } from '../../db/index.js';
@@ -49,6 +50,8 @@ const iso = (d: Date | null) => (d ? d.toISOString() : null);
 
 // ---------------------------------------------------------------- opções
 
+const LANGUAGES: SimuladoLanguage[] = ['ingles', 'espanhol'];
+
 /** Tempo oficial da prova completa em minutos (só ENEM, pelo dia). */
 export function officialMinutes(institutionSlug: string, phase: string | null): number | null {
   if (institutionSlug !== 'enem' || !phase) return null;
@@ -59,7 +62,7 @@ export function officialMinutes(institutionSlug: string, phase: string | null): 
 
 export async function getOptions(): Promise<SimuladoOptions> {
   const published = eq(questions.status, 'published');
-  const [examRows, perArea, subjectRows, instRows] = await Promise.all([
+  const [examRows, perArea, perLanguage, subjectRows, instRows] = await Promise.all([
     db
       .select({
         id: exams.id,
@@ -79,6 +82,12 @@ export async function getOptions(): Promise<SimuladoOptions> {
       .leftJoin(subjects, eq(subjects.id, questions.subjectId))
       .where(and(published, isNotNull(questions.examId)))
       .groupBy(questions.examId, subjects.area),
+    db
+      .select({ examId: questions.examId, slug: subjects.slug, n: count() })
+      .from(questions)
+      .innerJoin(subjects, eq(subjects.id, questions.subjectId))
+      .where(and(published, isNotNull(questions.examId), inArray(subjects.slug, LANGUAGES)))
+      .groupBy(questions.examId, subjects.slug),
     db
       .select({
         id: subjects.id,
@@ -117,12 +126,21 @@ export async function getOptions(): Promise<SimuladoOptions> {
     }
   }
 
+  const languagesByExam = new Map<string, { ingles: number; espanhol: number }>();
+  for (const r of perLanguage) {
+    if (!r.examId) continue;
+    const cur = languagesByExam.get(r.examId) ?? { ingles: 0, espanhol: 0 };
+    cur[r.slug as SimuladoLanguage] = r.n;
+    languagesByExam.set(r.examId, cur);
+  }
+
   const examList = examRows
     .filter((e) => (totalByExam.get(e.id) ?? 0) > 0)
     .map((e) => ({
       ...e,
       questionCount: totalByExam.get(e.id) ?? 0,
       areas: areasByExam.get(e.id) ?? [],
+      languageCounts: languagesByExam.get(e.id) ?? { ingles: 0, espanhol: 0 },
       officialMinutes: officialMinutes(e.institutionSlug, e.phase),
     }));
 
@@ -159,7 +177,7 @@ export async function createSimulado(userId: string, input: SimuladoCreate): Pro
     if (!exam) throw notFound('Prova');
     examId = exam.id;
     const rows = await db
-      .select({ id: questions.id })
+      .select({ id: questions.id, slug: subjects.slug })
       .from(questions)
       .leftJoin(subjects, eq(subjects.id, questions.subjectId))
       .where(
@@ -170,10 +188,16 @@ export async function createSimulado(userId: string, input: SimuladoCreate): Pro
         ),
       )
       .orderBy(sql`${questions.number} asc nulls last`, asc(questions.id));
-    if (rows.length === 0) {
+    // ENEM Dia 1: Inglês e Espanhol repetem os números 1–5; o aluno escolhe uma língua.
+    const slugs = new Set(rows.map((r) => r.slug));
+    const bothLanguages = LANGUAGES.every((l) => slugs.has(l));
+    const language = input.language ?? 'ingles';
+    const dropped = language === 'ingles' ? 'espanhol' : 'ingles';
+    const chosen = bothLanguages ? rows.filter((r) => r.slug !== dropped) : rows;
+    if (chosen.length === 0) {
       throw new ServiceError(422, 'Esta prova não tem questões publicadas para essa seleção.');
     }
-    questionIds = rows.map((r) => r.id);
+    questionIds = chosen.map((r) => r.id);
     const base = officialMinutes(exam.institutionSlug, exam.phase);
     if (input.timeLimitMinutes !== undefined) timeLimit = input.timeLimitMinutes;
     else if (base === null) timeLimit = Math.ceil(questionIds.length * 3);
@@ -186,7 +210,10 @@ export async function createSimulado(userId: string, input: SimuladoCreate): Pro
     title ??= `${exam.institution} ${exam.year} - ${exam.label}${
       input.area ? ` (${ENEM_AREA_LABELS[input.area].split(' e ')[0]})` : ''
     }`;
-    storedFilters = input.area ? { area: input.area } : null;
+    storedFilters =
+      input.area || bothLanguages
+        ? { ...(input.area ? { area: input.area } : {}), ...(bothLanguages ? { language } : {}) }
+        : null;
   } else {
     const f = input.filters ?? {};
     const wanted = input.questionCount ?? 20;

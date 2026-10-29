@@ -27,7 +27,7 @@ export function AuthForm({ mode, redirect }: { mode: 'signin' | 'signup'; redire
   const [notice, setNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const isSignup = mode === 'signup';
-  const target = redirect && redirect.startsWith('/') ? redirect : '/questoes';
+  const target = redirect && redirect.startsWith('/') ? redirect : '/inicio';
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();

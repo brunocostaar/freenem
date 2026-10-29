@@ -6,6 +6,10 @@ import {
   simuladoModeSchema,
 } from './enums.js';
 
+/** Língua estrangeira do ENEM (Inglês e Espanhol repetem os números 1–5 no Dia 1). */
+export const simuladoLanguageSchema = z.enum(['ingles', 'espanhol']);
+export type SimuladoLanguage = z.infer<typeof simuladoLanguageSchema>;
+
 export const SIMULADO_CUSTOM_MIN_QUESTIONS = 5;
 export const SIMULADO_CUSTOM_MAX_QUESTIONS = 90;
 
@@ -30,6 +34,11 @@ export const simuladoCreateSchema = z
     examId: z.string().uuid().optional(),
     /** mode=official: restringe a uma área do ENEM */
     area: enemAreaSchema.optional(),
+    /**
+     * mode=official: língua estrangeira escolhida (padrão: inglês). Só vale
+     * para provas que têm as duas línguas; a outra é removida do simulado.
+     */
+    language: simuladoLanguageSchema.optional(),
     /** mode=custom */
     filters: simuladoFiltersSchema.optional(),
     /** mode=custom: 5–90 */
@@ -77,7 +86,9 @@ export const simuladoSchema = z.object({
   questionCount: z.number().int(),
   timeLimitMinutes: z.number().int().nullable(),
   createdAt: z.string(),
-  filters: simuladoFiltersSchema.extend({ area: enemAreaSchema.optional() }).nullable(),
+  filters: simuladoFiltersSchema
+    .extend({ area: enemAreaSchema.optional(), language: simuladoLanguageSchema.optional() })
+    .nullable(),
   /** tentativas, da mais recente para a mais antiga */
   attempts: z.array(attemptSummarySchema),
 });
@@ -110,6 +121,8 @@ export const simuladoOptionsSchema = z.object({
       color: z.string().nullable(),
       questionCount: z.number().int(),
       areas: z.array(z.object({ area: enemAreaSchema, count: z.number().int() })),
+      /** questões publicadas por língua estrangeira (a prova tem opção de língua se ambas > 0) */
+      languageCounts: z.object({ ingles: z.number().int(), espanhol: z.number().int() }),
       /** tempo oficial sugerido para a prova completa, em minutos (null se desconhecido) */
       officialMinutes: z.number().int().nullable(),
     }),

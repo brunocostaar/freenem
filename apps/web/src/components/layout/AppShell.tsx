@@ -52,8 +52,10 @@ export function AppShell() {
 
   async function handleSignOut() {
     await signOut();
-    qc.clear();
+    // Navega antes de limpar o cache: limpar com a tela autenticada montada
+    // dispararia refetches 401 (stats, plano, me).
     await navigate({ to: '/' });
+    qc.clear();
   }
 
   return (
