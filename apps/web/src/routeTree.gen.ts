@@ -18,8 +18,10 @@ import { Route as AppQuestoesRouteImport } from './routes/_app/questoes'
 import { Route as AppAuthDesempenhoRouteImport } from './routes/_app/_auth/desempenho'
 import { Route as AppAuthPlanoRouteImport } from './routes/_app/_auth/plano'
 import { Route as AppAuthRedacaoRouteImport } from './routes/_app/_auth/redacao'
-import { Route as AppAuthSimuladosRouteImport } from './routes/_app/_auth/simulados'
 import { Route as AppAuthAdminRevisaoRouteImport } from './routes/_app/_auth/admin/revisao'
+import { Route as AppAuthSimuladosIndexRouteImport } from './routes/_app/_auth/simulados.index'
+import { Route as AppAuthSimuladosAttemptIdFazerRouteImport } from './routes/_app/_auth/simulados.$attemptId.fazer'
+import { Route as AppAuthSimuladosAttemptIdResultadoRouteImport } from './routes/_app/_auth/simulados.$attemptId.resultado'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -64,16 +66,28 @@ const AppAuthRedacaoRoute = AppAuthRedacaoRouteImport.update({
   path: '/redacao',
   getParentRoute: () => AppAuthRoute,
 } as any)
-const AppAuthSimuladosRoute = AppAuthSimuladosRouteImport.update({
-  id: '/simulados',
-  path: '/simulados',
-  getParentRoute: () => AppAuthRoute,
-} as any)
 const AppAuthAdminRevisaoRoute = AppAuthAdminRevisaoRouteImport.update({
   id: '/admin/revisao',
   path: '/admin/revisao',
   getParentRoute: () => AppAuthRoute,
 } as any)
+const AppAuthSimuladosIndexRoute = AppAuthSimuladosIndexRouteImport.update({
+  id: '/simulados/',
+  path: '/simulados/',
+  getParentRoute: () => AppAuthRoute,
+} as any)
+const AppAuthSimuladosAttemptIdFazerRoute =
+  AppAuthSimuladosAttemptIdFazerRouteImport.update({
+    id: '/simulados/$attemptId/fazer',
+    path: '/simulados/$attemptId/fazer',
+    getParentRoute: () => AppAuthRoute,
+  } as any)
+const AppAuthSimuladosAttemptIdResultadoRoute =
+  AppAuthSimuladosAttemptIdResultadoRouteImport.update({
+    id: '/simulados/$attemptId/resultado',
+    path: '/simulados/$attemptId/resultado',
+    getParentRoute: () => AppAuthRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -83,8 +97,10 @@ export interface FileRoutesByFullPath {
   '/desempenho': typeof AppAuthDesempenhoRoute
   '/plano': typeof AppAuthPlanoRoute
   '/redacao': typeof AppAuthRedacaoRoute
-  '/simulados': typeof AppAuthSimuladosRoute
   '/admin/revisao': typeof AppAuthAdminRevisaoRoute
+  '/simulados/': typeof AppAuthSimuladosIndexRoute
+  '/simulados/$attemptId/fazer': typeof AppAuthSimuladosAttemptIdFazerRoute
+  '/simulados/$attemptId/resultado': typeof AppAuthSimuladosAttemptIdResultadoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -94,8 +110,10 @@ export interface FileRoutesByTo {
   '/desempenho': typeof AppAuthDesempenhoRoute
   '/plano': typeof AppAuthPlanoRoute
   '/redacao': typeof AppAuthRedacaoRoute
-  '/simulados': typeof AppAuthSimuladosRoute
   '/admin/revisao': typeof AppAuthAdminRevisaoRoute
+  '/simulados': typeof AppAuthSimuladosIndexRoute
+  '/simulados/$attemptId/fazer': typeof AppAuthSimuladosAttemptIdFazerRoute
+  '/simulados/$attemptId/resultado': typeof AppAuthSimuladosAttemptIdResultadoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -108,8 +126,10 @@ export interface FileRoutesById {
   '/_app/_auth/desempenho': typeof AppAuthDesempenhoRoute
   '/_app/_auth/plano': typeof AppAuthPlanoRoute
   '/_app/_auth/redacao': typeof AppAuthRedacaoRoute
-  '/_app/_auth/simulados': typeof AppAuthSimuladosRoute
   '/_app/_auth/admin/revisao': typeof AppAuthAdminRevisaoRoute
+  '/_app/_auth/simulados/': typeof AppAuthSimuladosIndexRoute
+  '/_app/_auth/simulados/$attemptId/fazer': typeof AppAuthSimuladosAttemptIdFazerRoute
+  '/_app/_auth/simulados/$attemptId/resultado': typeof AppAuthSimuladosAttemptIdResultadoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -121,8 +141,10 @@ export interface FileRouteTypes {
     | '/desempenho'
     | '/plano'
     | '/redacao'
-    | '/simulados'
     | '/admin/revisao'
+    | '/simulados/'
+    | '/simulados/$attemptId/fazer'
+    | '/simulados/$attemptId/resultado'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -132,8 +154,10 @@ export interface FileRouteTypes {
     | '/desempenho'
     | '/plano'
     | '/redacao'
-    | '/simulados'
     | '/admin/revisao'
+    | '/simulados'
+    | '/simulados/$attemptId/fazer'
+    | '/simulados/$attemptId/resultado'
   id:
     | '__root__'
     | '/'
@@ -145,8 +169,10 @@ export interface FileRouteTypes {
     | '/_app/_auth/desempenho'
     | '/_app/_auth/plano'
     | '/_app/_auth/redacao'
-    | '/_app/_auth/simulados'
     | '/_app/_auth/admin/revisao'
+    | '/_app/_auth/simulados/'
+    | '/_app/_auth/simulados/$attemptId/fazer'
+    | '/_app/_auth/simulados/$attemptId/resultado'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -221,18 +247,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAuthRedacaoRouteImport
       parentRoute: typeof AppAuthRoute
     }
-    '/_app/_auth/simulados': {
-      id: '/_app/_auth/simulados'
-      path: '/simulados'
-      fullPath: '/simulados'
-      preLoaderRoute: typeof AppAuthSimuladosRouteImport
-      parentRoute: typeof AppAuthRoute
-    }
     '/_app/_auth/admin/revisao': {
       id: '/_app/_auth/admin/revisao'
       path: '/admin/revisao'
       fullPath: '/admin/revisao'
       preLoaderRoute: typeof AppAuthAdminRevisaoRouteImport
+      parentRoute: typeof AppAuthRoute
+    }
+    '/_app/_auth/simulados/': {
+      id: '/_app/_auth/simulados/'
+      path: '/simulados'
+      fullPath: '/simulados/'
+      preLoaderRoute: typeof AppAuthSimuladosIndexRouteImport
+      parentRoute: typeof AppAuthRoute
+    }
+    '/_app/_auth/simulados/$attemptId/fazer': {
+      id: '/_app/_auth/simulados/$attemptId/fazer'
+      path: '/simulados/$attemptId/fazer'
+      fullPath: '/simulados/$attemptId/fazer'
+      preLoaderRoute: typeof AppAuthSimuladosAttemptIdFazerRouteImport
+      parentRoute: typeof AppAuthRoute
+    }
+    '/_app/_auth/simulados/$attemptId/resultado': {
+      id: '/_app/_auth/simulados/$attemptId/resultado'
+      path: '/simulados/$attemptId/resultado'
+      fullPath: '/simulados/$attemptId/resultado'
+      preLoaderRoute: typeof AppAuthSimuladosAttemptIdResultadoRouteImport
       parentRoute: typeof AppAuthRoute
     }
   }
@@ -242,16 +282,21 @@ interface AppAuthRouteChildren {
   AppAuthDesempenhoRoute: typeof AppAuthDesempenhoRoute
   AppAuthPlanoRoute: typeof AppAuthPlanoRoute
   AppAuthRedacaoRoute: typeof AppAuthRedacaoRoute
-  AppAuthSimuladosRoute: typeof AppAuthSimuladosRoute
   AppAuthAdminRevisaoRoute: typeof AppAuthAdminRevisaoRoute
+  AppAuthSimuladosIndexRoute: typeof AppAuthSimuladosIndexRoute
+  AppAuthSimuladosAttemptIdFazerRoute: typeof AppAuthSimuladosAttemptIdFazerRoute
+  AppAuthSimuladosAttemptIdResultadoRoute: typeof AppAuthSimuladosAttemptIdResultadoRoute
 }
 
 const AppAuthRouteChildren: AppAuthRouteChildren = {
   AppAuthDesempenhoRoute: AppAuthDesempenhoRoute,
   AppAuthPlanoRoute: AppAuthPlanoRoute,
   AppAuthRedacaoRoute: AppAuthRedacaoRoute,
-  AppAuthSimuladosRoute: AppAuthSimuladosRoute,
   AppAuthAdminRevisaoRoute: AppAuthAdminRevisaoRoute,
+  AppAuthSimuladosIndexRoute: AppAuthSimuladosIndexRoute,
+  AppAuthSimuladosAttemptIdFazerRoute: AppAuthSimuladosAttemptIdFazerRoute,
+  AppAuthSimuladosAttemptIdResultadoRoute:
+    AppAuthSimuladosAttemptIdResultadoRoute,
 }
 
 const AppAuthRouteWithChildren =
