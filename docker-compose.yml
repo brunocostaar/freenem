@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:5442:5432'
+    environment:
+      POSTGRES_DB: freenem
+      POSTGRES_USER: freenem
+      POSTGRES_PASSWORD: freenem
+    volumes:
+      - freenem_pgdata:/var/lib/postgresql/data
+      - ./docker/postgres-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U freenem -d freenem']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  freenem_pgdata:

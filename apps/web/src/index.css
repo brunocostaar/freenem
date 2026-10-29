@@ -1,0 +1,153 @@
+@import 'tailwindcss';
+@import 'katex/dist/katex.min.css';
+
+/*
+ * Identidade freenem: "caderno de rascunho" — papel quente, tinta azul-marinho,
+ * marca-texto amarelo e laranja-tangerina. Bordas firmes e sombras duras (estilo adesivo).
+ * Tokens são variáveis CSS; modo escuro via prefers-color-scheme e [data-theme].
+ */
+:root {
+  --bg: #fbf6ea;
+  --surface: #ffffff;
+  --surface-2: #f3ecd9;
+  --ink: #14213d;
+  --muted: #5a6478;
+  --border: #14213d;
+  --border-soft: #d9d1bb;
+  --primary: #2b3af7;
+  --primary-ink: #ffffff;
+  --accent: #ff5b2e;
+  --accent-ink: #ffffff;
+  --highlight: #ffd23f;
+  --success: #12805c;
+  --danger: #c62828;
+  --warning: #9a6700;
+  --shadow: #14213d;
+  --ring: #2b3af7;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #0d1424;
+    --surface: #162038;
+    --surface-2: #1d2a47;
+    --ink: #f4efe0;
+    --muted: #a3adc4;
+    --border: #f4efe0;
+    --border-soft: #2e3b5c;
+    --primary: #8f9bff;
+    --primary-ink: #0d1424;
+    --accent: #ff7a50;
+    --accent-ink: #0d1424;
+    --highlight: #ffd23f;
+    --success: #4ade9f;
+    --danger: #ff7b7b;
+    --warning: #f2c14e;
+    --shadow: #000000;
+    --ring: #8f9bff;
+  }
+}
+:root[data-theme='dark'] {
+  --bg: #0d1424;
+  --surface: #162038;
+  --surface-2: #1d2a47;
+  --ink: #f4efe0;
+  --muted: #a3adc4;
+  --border: #f4efe0;
+  --border-soft: #2e3b5c;
+  --primary: #8f9bff;
+  --primary-ink: #0d1424;
+  --accent: #ff7a50;
+  --accent-ink: #0d1424;
+  --highlight: #ffd23f;
+  --success: #4ade9f;
+  --danger: #ff7b7b;
+  --warning: #f2c14e;
+  --shadow: #000000;
+  --ring: #8f9bff;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--border);
+  --color-line-soft: var(--border-soft);
+  --color-primary: var(--primary);
+  --color-primary-ink: var(--primary-ink);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-highlight: var(--highlight);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
+  --font-display: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --shadow-hard: 4px 4px 0 0 var(--shadow);
+  --shadow-hard-sm: 2px 2px 0 0 var(--shadow);
+}
+
+@layer base {
+  html {
+    color-scheme: light dark;
+    -webkit-text-size-adjust: 100%;
+  }
+  :root[data-theme='light'] {
+    color-scheme: light;
+  }
+  :root[data-theme='dark'] {
+    color-scheme: dark;
+  }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+    line-height: 1.08;
+    font-weight: 700;
+  }
+  :focus-visible {
+    outline: 3px solid var(--ring);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: var(--highlight);
+    color: #14213d;
+  }
+}
+
+@layer utilities {
+  .marker {
+    background-image: linear-gradient(
+      transparent 58%,
+      var(--highlight) 58%,
+      var(--highlight) 92%,
+      transparent 92%
+    );
+    padding: 0 0.1em;
+    color: inherit;
+  }
+  .dotgrid {
+    background-image: radial-gradient(var(--border-soft) 1.2px, transparent 1.2px);
+    background-size: 22px 22px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: freenem_test
+          POSTGRES_USER: freenem
+          POSTGRES_PASSWORD: freenem
+        ports:
+          - 5442:5432
+        options: >-
+          --health-cmd "pg_isready -U freenem -d freenem_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgres://freenem:freenem@127.0.0.1:5442/freenem_test
+      DATABASE_URL_TEST: postgres://freenem:freenem@127.0.0.1:5442/freenem_test
+      BETTER_AUTH_SECRET: ci-secret-ci-secret-ci-secret-ci-secret
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm exec prettier --check .
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
