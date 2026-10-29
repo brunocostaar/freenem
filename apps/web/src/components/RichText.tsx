@@ -2,10 +2,12 @@ import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import { cn } from '@/lib/cn';
+import { ZoomableImage } from '@/components/question/ZoomableImage';
 
 /**
  * Renderiza Markdown + LaTeX (KaTeX). Use `$...$` para fórmulas inline e `$$...$$` em bloco.
- * Usado em enunciados, alternativas e resoluções de questões.
+ * Usado em enunciados, alternativas e resoluções de questões. Imagens carregam sob demanda
+ * e ampliam ao toque.
  */
 export function RichText({ children, className }: { children: string; className?: string }) {
   return (
@@ -15,7 +17,16 @@ export function RichText({ children, className }: { children: string; className?
         className,
       )}
     >
-      <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]} skipHtml>
+      <ReactMarkdown
+        remarkPlugins={[remarkMath]}
+        rehypePlugins={[rehypeKatex]}
+        skipHtml
+        components={{
+          img: ({ src, alt }) => (
+            <ZoomableImage src={typeof src === 'string' ? src : undefined} alt={alt} />
+          ),
+        }}
+      >
         {children}
       </ReactMarkdown>
     </div>

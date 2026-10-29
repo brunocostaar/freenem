@@ -43,6 +43,8 @@ Sem chaves externas tudo funciona: e-mails são impressos no console da API, o l
 | `pnpm db:generate` | gera migration a partir do schema Drizzle                                         |
 | `pnpm db:migrate`  | aplica migrations                                                                 |
 | `pnpm db:seed`     | popula dados iniciais (idempotente)                                               |
+| `pnpm ingest:enem` | importa as questões do ENEM 2009–2023 (veja `packages/ingest/README.md`)          |
+| `pnpm ingest:tri`  | importa os parâmetros TRI (a, b, c) dos microdados do INEP                        |
 
 ## Contribuindo
 

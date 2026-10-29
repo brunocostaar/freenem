@@ -126,7 +126,8 @@ export const questions = pgTable(
     index('questions_exam_idx').on(t.examId),
     index('questions_subject_idx').on(t.subjectId),
     index('questions_status_idx').on(t.status),
-    uniqueIndex('questions_exam_number_idx').on(t.examId, t.number),
+    // subject_id entra na chave: as questões de Inglês e Espanhol (1–5) repetem o número na mesma prova
+    uniqueIndex('questions_exam_number_idx').on(t.examId, t.number, t.subjectId),
   ],
 );
 

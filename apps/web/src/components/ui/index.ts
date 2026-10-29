@@ -7,3 +7,4 @@ export * from './Skeleton';
 export * from './EmptyState';
 export * from './Dialog';
 export * from './Toast';
+export * from './Textarea';

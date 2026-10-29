@@ -10,3 +10,4 @@ apps/api/storage
 .turbo
 *.tsbuildinfo
 .claude/worktrees/
+packages/ingest/.cache

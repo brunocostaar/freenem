@@ -14,10 +14,11 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as AppAuthRouteImport } from './routes/_app/_auth'
-import { Route as AppQuestoesRouteImport } from './routes/_app/questoes'
 import { Route as AppAuthDesempenhoRouteImport } from './routes/_app/_auth/desempenho'
 import { Route as AppAuthInicioRouteImport } from './routes/_app/_auth/inicio'
 import { Route as AppAuthPlanoRouteImport } from './routes/_app/_auth/plano'
+import { Route as AppQuestoesIndexRouteImport } from './routes/_app/questoes/index'
+import { Route as AppQuestoesIdRouteImport } from './routes/_app/questoes/$id'
 import { Route as AppAuthAdminRevisaoRouteImport } from './routes/_app/_auth/admin/revisao'
 import { Route as AppAuthRedacaoIndexRouteImport } from './routes/_app/_auth/redacao/index'
 import { Route as AppAuthRedacaoIdRouteImport } from './routes/_app/_auth/redacao/$id'
@@ -50,11 +51,6 @@ const AppAuthRoute = AppAuthRouteImport.update({
   id: '/_auth',
   getParentRoute: () => AppRoute,
 } as any)
-const AppQuestoesRoute = AppQuestoesRouteImport.update({
-  id: '/questoes',
-  path: '/questoes',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppAuthDesempenhoRoute = AppAuthDesempenhoRouteImport.update({
   id: '/desempenho',
   path: '/desempenho',
@@ -69,6 +65,16 @@ const AppAuthPlanoRoute = AppAuthPlanoRouteImport.update({
   id: '/plano',
   path: '/plano',
   getParentRoute: () => AppAuthRoute,
+} as any)
+const AppQuestoesIndexRoute = AppQuestoesIndexRouteImport.update({
+  id: '/questoes/',
+  path: '/questoes/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppQuestoesIdRoute = AppQuestoesIdRouteImport.update({
+  id: '/questoes/$id',
+  path: '/questoes/$id',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppAuthAdminRevisaoRoute = AppAuthAdminRevisaoRouteImport.update({
   id: '/admin/revisao',
@@ -118,10 +124,11 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/cadastro': typeof CadastroRoute
   '/entrar': typeof EntrarRoute
-  '/questoes': typeof AppQuestoesRoute
   '/desempenho': typeof AppAuthDesempenhoRoute
   '/inicio': typeof AppAuthInicioRoute
   '/plano': typeof AppAuthPlanoRoute
+  '/questoes/$id': typeof AppQuestoesIdRoute
+  '/questoes/': typeof AppQuestoesIndexRoute
   '/admin/revisao': typeof AppAuthAdminRevisaoRoute
   '/redacao/$id': typeof AppAuthRedacaoIdRoute
   '/redacao/competencias': typeof AppAuthRedacaoCompetenciasRoute
@@ -135,10 +142,11 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/cadastro': typeof CadastroRoute
   '/entrar': typeof EntrarRoute
-  '/questoes': typeof AppQuestoesRoute
   '/desempenho': typeof AppAuthDesempenhoRoute
   '/inicio': typeof AppAuthInicioRoute
   '/plano': typeof AppAuthPlanoRoute
+  '/questoes/$id': typeof AppQuestoesIdRoute
+  '/questoes': typeof AppQuestoesIndexRoute
   '/admin/revisao': typeof AppAuthAdminRevisaoRoute
   '/redacao/$id': typeof AppAuthRedacaoIdRoute
   '/redacao/competencias': typeof AppAuthRedacaoCompetenciasRoute
@@ -155,10 +163,11 @@ export interface FileRoutesById {
   '/cadastro': typeof CadastroRoute
   '/entrar': typeof EntrarRoute
   '/_app/_auth': typeof AppAuthRouteWithChildren
-  '/_app/questoes': typeof AppQuestoesRoute
   '/_app/_auth/desempenho': typeof AppAuthDesempenhoRoute
   '/_app/_auth/inicio': typeof AppAuthInicioRoute
   '/_app/_auth/plano': typeof AppAuthPlanoRoute
+  '/_app/questoes/$id': typeof AppQuestoesIdRoute
+  '/_app/questoes/': typeof AppQuestoesIndexRoute
   '/_app/_auth/admin/revisao': typeof AppAuthAdminRevisaoRoute
   '/_app/_auth/redacao/$id': typeof AppAuthRedacaoIdRoute
   '/_app/_auth/redacao/competencias': typeof AppAuthRedacaoCompetenciasRoute
@@ -174,10 +183,11 @@ export interface FileRouteTypes {
     | '/'
     | '/cadastro'
     | '/entrar'
-    | '/questoes'
     | '/desempenho'
     | '/inicio'
     | '/plano'
+    | '/questoes/$id'
+    | '/questoes/'
     | '/admin/revisao'
     | '/redacao/$id'
     | '/redacao/competencias'
@@ -191,10 +201,11 @@ export interface FileRouteTypes {
     | '/'
     | '/cadastro'
     | '/entrar'
-    | '/questoes'
     | '/desempenho'
     | '/inicio'
     | '/plano'
+    | '/questoes/$id'
+    | '/questoes'
     | '/admin/revisao'
     | '/redacao/$id'
     | '/redacao/competencias'
@@ -210,10 +221,11 @@ export interface FileRouteTypes {
     | '/cadastro'
     | '/entrar'
     | '/_app/_auth'
-    | '/_app/questoes'
     | '/_app/_auth/desempenho'
     | '/_app/_auth/inicio'
     | '/_app/_auth/plano'
+    | '/_app/questoes/$id'
+    | '/_app/questoes/'
     | '/_app/_auth/admin/revisao'
     | '/_app/_auth/redacao/$id'
     | '/_app/_auth/redacao/competencias'
@@ -268,13 +280,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAuthRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/questoes': {
-      id: '/_app/questoes'
-      path: '/questoes'
-      fullPath: '/questoes'
-      preLoaderRoute: typeof AppQuestoesRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/_auth/desempenho': {
       id: '/_app/_auth/desempenho'
       path: '/desempenho'
@@ -295,6 +300,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/plano'
       preLoaderRoute: typeof AppAuthPlanoRouteImport
       parentRoute: typeof AppAuthRoute
+    }
+    '/_app/questoes/': {
+      id: '/_app/questoes/'
+      path: '/questoes'
+      fullPath: '/questoes/'
+      preLoaderRoute: typeof AppQuestoesIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/questoes/$id': {
+      id: '/_app/questoes/$id'
+      path: '/questoes/$id'
+      fullPath: '/questoes/$id'
+      preLoaderRoute: typeof AppQuestoesIdRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/_auth/admin/revisao': {
       id: '/_app/_auth/admin/revisao'
@@ -389,12 +408,14 @@ const AppAuthRouteWithChildren =
 
 interface AppRouteChildren {
   AppAuthRoute: typeof AppAuthRouteWithChildren
-  AppQuestoesRoute: typeof AppQuestoesRoute
+  AppQuestoesIdRoute: typeof AppQuestoesIdRoute
+  AppQuestoesIndexRoute: typeof AppQuestoesIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppAuthRoute: AppAuthRouteWithChildren,
-  AppQuestoesRoute: AppQuestoesRoute,
+  AppQuestoesIdRoute: AppQuestoesIdRoute,
+  AppQuestoesIndexRoute: AppQuestoesIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

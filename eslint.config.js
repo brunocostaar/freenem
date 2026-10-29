@@ -14,6 +14,7 @@ export default tseslint.config(
       '**/drizzle/**',
       '**/routeTree.gen.ts',
       '**/coverage/**',
+      '**/.cache/**',
     ],
   },
   js.configs.recommended,
