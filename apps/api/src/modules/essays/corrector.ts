@@ -1,11 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { ModelCorrectionOutput, CompetencyResult } from '@freenem/shared';
-import {
-  SUBMIT_TOOL_INPUT_SCHEMA,
-  SUBMIT_TOOL_NAME,
-  SYSTEM_PROMPT,
-  buildUserMessage,
-} from './prompt.js';
+import { OUTPUT_JSON_SCHEMA, SYSTEM_PROMPT, buildUserMessage } from './prompt.js';
 
 export interface CorrectorInput {
   /** título do tema (do nosso banco) */
@@ -28,14 +23,49 @@ export interface EssayCorrector {
   correct(input: CorrectorInput): Promise<CorrectorResult>;
 }
 
-const MAX_OUTPUT_TOKENS = 2000;
+// Thinking adaptativo (padrão) consome tokens de saída: margem folgada.
+const MAX_OUTPUT_TOKENS = 4000;
 const REQUEST_TIMEOUT_MS = 60_000;
 
+export type CorrectorEffort = 'low' | 'medium' | 'high';
+
+/** A API recusou a correção por política (stop_reason `refusal`). Conta como falha de correção. */
+export class CorrectionRefusedError extends Error {
+  constructor() {
+    super('O modelo recusou corrigir esta redação.');
+    this.name = 'CorrectionRefusedError';
+  }
+}
+
 /**
- * Claude via tool use com `tool_choice` forçado em uma única ferramenta (`submit_correction`).
- * É o mecanismo mais robusto: o modelo é obrigado a responder com um bloco `tool_use` cujo
- * `input` segue o JSON Schema. Sem outras ferramentas e sem histórico. (O SDK atual não aceita `temperature` nos modelos novos.)
- * (Extended thinking é incompatível com tool_choice forçado, então não é usado.)
+ * Parâmetros da requisição (função pura, testável). Saída estruturada via
+ * `output_config.format` (json_schema); `thinking` omitido (adaptativo), sem `tool_choice` forçado
+ * e sem parâmetros de amostragem (rejeitados pelos modelos atuais).
+ */
+export function buildRequestParams(
+  input: CorrectorInput,
+  model: string,
+  effort: CorrectorEffort = 'low',
+) {
+  return {
+    model,
+    max_tokens: MAX_OUTPUT_TOKENS,
+    system: SYSTEM_PROMPT,
+    output_config: {
+      effort,
+      format: {
+        type: 'json_schema' as const,
+        schema: OUTPUT_JSON_SCHEMA as Record<string, unknown>,
+      },
+    },
+    messages: [{ role: 'user' as const, content: buildUserMessage(input) }],
+  };
+}
+
+/**
+ * Claude com saída estruturada (JSON Schema). O JSON vem em um bloco `text`; a validação estrita
+ * (Zod, validate.ts) continua sendo a barreira real. Usa o cliente beta para o fallback
+ * server-side em recusas (`fallbacks: 'default'`). Sem ferramentas e sem histórico.
  */
 export class ClaudeCorrector implements EssayCorrector {
   readonly isDemo = false;
@@ -44,37 +74,57 @@ export class ClaudeCorrector implements EssayCorrector {
   constructor(
     apiKey: string,
     private model: string,
+    private effort: CorrectorEffort = 'low',
   ) {
     this.client = new Anthropic({ apiKey, maxRetries: 1, timeout: REQUEST_TIMEOUT_MS });
   }
 
   async correct(input: CorrectorInput): Promise<CorrectorResult> {
-    const msg = await this.client.messages.create(
-      {
-        model: this.model,
-        max_tokens: MAX_OUTPUT_TOKENS,
-        thinking: { type: 'disabled' },
-        system: SYSTEM_PROMPT,
-        tools: [
-          {
-            name: SUBMIT_TOOL_NAME,
-            description:
-              'Registra a correção final da redação. Deve ser chamada exatamente uma vez com todos os campos.',
-            input_schema: SUBMIT_TOOL_INPUT_SCHEMA as unknown as Anthropic.Tool.InputSchema,
-          },
-        ],
-        tool_choice: { type: 'tool', name: SUBMIT_TOOL_NAME, disable_parallel_tool_use: true },
-        messages: [{ role: 'user', content: buildUserMessage(input) }],
-      },
-      { timeout: REQUEST_TIMEOUT_MS },
-    );
-    const block = msg.content.find((b) => b.type === 'tool_use' && b.name === SUBMIT_TOOL_NAME);
-    return {
-      raw: block && block.type === 'tool_use' ? block.input : undefined,
+    let msg;
+    try {
+      msg = await this.client.beta.messages.create(
+        {
+          ...buildRequestParams(input, this.model, this.effort),
+          betas: ['server-side-fallback-2026-07-01'],
+          fallbacks: 'default',
+        },
+        { timeout: REQUEST_TIMEOUT_MS },
+      );
+    } catch (err) {
+      if (err instanceof Anthropic.RateLimitError) {
+        console.error('[essays] Anthropic rate limit (429):', err.message);
+      } else if (err instanceof Anthropic.APIError) {
+        console.error(`[essays] Anthropic API error ${err.status ?? '?'}:`, err.message);
+      }
+      throw err;
+    }
+
+    if (msg.stop_reason === 'refusal') {
+      console.error('[essays] correção recusada pelo modelo (stop_reason=refusal)');
+      throw new CorrectionRefusedError();
+    }
+
+    const base = {
       model: msg.model ?? this.model,
       inputTokens: msg.usage?.input_tokens ?? null,
       outputTokens: msg.usage?.output_tokens ?? null,
     };
+    if (msg.stop_reason === 'max_tokens') {
+      console.error('[essays] saída truncada (stop_reason=max_tokens); tentando de novo');
+      return { raw: undefined, ...base };
+    }
+
+    // Pode haver blocos de thinking/fallback antes: pega o último bloco de texto.
+    const textBlock = [...msg.content].reverse().find((b) => b.type === 'text');
+    let raw: unknown;
+    if (textBlock && textBlock.type === 'text') {
+      try {
+        raw = JSON.parse(textBlock.text);
+      } catch {
+        raw = undefined; // validação falha -> retry no pipeline
+      }
+    }
+    return { raw, ...base };
   }
 }
 

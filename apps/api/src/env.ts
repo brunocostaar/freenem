@@ -20,6 +20,7 @@ const envSchema = z.object({
   EMAIL_FROM: z.string().default('freenem <onboarding@resend.dev>'),
   ANTHROPIC_API_KEY: optionalString,
   ANTHROPIC_MODEL: z.string().default('claude-sonnet-5-5'),
+  ANTHROPIC_EFFORT: z.enum(['low', 'medium', 'high']).default('low'),
   STORAGE_DRIVER: z.enum(['local', 'r2']).default('local'),
   R2_ACCOUNT_ID: optionalString,
   R2_ACCESS_KEY_ID: optionalString,

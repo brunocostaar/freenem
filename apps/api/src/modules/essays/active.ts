@@ -8,7 +8,7 @@ let cached: EssayCorrector | null = null;
 export function getCorrector(): EssayCorrector {
   if (override) return override;
   cached ??= env.ANTHROPIC_API_KEY
-    ? new ClaudeCorrector(env.ANTHROPIC_API_KEY, env.ANTHROPIC_MODEL)
+    ? new ClaudeCorrector(env.ANTHROPIC_API_KEY, env.ANTHROPIC_MODEL, env.ANTHROPIC_EFFORT)
     : new MockCorrector();
   return cached;
 }
