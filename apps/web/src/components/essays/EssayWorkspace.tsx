@@ -56,7 +56,7 @@ export function EssayWorkspace({
   const quota = useQuery(essayQuotaQuery);
 
   const [text, setText] = useState(initialText);
-  const [saveState, setSaveState] = useState<SaveState>('idle');
+  const [saveState, setSaveState] = useState<SaveState>(initialText ? 'saved' : 'idle');
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const [timerOn, setTimerOn] = useState(false);

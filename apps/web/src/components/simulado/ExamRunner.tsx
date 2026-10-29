@@ -370,7 +370,12 @@ export function ExamRunner({ session }: { session: AttemptSession }) {
       </div>
 
       <footer className="flex items-center justify-between gap-2 border-t-2 border-line bg-surface px-3 py-2.5 sm:px-6">
-        <Button variant="secondary" onClick={() => go(index - 1)} disabled={index === 0}>
+        <Button
+          variant="secondary"
+          onClick={() => go(index - 1)}
+          disabled={index === 0}
+          aria-label="Anterior"
+        >
           <ChevronLeft className="size-4" aria-hidden />
           <span className="hidden sm:inline">Anterior</span>
         </Button>
@@ -383,7 +388,7 @@ export function ExamRunner({ session }: { session: AttemptSession }) {
           <span>{isFlagged ? 'Desmarcar' : 'Revisar depois'}</span>
         </Button>
         {index < questions.length - 1 ? (
-          <Button onClick={() => go(index + 1)}>
+          <Button onClick={() => go(index + 1)} aria-label="Próxima">
             <span className="hidden sm:inline">Próxima</span>
             <ChevronRight className="size-4" aria-hidden />
           </Button>

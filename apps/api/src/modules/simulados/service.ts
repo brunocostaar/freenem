@@ -12,6 +12,7 @@ import {
   type SimuladoOptions,
 } from '@freenem/shared';
 import { db, schema, type Db } from '../../db/index.js';
+import { publicUrls } from '../../lib/storage.js';
 import { hasValidParams } from '../../lib/tri.js';
 import { outcomeOf, summarize, type ScoreQuestion } from './scoring.js';
 
@@ -474,9 +475,9 @@ async function loadQuestionData(ex: Executor, simuladoId: string): Promise<Quest
       id: r.id,
       position: r.position,
       number: r.number,
-      statement: r.statement,
-      imageUrls: r.imageUrls,
-      resolution: r.resolution,
+      statement: publicUrls(r.statement),
+      imageUrls: r.imageUrls.map(publicUrls),
+      resolution: r.resolution ? publicUrls(r.resolution) : null,
       subjectId: r.subjectId,
       subject: r.subject,
       area: r.area,
@@ -484,8 +485,8 @@ async function loadQuestionData(ex: Executor, simuladoId: string): Promise<Quest
       correctLetter: list.find((a) => a.isCorrect)?.letter ?? null,
       alts: list.map((a) => ({
         letter: a.letter,
-        text: a.text,
-        imageUrl: a.imageUrl,
+        text: publicUrls(a.text),
+        imageUrl: a.imageUrl ? publicUrls(a.imageUrl) : null,
         isCorrect: a.isCorrect,
       })),
     };

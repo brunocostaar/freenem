@@ -200,10 +200,13 @@ function SubjectChart({ r }: { r: AttemptResult }) {
                   color: 'var(--ink)',
                 }}
               />
-              <Legend wrapperStyle={{ color: 'var(--ink)', fontSize: 12 }} />
+              <Legend
+                wrapperStyle={{ fontSize: 12 }}
+                formatter={(v: string) => <span style={{ color: 'var(--ink)' }}>{v}</span>}
+              />
               <Bar dataKey="Acertos" stackId="s" fill="var(--success)" />
               <Bar dataKey="Erros" stackId="s" fill="var(--danger)" />
-              <Bar dataKey="Em branco" stackId="s" fill="var(--border-soft)" />
+              <Bar dataKey="Em branco" stackId="s" fill="var(--muted)" />
             </BarChart>
           </ResponsiveContainer>
         </div>
