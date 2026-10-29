@@ -4,7 +4,8 @@ import { auth } from '../auth.js';
 import { env, isProd } from '../env.js';
 import { slugify } from '../lib/slug.js';
 import { db, schema, sql } from './index.js';
-import { essayThemesSeed, institutionsSeed, subjectsSeed } from './seed-data/taxonomy.js';
+import { institutionsSeed, subjectsSeed } from './seed-data/taxonomy.js';
+import { allEssayThemes } from './seed-data/essay-themes.js';
 
 async function seedInstitutions() {
   for (const inst of institutionsSeed) {
@@ -74,16 +75,20 @@ async function seedSubjectsAndTopics() {
 }
 
 async function seedEssayThemes() {
-  for (const t of essayThemesSeed) {
+  for (const t of allEssayThemes) {
     await db
       .insert(schema.essayThemes)
       .values(t)
       .onConflictDoUpdate({
         target: schema.essayThemes.title,
-        set: { year: t.year, description: t.description },
+        set: {
+          year: t.year,
+          description: t.description,
+          supportingTexts: t.supportingTexts ?? null,
+        },
       });
   }
-  console.log(`  temas de redação: ${essayThemesSeed.length}`);
+  console.log(`  temas de redação: ${allEssayThemes.length}`);
 }
 
 async function seedAdmin() {

@@ -18,8 +18,11 @@ import { Route as AppQuestoesRouteImport } from './routes/_app/questoes'
 import { Route as AppAuthDesempenhoRouteImport } from './routes/_app/_auth/desempenho'
 import { Route as AppAuthInicioRouteImport } from './routes/_app/_auth/inicio'
 import { Route as AppAuthPlanoRouteImport } from './routes/_app/_auth/plano'
-import { Route as AppAuthRedacaoRouteImport } from './routes/_app/_auth/redacao'
 import { Route as AppAuthAdminRevisaoRouteImport } from './routes/_app/_auth/admin/revisao'
+import { Route as AppAuthRedacaoIndexRouteImport } from './routes/_app/_auth/redacao/index'
+import { Route as AppAuthRedacaoIdRouteImport } from './routes/_app/_auth/redacao/$id'
+import { Route as AppAuthRedacaoCompetenciasRouteImport } from './routes/_app/_auth/redacao/competencias'
+import { Route as AppAuthRedacaoNovaRouteImport } from './routes/_app/_auth/redacao/nova'
 import { Route as AppAuthSimuladosIndexRouteImport } from './routes/_app/_auth/simulados.index'
 import { Route as AppAuthSimuladosAttemptIdFazerRouteImport } from './routes/_app/_auth/simulados.$attemptId.fazer'
 import { Route as AppAuthSimuladosAttemptIdResultadoRouteImport } from './routes/_app/_auth/simulados.$attemptId.resultado'
@@ -67,14 +70,30 @@ const AppAuthPlanoRoute = AppAuthPlanoRouteImport.update({
   path: '/plano',
   getParentRoute: () => AppAuthRoute,
 } as any)
-const AppAuthRedacaoRoute = AppAuthRedacaoRouteImport.update({
-  id: '/redacao',
-  path: '/redacao',
-  getParentRoute: () => AppAuthRoute,
-} as any)
 const AppAuthAdminRevisaoRoute = AppAuthAdminRevisaoRouteImport.update({
   id: '/admin/revisao',
   path: '/admin/revisao',
+  getParentRoute: () => AppAuthRoute,
+} as any)
+const AppAuthRedacaoIndexRoute = AppAuthRedacaoIndexRouteImport.update({
+  id: '/redacao/',
+  path: '/redacao/',
+  getParentRoute: () => AppAuthRoute,
+} as any)
+const AppAuthRedacaoIdRoute = AppAuthRedacaoIdRouteImport.update({
+  id: '/redacao/$id',
+  path: '/redacao/$id',
+  getParentRoute: () => AppAuthRoute,
+} as any)
+const AppAuthRedacaoCompetenciasRoute =
+  AppAuthRedacaoCompetenciasRouteImport.update({
+    id: '/redacao/competencias',
+    path: '/redacao/competencias',
+    getParentRoute: () => AppAuthRoute,
+  } as any)
+const AppAuthRedacaoNovaRoute = AppAuthRedacaoNovaRouteImport.update({
+  id: '/redacao/nova',
+  path: '/redacao/nova',
   getParentRoute: () => AppAuthRoute,
 } as any)
 const AppAuthSimuladosIndexRoute = AppAuthSimuladosIndexRouteImport.update({
@@ -103,8 +122,11 @@ export interface FileRoutesByFullPath {
   '/desempenho': typeof AppAuthDesempenhoRoute
   '/inicio': typeof AppAuthInicioRoute
   '/plano': typeof AppAuthPlanoRoute
-  '/redacao': typeof AppAuthRedacaoRoute
   '/admin/revisao': typeof AppAuthAdminRevisaoRoute
+  '/redacao/$id': typeof AppAuthRedacaoIdRoute
+  '/redacao/competencias': typeof AppAuthRedacaoCompetenciasRoute
+  '/redacao/nova': typeof AppAuthRedacaoNovaRoute
+  '/redacao/': typeof AppAuthRedacaoIndexRoute
   '/simulados/': typeof AppAuthSimuladosIndexRoute
   '/simulados/$attemptId/fazer': typeof AppAuthSimuladosAttemptIdFazerRoute
   '/simulados/$attemptId/resultado': typeof AppAuthSimuladosAttemptIdResultadoRoute
@@ -117,8 +139,11 @@ export interface FileRoutesByTo {
   '/desempenho': typeof AppAuthDesempenhoRoute
   '/inicio': typeof AppAuthInicioRoute
   '/plano': typeof AppAuthPlanoRoute
-  '/redacao': typeof AppAuthRedacaoRoute
   '/admin/revisao': typeof AppAuthAdminRevisaoRoute
+  '/redacao/$id': typeof AppAuthRedacaoIdRoute
+  '/redacao/competencias': typeof AppAuthRedacaoCompetenciasRoute
+  '/redacao/nova': typeof AppAuthRedacaoNovaRoute
+  '/redacao': typeof AppAuthRedacaoIndexRoute
   '/simulados': typeof AppAuthSimuladosIndexRoute
   '/simulados/$attemptId/fazer': typeof AppAuthSimuladosAttemptIdFazerRoute
   '/simulados/$attemptId/resultado': typeof AppAuthSimuladosAttemptIdResultadoRoute
@@ -134,8 +159,11 @@ export interface FileRoutesById {
   '/_app/_auth/desempenho': typeof AppAuthDesempenhoRoute
   '/_app/_auth/inicio': typeof AppAuthInicioRoute
   '/_app/_auth/plano': typeof AppAuthPlanoRoute
-  '/_app/_auth/redacao': typeof AppAuthRedacaoRoute
   '/_app/_auth/admin/revisao': typeof AppAuthAdminRevisaoRoute
+  '/_app/_auth/redacao/$id': typeof AppAuthRedacaoIdRoute
+  '/_app/_auth/redacao/competencias': typeof AppAuthRedacaoCompetenciasRoute
+  '/_app/_auth/redacao/nova': typeof AppAuthRedacaoNovaRoute
+  '/_app/_auth/redacao/': typeof AppAuthRedacaoIndexRoute
   '/_app/_auth/simulados/': typeof AppAuthSimuladosIndexRoute
   '/_app/_auth/simulados/$attemptId/fazer': typeof AppAuthSimuladosAttemptIdFazerRoute
   '/_app/_auth/simulados/$attemptId/resultado': typeof AppAuthSimuladosAttemptIdResultadoRoute
@@ -150,8 +178,11 @@ export interface FileRouteTypes {
     | '/desempenho'
     | '/inicio'
     | '/plano'
-    | '/redacao'
     | '/admin/revisao'
+    | '/redacao/$id'
+    | '/redacao/competencias'
+    | '/redacao/nova'
+    | '/redacao/'
     | '/simulados/'
     | '/simulados/$attemptId/fazer'
     | '/simulados/$attemptId/resultado'
@@ -164,8 +195,11 @@ export interface FileRouteTypes {
     | '/desempenho'
     | '/inicio'
     | '/plano'
-    | '/redacao'
     | '/admin/revisao'
+    | '/redacao/$id'
+    | '/redacao/competencias'
+    | '/redacao/nova'
+    | '/redacao'
     | '/simulados'
     | '/simulados/$attemptId/fazer'
     | '/simulados/$attemptId/resultado'
@@ -180,8 +214,11 @@ export interface FileRouteTypes {
     | '/_app/_auth/desempenho'
     | '/_app/_auth/inicio'
     | '/_app/_auth/plano'
-    | '/_app/_auth/redacao'
     | '/_app/_auth/admin/revisao'
+    | '/_app/_auth/redacao/$id'
+    | '/_app/_auth/redacao/competencias'
+    | '/_app/_auth/redacao/nova'
+    | '/_app/_auth/redacao/'
     | '/_app/_auth/simulados/'
     | '/_app/_auth/simulados/$attemptId/fazer'
     | '/_app/_auth/simulados/$attemptId/resultado'
@@ -259,18 +296,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAuthPlanoRouteImport
       parentRoute: typeof AppAuthRoute
     }
-    '/_app/_auth/redacao': {
-      id: '/_app/_auth/redacao'
-      path: '/redacao'
-      fullPath: '/redacao'
-      preLoaderRoute: typeof AppAuthRedacaoRouteImport
-      parentRoute: typeof AppAuthRoute
-    }
     '/_app/_auth/admin/revisao': {
       id: '/_app/_auth/admin/revisao'
       path: '/admin/revisao'
       fullPath: '/admin/revisao'
       preLoaderRoute: typeof AppAuthAdminRevisaoRouteImport
+      parentRoute: typeof AppAuthRoute
+    }
+    '/_app/_auth/redacao/': {
+      id: '/_app/_auth/redacao/'
+      path: '/redacao'
+      fullPath: '/redacao/'
+      preLoaderRoute: typeof AppAuthRedacaoIndexRouteImport
+      parentRoute: typeof AppAuthRoute
+    }
+    '/_app/_auth/redacao/$id': {
+      id: '/_app/_auth/redacao/$id'
+      path: '/redacao/$id'
+      fullPath: '/redacao/$id'
+      preLoaderRoute: typeof AppAuthRedacaoIdRouteImport
+      parentRoute: typeof AppAuthRoute
+    }
+    '/_app/_auth/redacao/competencias': {
+      id: '/_app/_auth/redacao/competencias'
+      path: '/redacao/competencias'
+      fullPath: '/redacao/competencias'
+      preLoaderRoute: typeof AppAuthRedacaoCompetenciasRouteImport
+      parentRoute: typeof AppAuthRoute
+    }
+    '/_app/_auth/redacao/nova': {
+      id: '/_app/_auth/redacao/nova'
+      path: '/redacao/nova'
+      fullPath: '/redacao/nova'
+      preLoaderRoute: typeof AppAuthRedacaoNovaRouteImport
       parentRoute: typeof AppAuthRoute
     }
     '/_app/_auth/simulados/': {
@@ -301,8 +359,11 @@ interface AppAuthRouteChildren {
   AppAuthDesempenhoRoute: typeof AppAuthDesempenhoRoute
   AppAuthInicioRoute: typeof AppAuthInicioRoute
   AppAuthPlanoRoute: typeof AppAuthPlanoRoute
-  AppAuthRedacaoRoute: typeof AppAuthRedacaoRoute
   AppAuthAdminRevisaoRoute: typeof AppAuthAdminRevisaoRoute
+  AppAuthRedacaoIdRoute: typeof AppAuthRedacaoIdRoute
+  AppAuthRedacaoCompetenciasRoute: typeof AppAuthRedacaoCompetenciasRoute
+  AppAuthRedacaoNovaRoute: typeof AppAuthRedacaoNovaRoute
+  AppAuthRedacaoIndexRoute: typeof AppAuthRedacaoIndexRoute
   AppAuthSimuladosIndexRoute: typeof AppAuthSimuladosIndexRoute
   AppAuthSimuladosAttemptIdFazerRoute: typeof AppAuthSimuladosAttemptIdFazerRoute
   AppAuthSimuladosAttemptIdResultadoRoute: typeof AppAuthSimuladosAttemptIdResultadoRoute
@@ -312,8 +373,11 @@ const AppAuthRouteChildren: AppAuthRouteChildren = {
   AppAuthDesempenhoRoute: AppAuthDesempenhoRoute,
   AppAuthInicioRoute: AppAuthInicioRoute,
   AppAuthPlanoRoute: AppAuthPlanoRoute,
-  AppAuthRedacaoRoute: AppAuthRedacaoRoute,
   AppAuthAdminRevisaoRoute: AppAuthAdminRevisaoRoute,
+  AppAuthRedacaoIdRoute: AppAuthRedacaoIdRoute,
+  AppAuthRedacaoCompetenciasRoute: AppAuthRedacaoCompetenciasRoute,
+  AppAuthRedacaoNovaRoute: AppAuthRedacaoNovaRoute,
+  AppAuthRedacaoIndexRoute: AppAuthRedacaoIndexRoute,
   AppAuthSimuladosIndexRoute: AppAuthSimuladosIndexRoute,
   AppAuthSimuladosAttemptIdFazerRoute: AppAuthSimuladosAttemptIdFazerRoute,
   AppAuthSimuladosAttemptIdResultadoRoute:

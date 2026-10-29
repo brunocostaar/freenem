@@ -137,6 +137,18 @@
     padding: 0 0.1em;
     color: inherit;
   }
+  /* Folha de redação: linhas pautadas alinhadas ao line-height do texto. */
+  .paper {
+    line-height: 1.875rem;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent calc(1.875rem - 1px),
+      var(--border-soft) calc(1.875rem - 1px),
+      var(--border-soft) 1.875rem
+    );
+    background-attachment: local;
+  }
   .dotgrid {
     background-image: radial-gradient(var(--border-soft) 1.2px, transparent 1.2px);
     background-size: 22px 22px;
