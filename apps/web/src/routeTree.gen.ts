@@ -16,6 +16,7 @@ import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as AppAuthRouteImport } from './routes/_app/_auth'
 import { Route as AppQuestoesRouteImport } from './routes/_app/questoes'
 import { Route as AppAuthDesempenhoRouteImport } from './routes/_app/_auth/desempenho'
+import { Route as AppAuthInicioRouteImport } from './routes/_app/_auth/inicio'
 import { Route as AppAuthPlanoRouteImport } from './routes/_app/_auth/plano'
 import { Route as AppAuthRedacaoRouteImport } from './routes/_app/_auth/redacao'
 import { Route as AppAuthSimuladosRouteImport } from './routes/_app/_auth/simulados'
@@ -54,6 +55,11 @@ const AppAuthDesempenhoRoute = AppAuthDesempenhoRouteImport.update({
   path: '/desempenho',
   getParentRoute: () => AppAuthRoute,
 } as any)
+const AppAuthInicioRoute = AppAuthInicioRouteImport.update({
+  id: '/inicio',
+  path: '/inicio',
+  getParentRoute: () => AppAuthRoute,
+} as any)
 const AppAuthPlanoRoute = AppAuthPlanoRouteImport.update({
   id: '/plano',
   path: '/plano',
@@ -81,6 +87,7 @@ export interface FileRoutesByFullPath {
   '/entrar': typeof EntrarRoute
   '/questoes': typeof AppQuestoesRoute
   '/desempenho': typeof AppAuthDesempenhoRoute
+  '/inicio': typeof AppAuthInicioRoute
   '/plano': typeof AppAuthPlanoRoute
   '/redacao': typeof AppAuthRedacaoRoute
   '/simulados': typeof AppAuthSimuladosRoute
@@ -92,6 +99,7 @@ export interface FileRoutesByTo {
   '/entrar': typeof EntrarRoute
   '/questoes': typeof AppQuestoesRoute
   '/desempenho': typeof AppAuthDesempenhoRoute
+  '/inicio': typeof AppAuthInicioRoute
   '/plano': typeof AppAuthPlanoRoute
   '/redacao': typeof AppAuthRedacaoRoute
   '/simulados': typeof AppAuthSimuladosRoute
@@ -106,6 +114,7 @@ export interface FileRoutesById {
   '/_app/_auth': typeof AppAuthRouteWithChildren
   '/_app/questoes': typeof AppQuestoesRoute
   '/_app/_auth/desempenho': typeof AppAuthDesempenhoRoute
+  '/_app/_auth/inicio': typeof AppAuthInicioRoute
   '/_app/_auth/plano': typeof AppAuthPlanoRoute
   '/_app/_auth/redacao': typeof AppAuthRedacaoRoute
   '/_app/_auth/simulados': typeof AppAuthSimuladosRoute
@@ -119,6 +128,7 @@ export interface FileRouteTypes {
     | '/entrar'
     | '/questoes'
     | '/desempenho'
+    | '/inicio'
     | '/plano'
     | '/redacao'
     | '/simulados'
@@ -130,6 +140,7 @@ export interface FileRouteTypes {
     | '/entrar'
     | '/questoes'
     | '/desempenho'
+    | '/inicio'
     | '/plano'
     | '/redacao'
     | '/simulados'
@@ -143,6 +154,7 @@ export interface FileRouteTypes {
     | '/_app/_auth'
     | '/_app/questoes'
     | '/_app/_auth/desempenho'
+    | '/_app/_auth/inicio'
     | '/_app/_auth/plano'
     | '/_app/_auth/redacao'
     | '/_app/_auth/simulados'
@@ -207,6 +219,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAuthDesempenhoRouteImport
       parentRoute: typeof AppAuthRoute
     }
+    '/_app/_auth/inicio': {
+      id: '/_app/_auth/inicio'
+      path: '/inicio'
+      fullPath: '/inicio'
+      preLoaderRoute: typeof AppAuthInicioRouteImport
+      parentRoute: typeof AppAuthRoute
+    }
     '/_app/_auth/plano': {
       id: '/_app/_auth/plano'
       path: '/plano'
@@ -240,6 +259,7 @@ declare module '@tanstack/react-router' {
 
 interface AppAuthRouteChildren {
   AppAuthDesempenhoRoute: typeof AppAuthDesempenhoRoute
+  AppAuthInicioRoute: typeof AppAuthInicioRoute
   AppAuthPlanoRoute: typeof AppAuthPlanoRoute
   AppAuthRedacaoRoute: typeof AppAuthRedacaoRoute
   AppAuthSimuladosRoute: typeof AppAuthSimuladosRoute
@@ -248,6 +268,7 @@ interface AppAuthRouteChildren {
 
 const AppAuthRouteChildren: AppAuthRouteChildren = {
   AppAuthDesempenhoRoute: AppAuthDesempenhoRoute,
+  AppAuthInicioRoute: AppAuthInicioRoute,
   AppAuthPlanoRoute: AppAuthPlanoRoute,
   AppAuthRedacaoRoute: AppAuthRedacaoRoute,
   AppAuthSimuladosRoute: AppAuthSimuladosRoute,
