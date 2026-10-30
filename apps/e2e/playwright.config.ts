@@ -52,6 +52,7 @@ export default defineConfig({
             GOOGLE_CLIENT_SECRET: '',
             RESEND_API_KEY: '',
             ANTHROPIC_API_KEY: '',
+            DEEPSEEK_API_KEY: '',
           },
         },
         {

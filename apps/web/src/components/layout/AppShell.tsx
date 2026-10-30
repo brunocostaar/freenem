@@ -55,6 +55,8 @@ export function AppShell() {
   const qc = useQueryClient();
   const canReview = me?.role === 'admin' || me?.role === 'reviewer';
   const items = canReview ? [...NAV, ADMIN_NAV] : NAV;
+  // no mobile o "Apoiar" vai para a barra do topo (a de baixo já fica cheia)
+  const mobileItems = items.filter((i) => i.to !== '/apoiar');
 
   async function handleSignOut() {
     await signOut();
@@ -118,6 +120,13 @@ export function AppShell() {
         <header className="sticky top-0 z-20 flex items-center justify-between border-b-2 border-line bg-surface px-4 py-3 md:hidden">
           <Logo className="text-xl" />
           <div className="flex items-center gap-2">
+            <Link
+              to="/apoiar"
+              aria-label="Apoiar o projeto"
+              className="grid size-9 place-items-center rounded-xl border-2 border-line bg-surface shadow-hard-sm"
+            >
+              <Heart className="size-4" />
+            </Link>
             <InstallAppButton compact />
             <ThemeToggle className="size-9" />
             {session && (
@@ -156,9 +165,9 @@ export function AppShell() {
       <nav
         aria-label="Principal"
         className="fixed inset-x-0 bottom-0 z-30 grid border-t-2 border-line bg-surface pb-[env(safe-area-inset-bottom)] md:hidden"
-        style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}
+        style={{ gridTemplateColumns: `repeat(${mobileItems.length}, minmax(0, 1fr))` }}
       >
-        {items.map((item) => (
+        {mobileItems.map((item) => (
           <Link
             key={item.to}
             to={item.to}
