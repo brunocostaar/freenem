@@ -11,6 +11,8 @@
     "import:tri": "tsx --env-file-if-exists=../../apps/api/.env src/cli.ts tri",
     "import:fuvest": "tsx --env-file-if-exists=../../apps/api/.env src/cli.ts fuvest",
     "import:ufrgs": "tsx --env-file-if-exists=../../apps/api/.env src/cli.ts ufrgs",
+    "import:unicamp": "tsx --env-file-if-exists=../../apps/api/.env src/cli.ts unicamp",
+    "import:vestibulares": "tsx --env-file-if-exists=../../apps/api/.env src/cli.ts vestibulares",
     "classify:llm": "tsx --env-file-if-exists=../../apps/api/.env src/cli.ts classify-llm",
     "quality:report": "tsx --env-file-if-exists=../../apps/api/.env src/cli.ts quality",
     "classify:report": "tsx --env-file-if-exists=../../apps/api/.env src/cli.ts report"

@@ -12,7 +12,10 @@ import { STOPWORDS, SUBJECT_KEYWORDS, TOPIC_KEYWORDS } from './keywords.js';
 export interface ClassifyInput {
   /** enunciado + alternativas (Markdown) */
   text: string;
-  area: EnemArea;
+  /** área do ENEM (restringe as matérias candidatas); vestibulares usam `subjects` */
+  area?: EnemArea;
+  /** matérias candidatas explícitas (vestibulares: sem áreas do ENEM); vence `area` */
+  subjects?: string[];
   /** 'ingles' | 'espanhol' quando a questão é de língua estrangeira */
   language?: 'ingles' | 'espanhol' | null;
 }
@@ -38,6 +41,11 @@ export interface Classification {
 
 /** Abaixo disso a questão vai para a fila de revisão (`draft`). */
 export const PUBLISH_MIN_SUBJECT_CONFIDENCE = 0.25;
+
+/** Todas as matérias da taxonomia (exceto línguas estrangeiras): candidatas dos vestibulares. */
+export const ALL_SUBJECTS = subjectsSeed
+  .map((s) => s.name)
+  .filter((n) => n !== 'Inglês' && n !== 'Espanhol');
 
 export function normalize(text: string): string {
   return text
@@ -149,9 +157,8 @@ export function classify(input: ClassifyInput): Classification {
     subject = LANG_SUBJECT[input.language];
     subjectConfidence = 1;
   } else {
-    const candidates = (areaSubjects.get(input.area) ?? []).filter(
-      (n) => n !== 'Inglês' && n !== 'Espanhol',
-    );
+    const pool = input.subjects ?? (input.area ? areaSubjects.get(input.area) : undefined) ?? [];
+    const candidates = pool.filter((n) => n !== 'Inglês' && n !== 'Espanhol');
     for (const c of candidates) subjectScores[c] = score(text, subjectMatchers.get(c) ?? []);
     const ranked = Object.entries(subjectScores).sort((a, b) => b[1] - a[1]);
     const [top, second] = ranked;

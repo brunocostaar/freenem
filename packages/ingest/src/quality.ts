@@ -26,6 +26,14 @@ export interface Issue {
   detail: string;
 }
 
+/**
+ * Nº de alternativas esperado por instituição (padrão 5; UNICAMP usa 4: a–d). O schema aceita A–E,
+ * então 4 alternativas são válidas, só não são o padrão do ENEM.
+ */
+export const EXPECTED_ALTERNATIVES: Record<string, number> = { unicamp: 4 };
+export const expectedAlternativesOf = (institutionSlug: string | null | undefined): number =>
+  (institutionSlug && EXPECTED_ALTERNATIVES[institutionSlug]) || 5;
+
 /** Enunciado (sem imagens) menor que isto, sem imagem na questão, é suspeito de truncado. */
 export const MIN_STATEMENT_CHARS = 60;
 
@@ -70,7 +78,7 @@ function oddBold(md: string): boolean {
 
 export function checkQuality(
   q: QualityInput,
-  opts: { imageMissing?: (ref: string) => boolean } = {},
+  opts: { imageMissing?: (ref: string) => boolean; expectedAlternatives?: number } = {},
 ): Issue[] {
   const issues: Issue[] = [];
   const add = (code: IssueCode, detail: string) => issues.push({ code, detail });
@@ -86,8 +94,10 @@ export function checkQuality(
     add('statement_short', `enunciado com ${body.length} caracteres e sem imagem`);
   }
 
-  if (q.alternatives.length !== 5)
-    add('alternatives_count', `${q.alternatives.length} alternativas`);
+  const expected = opts.expectedAlternatives ?? 5;
+  if (q.alternatives.length !== expected) {
+    add('alternatives_count', `${q.alternatives.length} alternativas (esperado ${expected})`);
+  }
   const empty = q.alternatives.filter((a) => !a.text.trim() && !a.imageUrl).map((a) => a.letter);
   if (empty.length) add('alternative_empty', `alternativas vazias: ${empty.join(',')}`);
 

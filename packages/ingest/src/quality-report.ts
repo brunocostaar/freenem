@@ -3,7 +3,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { and, asc, eq, inArray } from 'drizzle-orm';
 import { CACHE_DIR, db, schema } from './db.js';
-import { checkQuality, type Issue } from './quality.js';
+import { checkQuality, expectedAlternativesOf, type Issue } from './quality.js';
 
 function csvCell(v: string | number | null): string {
   const s = v === null ? '' : String(v);
@@ -38,6 +38,7 @@ export async function qualityReport(opts: QualityOptions = {}): Promise<void> {
   const qs = await db
     .select({
       id: schema.questions.id,
+      examId: schema.questions.examId,
       externalId: schema.questions.externalId,
       number: schema.questions.number,
       status: schema.questions.status,
@@ -47,6 +48,14 @@ export async function qualityReport(opts: QualityOptions = {}): Promise<void> {
     })
     .from(schema.questions)
     .orderBy(asc(schema.questions.externalId));
+  const examInst = new Map(
+    (
+      await db
+        .select({ id: schema.exams.id, slug: schema.institutions.slug })
+        .from(schema.exams)
+        .innerJoin(schema.institutions, eq(schema.institutions.id, schema.exams.institutionId))
+    ).map((e) => [e.id, e.slug]),
+  );
   const alts = await db
     .select({
       questionId: schema.alternatives.questionId,
@@ -68,7 +77,10 @@ export async function qualityReport(opts: QualityOptions = {}): Promise<void> {
   for (const q of qs) {
     const issues = checkQuality(
       { statement: q.statement, imageUrls: q.imageUrls, alternatives: byQ.get(q.id) ?? [] },
-      { imageMissing },
+      {
+        imageMissing,
+        expectedAlternatives: expectedAlternativesOf(q.examId ? examInst.get(q.examId) : undefined),
+      },
     );
     if (issues.length) flagged.push({ q, issues });
   }
