@@ -22,7 +22,6 @@ function QuestionPage() {
 
   useEffect(() => {
     if (!q.data) return;
-    practice.markShown(q.data.id);
     const prev = document.title;
     document.title = `${q.data.institution} ${q.data.year} · ${q.data.subject} — freenem`;
     return () => {

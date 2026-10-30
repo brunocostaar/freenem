@@ -1,34 +1,31 @@
-import ReactMarkdown from 'react-markdown';
-import remarkMath from 'remark-math';
-import rehypeKatex from 'rehype-katex';
+import { lazy, Suspense } from 'react';
 import { cn } from '@/lib/cn';
-import { ZoomableImage } from '@/components/question/ZoomableImage';
+
+// react-markdown + KaTeX pesam ~120 kB gzip: ficam fora do bundle inicial (só carregam
+// quando algum texto rico é renderizado).
+const RichTextImpl = lazy(() => import('./RichTextImpl'));
+
+interface RichTextProps {
+  children: string;
+  className?: string;
+  /** false = imagens sem botão de zoom (para uso dentro de controles interativos, ex.: alternativas) */
+  zoomable?: boolean;
+}
 
 /**
- * Renderiza Markdown + LaTeX (KaTeX). Use `$...$` para fórmulas inline e `$$...$$` em bloco.
- * Usado em enunciados, alternativas e resoluções de questões. Imagens carregam sob demanda
- * e ampliam ao toque.
+ * Markdown + LaTeX (KaTeX) para enunciados, alternativas e resoluções. Enquanto o renderizador
+ * carrega, mostra o texto puro (sem salto de layout relevante).
  */
-export function RichText({ children, className }: { children: string; className?: string }) {
+export function RichText(props: RichTextProps) {
   return (
-    <div
-      className={cn(
-        'prose-richtext space-y-3 leading-relaxed [&_img]:max-w-full [&_img]:rounded-lg [&_img]:border-2 [&_img]:border-line [&_table]:border-collapse [&_td]:border [&_td]:border-line-soft [&_td]:px-2 [&_th]:border [&_th]:border-line-soft [&_th]:px-2 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_a]:text-primary [&_a]:underline [&_blockquote]:border-l-4 [&_blockquote]:border-line-soft [&_blockquote]:pl-4 [&_blockquote]:text-muted',
-        className,
-      )}
+    <Suspense
+      fallback={
+        <div className={cn('space-y-3 leading-relaxed whitespace-pre-wrap', props.className)}>
+          {props.children.replace(/!\[[^\]]*\]\([^)]*\)/g, '')}
+        </div>
+      }
     >
-      <ReactMarkdown
-        remarkPlugins={[remarkMath]}
-        rehypePlugins={[rehypeKatex]}
-        skipHtml
-        components={{
-          img: ({ src, alt }) => (
-            <ZoomableImage src={typeof src === 'string' ? src : undefined} alt={alt} />
-          ),
-        }}
-      >
-        {children}
-      </ReactMarkdown>
-    </div>
+      <RichTextImpl {...props} />
+    </Suspense>
   );
 }

@@ -74,12 +74,6 @@ function QuestionsPage() {
     [items.length, list],
   );
 
-  // registra o instante em que a questão do modo foco apareceu
-  useEffect(() => {
-    if (view === 'focus' && current) practice.markShown(current.id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [view, current?.id]);
-
   // atalhos do modo foco: J/K ou setas navegam, Enter responde / avança
   useEffect(() => {
     if (view !== 'focus') return;

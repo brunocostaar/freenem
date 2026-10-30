@@ -54,6 +54,20 @@ Baixam o PDF oficial, extraem o texto com `pdftotext -layout` (poppler-utils) e 
 sem matéria/gabarito (parser de melhor esforço; provas com duas colunas/figuras exigem revisão).
 Direitos das provas pertencem às instituições: sempre citamos a fonte e atendemos pedidos de remoção.
 
+## Qualidade dos dados
+
+```bash
+pnpm --filter @freenem/ingest run quality:report            # relata e rebaixa suspeitas para draft
+pnpm --filter @freenem/ingest run quality:report --dry-run  # só relata
+```
+
+`src/quality.ts` (função pura, também usada pelo importador) sinaliza: enunciado curto (< 60 caracteres
+sem imagem), alternativas vazias/duplicadas/em número errado, gabarito ausente ou múltiplo, imagens
+quebradas ou ausentes no storage (use `STORAGE_DIR` absoluto se não for o padrão), `$` de LaTeX
+desbalanceado e artefatos de Markdown/HTML. Questões **publicadas e ainda não revisadas** com problemas
+vão para `draft`; o motivo fica em `.cache/quality-report.csv` (não há coluna de motivo no banco).
+O importador escapa `$` de moeda (`R$`, `US$`) para o KaTeX não tratá-los como fórmula.
+
 ## Relatório
 
 `pnpm --filter @freenem/ingest run classify:report` — contagens por ano, status, matéria e cobertura TRI.

@@ -72,7 +72,7 @@ try {
   }
   const og = await browser.newPage({ viewport: { width: 1200, height: 630 } });
   await og.setContent(ogHtml, { waitUntil: 'networkidle' }).catch(() => undefined);
-  await og.evaluate("document.fonts.ready");
+  await og.evaluate('document.fonts.ready');
   await og.screenshot({ path: OUT + 'og.png' });
   console.log('gerado og.png');
 } finally {

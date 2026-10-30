@@ -8,6 +8,7 @@ Comandos (via scripts do pacote):
   import:fuvest [--year 2024] [--pdf arquivo.pdf]   Rascunhos de questões da FUVEST (PDF oficial)
   import:ufrgs  [--year 2024] [--pdf arquivo.pdf]   Rascunhos de questões da UFRGS (PDF oficial)
   classify:llm  [--limit 200] [--status draft]      Classifica matéria/assunto com a API da Anthropic
+  quality:report [--dry-run]                        Checa qualidade das questões; rebaixa suspeitas publicadas para draft
   classify:report                                   Contagens por ano, status e matéria no banco
 `;
 
@@ -71,6 +72,11 @@ try {
     case 'report': {
       const { report } = await import('./report.js');
       await report();
+      break;
+    }
+    case 'quality': {
+      const { qualityReport } = await import('./quality-report.js');
+      await qualityReport({ dryRun: flag('dry-run') });
       break;
     }
     default:

@@ -131,8 +131,8 @@ export function estimateTri(items: ScoredItem[], opts: TriOptions = {}): TriResu
  * item mais fácil foi errado enquanto um mais difícil foi acertado (inversões). Normaliza pelo
  * máximo possível dado o número de acertos e erros: 1 = perfeitamente coerente (acertou os mais
  * fáceis), 0 = máximo de incoerência (acertou só os mais difíceis, típico de "chute").
- * Devolve null se houver menos de `minItems` itens com parâmetros; sem mistura de acertos e
- * erros devolve 1.
+ * Devolve null se houver menos de `minItems` itens com parâmetros ou se não houver
+ * mistura de acertos e erros (tudo certo / tudo errado): sem pares, o índice é indefinido.
  */
 export function coherence(items: ScoredItem[], minItems = MIN_TRI_ITEMS): number | null {
   const usable = usableItems(items);
@@ -140,7 +140,7 @@ export function coherence(items: ScoredItem[], minItems = MIN_TRI_ITEMS): number
   const right = usable.filter((i) => i.correct);
   const wrong = usable.filter((i) => !i.correct);
   const maxInv = right.length * wrong.length;
-  if (maxInv === 0) return 1;
+  if (maxInv === 0) return null;
   let inversions = 0;
   for (const w of wrong) for (const r of right) if (w.params.b < r.params.b) inversions++;
   return 1 - inversions / maxInv;

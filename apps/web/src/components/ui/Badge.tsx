@@ -8,7 +8,7 @@ const tones: Record<BadgeTone, string> = {
   primary: 'bg-primary text-primary-ink',
   accent: 'bg-accent text-accent-ink',
   success: 'bg-success text-bg',
-  danger: 'bg-danger text-white',
+  danger: 'bg-danger text-danger-ink',
   highlight: 'bg-highlight text-[#14213d]',
 };
 

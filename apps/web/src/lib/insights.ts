@@ -45,6 +45,8 @@ export function nextEnemDate(from: Date = new Date()): string {
 }
 
 export function formatDuration(ms: number): string {
+  // menos de 1 min: mostra segundos (senão "0 min" esconde o tempo registrado)
+  if (ms > 0 && ms < 60_000) return `${Math.max(1, Math.round(ms / 1000))} s`;
   const minutes = Math.round(ms / 60_000);
   if (minutes < 60) return `${minutes} min`;
   const h = Math.floor(minutes / 60);

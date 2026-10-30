@@ -5,6 +5,7 @@ import { eq } from 'drizzle-orm';
 import { contentTypeFor, type Storage } from '../../../apps/api/src/lib/storage-core.js';
 import { classify, shouldPublish } from './classify.js';
 import { db, getStorage, schema } from './db.js';
+import { checkQuality, escapeDollars } from './quality.js';
 import {
   areaOf,
   dayOf,
@@ -14,6 +15,14 @@ import {
   loadYear,
   type LoadedQuestion,
 } from './sources/enem-api.js';
+
+const COVERED_ABOVE = new Set([
+  'statement_empty',
+  'alternatives_count',
+  'alternative_empty',
+  'no_correct',
+  'broken_image',
+]);
 
 const INEP_URL =
   'https://www.gov.br/inep/pt-br/areas-de-atuacao/avaliacao-e-exames-educacionais/enem/provas-e-gabaritos';
@@ -88,7 +97,7 @@ async function rewriteMarkdown(
   const parts: string[] = [];
   let last = 0;
   for (const m of md.matchAll(re)) {
-    parts.push(md.slice(last, m.index));
+    parts.push(escapeDollars(md.slice(last, m.index)));
     last = m.index + m[0].length;
     const alt = m[1] ?? '';
     const url = m[2] ?? '';
@@ -104,7 +113,7 @@ async function rewriteMarkdown(
     const ref = await uploadImage(url, storage, flags, cache);
     parts.push(ref ? `![${alt || 'Imagem da questão'}](${ref})` : '');
   }
-  parts.push(md.slice(last));
+  parts.push(escapeDollars(md.slice(last)));
   return parts
     .join('')
     .replace(/[ \t]+\n/g, '\n')
@@ -216,7 +225,7 @@ export async function importEnem(opts: ImportOptions): Promise<ImportStats> {
         const ctx = data.context
           ? await rewriteMarkdown(data.context, storage, flags, imageCache)
           : '';
-        const intro = data.alternativesIntroduction?.trim() ?? '';
+        const intro = escapeDollars(data.alternativesIntroduction?.trim() ?? '');
         statement = [ctx, intro].filter(Boolean).join('\n\n');
         for (const f of data.files) {
           if (f.toLowerCase().endsWith('.latex')) continue;
@@ -266,6 +275,10 @@ export async function importEnem(opts: ImportOptions): Promise<ImportStats> {
       if (!data.correctAlternative || !altRows.some((a) => a.isCorrect))
         problems.push('sem gabarito');
       if (altRows.some((a) => !a.text.trim() && !a.imageUrl)) problems.push('alternativa vazia');
+      // checagens de qualidade (enunciado curto/truncado, alternativas repetidas, LaTeX, etc.)
+      for (const issue of checkQuality({ statement, imageUrls, alternatives: altRows })) {
+        if (!COVERED_ABOVE.has(issue.code)) problems.push(`${issue.code}: ${issue.detail}`);
+      }
       stats.flaggedImages += flags.brokenImages + flags.missingImages;
       const status =
         problems.length === 0 && shouldPublish(c, data.language) ? 'published' : 'draft';

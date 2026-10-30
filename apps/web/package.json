@@ -8,6 +8,7 @@
     "build": "tsc --noEmit -p tsconfig.json && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit -p tsconfig.json",
+    "contrast": "node scripts/contrast.mjs",
     "test": "echo \"sem testes no web ainda\""
   },
   "dependencies": {
