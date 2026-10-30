@@ -5,6 +5,7 @@ const USAGE = `Uso: pnpm --filter @freenem/ingest run <comando> [opções]
 Comandos (via scripts do pacote):
   import:enem   [--years 2022,2023] [--no-images]   Importa questões do ENEM (dataset enem-api)
   import:tri    [--years 2022,2023]                 Importa parâmetros TRI (a,b,c) dos microdados do INEP
+  import:enem-ppl [--years 2022,2023] [--dry-run]   ENEM PPL (2ª aplicação): provas oficiais do INEP (PDF + gabarito)
   import:fuvest [--year 2024] [--pdf prova.pdf --gabarito gab.pdf] [--version V1]
                                                     Rascunhos da FUVEST 1ª fase (PDF oficial + gabarito)
   import:ufrgs  [--year 2025] [--pdf dia1.pdf --pdf2 dia2-ingles.pdf --gabarito pagina.html]
@@ -63,6 +64,14 @@ try {
         gabarito: arg('gabarito'),
         version: arg('version'),
         languages: arg('langs')?.split(',') as ('ingles' | 'espanhol')[] | undefined,
+        dryRun: flag('dry-run'),
+      });
+      break;
+    }
+    case 'enem-ppl': {
+      const { runEnemPpl } = await import('./run-enem-ppl.js');
+      await runEnemPpl({
+        years: arg('years') ? parseYears() : undefined,
         dryRun: flag('dry-run'),
       });
       break;
