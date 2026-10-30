@@ -21,6 +21,7 @@
     "ingest:enem": "pnpm --filter @freenem/ingest run import:enem",
     "ingest:tri": "pnpm --filter @freenem/ingest run import:tri",
     "ingest:vestibulares": "pnpm --filter @freenem/ingest run import:vestibulares",
+    "ingest:review": "pnpm --filter @freenem/ingest run review:auto",
     "e2e": "pnpm --filter @freenem/e2e e2e"
   },
   "devDependencies": {

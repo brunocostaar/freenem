@@ -11,7 +11,7 @@ function csvCell(v: string | number | null): string {
 }
 
 /** Resolve `storage://chave` no disco quando o driver é local; outros drivers: não checa. */
-function localImageMissing(): ((ref: string) => boolean) | undefined {
+export function localImageMissing(): ((ref: string) => boolean) | undefined {
   if (process.env.STORAGE_DRIVER === 'r2') return undefined;
   const dir = path.resolve(
     process.env.STORAGE_DIR ?? path.resolve(CACHE_DIR, '../../../apps/api/storage'),

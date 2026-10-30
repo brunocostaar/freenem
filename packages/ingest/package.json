@@ -15,6 +15,7 @@
     "import:vestibulares": "tsx --env-file-if-exists=../../apps/api/.env src/cli.ts vestibulares",
     "classify:llm": "tsx --env-file-if-exists=../../apps/api/.env src/cli.ts classify-llm",
     "quality:report": "tsx --env-file-if-exists=../../apps/api/.env src/cli.ts quality",
+    "review:auto": "tsx --env-file-if-exists=../../apps/api/.env src/cli.ts auto-review",
     "classify:report": "tsx --env-file-if-exists=../../apps/api/.env src/cli.ts report"
   },
   "dependencies": {

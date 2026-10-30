@@ -14,7 +14,8 @@
     "db:migrate": "tsx --env-file-if-exists=.env src/db/migrate.ts",
     "db:seed": "tsx --env-file-if-exists=.env src/db/seed.ts",
     "db:seed:fixtures": "tsx --env-file-if-exists=.env src/db/seed-fixtures.ts",
-    "db:reset:e2e": "tsx --env-file-if-exists=.env src/db/reset-e2e.ts"
+    "db:reset:e2e": "tsx --env-file-if-exists=.env src/db/reset-e2e.ts",
+    "storage:sync": "tsx --env-file-if-exists=.env src/db/sync-storage.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0",

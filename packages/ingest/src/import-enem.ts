@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { eq } from 'drizzle-orm';
 import { contentTypeFor, type Storage } from '../../../apps/api/src/lib/storage-core.js';
-import { classify, shouldPublish } from './classify.js';
+import { classify } from './classify.js';
 import { db, getStorage, schema } from './db.js';
 import { checkQuality, escapeDollars } from './quality.js';
 import {
@@ -280,8 +280,9 @@ export async function importEnem(opts: ImportOptions): Promise<ImportStats> {
         if (!COVERED_ABOVE.has(issue.code)) problems.push(`${issue.code}: ${issue.detail}`);
       }
       stats.flaggedImages += flags.brokenImages + flags.missingImages;
-      const status =
-        problems.length === 0 && shouldPublish(c, data.language) ? 'published' : 'draft';
+      // Confiança baixa de classificação NÃO rebaixa: a matéria atribuída fica e os assuntos podem
+      // ficar vazios (e reimportar não desfaz o `auto-review`).
+      const status = problems.length === 0 ? 'published' : 'draft';
 
       const examId = await examFor(dayOf(year, area));
       const values = {

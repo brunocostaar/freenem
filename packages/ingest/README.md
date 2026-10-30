@@ -111,6 +111,21 @@ desbalanceado e artefatos de Markdown/HTML. Questões **publicadas e ainda não 
 vão para `draft`; o motivo fica em `.cache/quality-report.csv` (não há coluna de motivo no banco).
 O importador escapa `$` de moeda (`R$`, `US$`) para o KaTeX não tratá-los como fórmula.
 
+## Auto-revisão (publicação em lote, sem LLM)
+
+```bash
+pnpm ingest:review -- --dry-run                  # só conta (também grava .cache/auto-review-report.csv)
+pnpm ingest:review                               # publica
+pnpm ingest:review -- --institution unicamp      # enem|fuvest|ufrgs|unicamp
+```
+
+`src/auto-review.ts` publica rascunhos **sem `reviewed_by`** que passam em regras determinísticas:
+enunciado não vazio, matéria definida, nº de alternativas da instituição (5; UNICAMP 4) com exatamente
+uma correta, nenhuma vazia, sem imagem quebrada/ausente e `checkQuality` sem problemas. Não preenche
+`reviewed_by` (continua distinguível de revisão humana). Relatório por questão em
+`.cache/auto-review-report.csv`. O importador do ENEM não rebaixa mais por baixa confiança de
+classificação, então reimportar não desfaz a publicação; os vestibulares seguem entrando como `draft`.
+
 ## Relatório
 
 `pnpm --filter @freenem/ingest run classify:report` — contagens por ano, status, matéria e cobertura TRI.

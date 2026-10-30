@@ -15,6 +15,8 @@ Comandos (via scripts do pacote):
                                                     Opções comuns: --dry-run (não grava no banco)
   classify:llm  [--limit 200] [--status draft]      Classifica matéria/assunto com a API da Anthropic
   quality:report [--dry-run]                        Checa qualidade das questões; rebaixa suspeitas publicadas para draft
+  review:auto   [--dry-run] [--institution enem|fuvest|ufrgs|unicamp]
+                                                    Publica rascunhos íntegros (regras determinísticas, sem LLM)
   classify:report                                   Contagens por ano, status e matéria no banco
 `;
 
@@ -83,6 +85,11 @@ try {
     case 'quality': {
       const { qualityReport } = await import('./quality-report.js');
       await qualityReport({ dryRun: flag('dry-run') });
+      break;
+    }
+    case 'auto-review': {
+      const { autoReview } = await import('./auto-review.js');
+      await autoReview({ dryRun: flag('dry-run'), institution: arg('institution') });
       break;
     }
     default:
