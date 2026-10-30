@@ -15,7 +15,13 @@ Plataforma de estudos **gratuita e open-source** para o ENEM e vestibulares: ban
 
 ## Rodando localmente
 
-Requisitos: Node 22+ (veja `.nvmrc`), pnpm, Docker.
+Requisitos: Node 22+ (veja `.nvmrc`), pnpm, Docker (ou Podman).
+
+```bash
+./dev.sh                      # faz tudo abaixo de uma vez (--no-seed pula o seed)
+```
+
+Ou passo a passo:
 
 ```bash
 pnpm install
