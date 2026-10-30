@@ -4,6 +4,7 @@ import {
   BarChart3,
   Home,
   BookOpenCheck,
+  Heart,
   CalendarCheck,
   ClipboardList,
   LogIn,
@@ -30,6 +31,7 @@ interface NavItem {
     | '/redacao'
     | '/desempenho'
     | '/plano'
+    | '/apoiar'
     | '/admin/revisao';
   label: string;
   icon: LucideIcon;
@@ -42,6 +44,7 @@ const NAV: NavItem[] = [
   { to: '/redacao', label: 'Redação', icon: PenLine },
   { to: '/desempenho', label: 'Desempenho', icon: BarChart3 },
   { to: '/plano', label: 'Plano', icon: CalendarCheck },
+  { to: '/apoiar', label: 'Apoiar', icon: Heart },
 ];
 const ADMIN_NAV: NavItem = { to: '/admin/revisao', label: 'Revisão', icon: ShieldCheck };
 

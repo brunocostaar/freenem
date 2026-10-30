@@ -187,14 +187,22 @@ function Landing() {
                 e hospedar a própria cópia.
               </p>
             </div>
-            <a
-              href={GITHUB_URL}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex h-14 items-center gap-2 rounded-xl border-2 border-[#14213d] bg-[#14213d] px-7 text-lg font-semibold whitespace-nowrap text-[#fbf6ea] shadow-[4px_4px_0_0_#ff5b2e] transition-transform hover:-translate-y-0.5"
-            >
-              <GitFork className="size-5" aria-hidden /> Contribuir no GitHub
-            </a>
+            <div className="flex flex-col gap-3 sm:flex-row md:flex-col">
+              <a
+                href={GITHUB_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex h-14 items-center gap-2 rounded-xl border-2 border-[#14213d] bg-[#14213d] px-7 text-lg font-semibold whitespace-nowrap text-[#fbf6ea] shadow-[4px_4px_0_0_#ff5b2e] transition-transform hover:-translate-y-0.5"
+              >
+                <GitFork className="size-5" aria-hidden /> Contribuir no GitHub
+              </a>
+              <Link
+                to="/apoiar"
+                className="inline-flex h-14 items-center justify-center gap-2 rounded-xl border-2 border-[#14213d] px-7 text-lg font-semibold whitespace-nowrap text-[#14213d] transition-transform hover:-translate-y-0.5"
+              >
+                <Heart className="size-5" aria-hidden /> Apoiar o projeto
+              </Link>
+            </div>
           </div>
         </section>
       </main>

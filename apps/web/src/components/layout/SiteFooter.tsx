@@ -10,6 +10,9 @@ export function SiteFooterLinks({ className }: { className?: string }) {
       <Link to="/sobre" className={link}>
         Sobre
       </Link>
+      <Link to="/apoiar" className={link}>
+        Apoiar
+      </Link>
       <Link to="/privacidade" className={link}>
         Privacidade
       </Link>

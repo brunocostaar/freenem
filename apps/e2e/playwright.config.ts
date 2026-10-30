@@ -59,7 +59,14 @@ export default defineConfig({
           url: baseURL,
           reuseExistingServer: false,
           timeout: 120_000,
-          env: { VITE_API_URL: apiURL },
+          env: {
+            VITE_API_URL: apiURL,
+            // valores fictícios para a página /apoiar renderizar completa
+            VITE_PIX_KEY: 'apoie@freenem.local',
+            VITE_PIX_NAME: 'FREENEM',
+            VITE_PIX_CITY: 'PORTO ALEGRE',
+            VITE_DONATION_CARD_URL: 'https://donate.example.com/freenem',
+          },
         },
       ],
   projects: [
