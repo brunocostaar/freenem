@@ -7,11 +7,18 @@ import {
   questionListResponseSchema,
   questionSummarySchema,
   savedResponseSchema,
+  subjectProgressResponseSchema,
 } from '@freenem/shared';
 import { env } from '../../env.js';
 import { buildAnswerResponse, getQuestionKey } from '../answers/service.js';
 import { getOptionalUser, isReviewer } from './optional-auth.js';
-import { getQuestion, listQuestions, questionIsVisible, setSaved } from './service.js';
+import {
+  getQuestion,
+  getSubjectProgress,
+  listQuestions,
+  questionIsVisible,
+  setSaved,
+} from './service.js';
 
 const routes: FastifyPluginAsyncZod = async (app) => {
   app.get(
@@ -30,6 +37,15 @@ const routes: FastifyPluginAsyncZod = async (app) => {
         throw app.httpErrors.forbidden('Você não tem permissão para filtrar por este status.');
       }
       return listQuestions(f, { userId: user?.id ?? null, canSeeAllStatuses: reviewer });
+    },
+  );
+
+  app.get(
+    '/questions/progress',
+    { schema: { response: { 200: subjectProgressResponseSchema } } },
+    async (req) => {
+      const user = await getOptionalUser(req);
+      return { subjects: await getSubjectProgress(user?.id ?? null) };
     },
   );
 

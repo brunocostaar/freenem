@@ -28,6 +28,21 @@
   --ring: #2b3af7;
   /* opacidade do marca-texto atrás dos títulos (.marker) */
   --marker-alpha: 1;
+  /* cores das matérias (barra/acento; fundo suave via /15) */
+  --subj-matematica: #2b5fd9;
+  --subj-fisica: #6d3fd1;
+  --subj-quimica: #0b8a8f;
+  --subj-biologia: #2f8f2f;
+  --subj-historia: #a8620a;
+  --subj-geografia: #177a4f;
+  --subj-filosofia: #8c3a9e;
+  --subj-sociologia: #c0392b;
+  --subj-portugues: #d1348a;
+  --subj-literatura: #a4294f;
+  --subj-ingles: #1f7aa8;
+  --subj-espanhol: #c26a00;
+  --subj-artes: #a8860a;
+  --subj-educacao-fisica: #4a5fb0;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -52,6 +67,20 @@
     --accent-strong: #ff7a50;
     --danger-ink: #0d1424;
     --marker-alpha: 0.3;
+    --subj-matematica: #7aa2ff;
+    --subj-fisica: #b196ff;
+    --subj-quimica: #4fd6d9;
+    --subj-biologia: #6fdc6f;
+    --subj-historia: #f0a850;
+    --subj-geografia: #4fd9a0;
+    --subj-filosofia: #d890e8;
+    --subj-sociologia: #ff8a7a;
+    --subj-portugues: #ff86c4;
+    --subj-literatura: #f08aa6;
+    --subj-ingles: #68c4f0;
+    --subj-espanhol: #ffb347;
+    --subj-artes: #e6c84a;
+    --subj-educacao-fisica: #9fb0f5;
   }
 }
 :root[data-theme='dark'] {
@@ -75,6 +104,20 @@
   --accent-strong: #ff7a50;
   --danger-ink: #0d1424;
   --marker-alpha: 0.3;
+  --subj-matematica: #7aa2ff;
+  --subj-fisica: #b196ff;
+  --subj-quimica: #4fd6d9;
+  --subj-biologia: #6fdc6f;
+  --subj-historia: #f0a850;
+  --subj-geografia: #4fd9a0;
+  --subj-filosofia: #d890e8;
+  --subj-sociologia: #ff8a7a;
+  --subj-portugues: #ff86c4;
+  --subj-literatura: #f08aa6;
+  --subj-ingles: #68c4f0;
+  --subj-espanhol: #ffb347;
+  --subj-artes: #e6c84a;
+  --subj-educacao-fisica: #9fb0f5;
 }
 
 @theme inline {
@@ -95,6 +138,20 @@
   --color-danger-ink: var(--danger-ink);
   --color-accent-strong: var(--accent-strong);
   --color-warning: var(--warning);
+  --color-subj-matematica: var(--subj-matematica);
+  --color-subj-fisica: var(--subj-fisica);
+  --color-subj-quimica: var(--subj-quimica);
+  --color-subj-biologia: var(--subj-biologia);
+  --color-subj-historia: var(--subj-historia);
+  --color-subj-geografia: var(--subj-geografia);
+  --color-subj-filosofia: var(--subj-filosofia);
+  --color-subj-sociologia: var(--subj-sociologia);
+  --color-subj-portugues: var(--subj-portugues);
+  --color-subj-literatura: var(--subj-literatura);
+  --color-subj-ingles: var(--subj-ingles);
+  --color-subj-espanhol: var(--subj-espanhol);
+  --color-subj-artes: var(--subj-artes);
+  --color-subj-educacao-fisica: var(--subj-educacao-fisica);
   --font-display: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
   --font-sans: 'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif;
   --shadow-hard: 4px 4px 0 0 var(--shadow);

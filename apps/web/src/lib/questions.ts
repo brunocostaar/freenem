@@ -5,6 +5,7 @@ import {
   questionSummarySchema,
   reviewListResponseSchema,
   reviewQuestionSchema,
+  subjectProgressResponseSchema,
   type QuestionSearch,
   type QuestionStatus,
 } from '@freenem/shared';
@@ -15,6 +16,13 @@ export const catalogQuery = queryOptions({
   queryFn: () => api('/api/v1/catalog', { schema: catalogResponseSchema }),
   staleTime: 10 * 60_000,
 });
+
+export const subjectProgressQuery = (userId: string | null) =>
+  queryOptions({
+    // o progresso é pessoal: o usuário entra na chave
+    queryKey: ['subject-progress', userId],
+    queryFn: () => api('/api/v1/questions/progress', { schema: subjectProgressResponseSchema }),
+  });
 
 /** Converte os search params da URL (booleanos reais) na query string da API. */
 export function toApiQuery(s: QuestionSearch) {

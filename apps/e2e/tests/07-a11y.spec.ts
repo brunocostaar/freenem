@@ -46,13 +46,13 @@ test('a11y: páginas públicas (axe, claro e escuro)', async ({ page }) => {
 });
 
 test('a11y: página de uma questão e modo lista', async ({ page }) => {
-  await page.goto('/questoes');
+  await page.goto('/questoes?all=true');
   await page.getByRole('link', { name: 'Abrir página da questão' }).first().click();
   await expect(page).toHaveURL(/\/questoes\/[0-9a-f-]{36}/);
   await expect(page.getByRole('radio', { name: /^Alternativa A/ })).toBeVisible();
   await auditBothThemes(page, 'questão');
 
-  await page.goto('/questoes?view=list');
+  await page.goto('/questoes?all=true&view=list');
   await expect(page.getByRole('radio', { name: /^Alternativa A/ }).first()).toBeVisible();
   await auditBothThemes(page, 'questões (lista)');
 });
@@ -124,7 +124,7 @@ test('teclado: diálogo prende o foco, Esc fecha e devolve o foco', async ({ pag
 });
 
 test('teclado: responder uma questão só com o teclado', async ({ page }) => {
-  await page.goto('/questoes');
+  await page.goto('/questoes?all=true');
   const alt = page.getByRole('radio', { name: /^Alternativa B/ });
   await expect(alt).toBeVisible();
   await alt.focus();

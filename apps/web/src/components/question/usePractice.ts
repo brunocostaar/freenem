@@ -115,7 +115,10 @@ export function usePractice() {
             });
         stopTimer(id);
         patch(id, { result, submitting: false });
-        if (loggedIn) void qc.invalidateQueries({ queryKey: ['stats'] });
+        if (loggedIn) {
+          void qc.invalidateQueries({ queryKey: ['stats'] });
+          void qc.invalidateQueries({ queryKey: ['subject-progress'] });
+        }
       } catch (err) {
         patch(id, { submitting: false });
         toast.error(err instanceof ApiError ? err.message : 'Não foi possível corrigir agora.');

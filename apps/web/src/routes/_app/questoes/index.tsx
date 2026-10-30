@@ -3,6 +3,7 @@ import { Link, createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import {
   AlertTriangle,
+  ArrowLeft,
   ChevronLeft,
   ChevronRight,
   ListChecks,
@@ -15,6 +16,7 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import {
   QuestionCard,
   QuestionFilters,
+  SubjectGrid,
   hasActiveFilters,
   isTypingTarget,
   usePractice,
@@ -22,7 +24,7 @@ import {
 import { Button, Card, EmptyState, Sheet, Skeleton, buttonClasses } from '@/components/ui';
 import { useSession } from '@/lib/auth-client';
 import { cn } from '@/lib/cn';
-import { catalogQuery, questionsInfiniteQuery } from '@/lib/questions';
+import { catalogQuery, questionsInfiniteQuery, subjectProgressQuery } from '@/lib/questions';
 
 export const Route = createFileRoute('/_app/questoes/')({
   head: () => ({ meta: [{ title: 'Questões · freenem' }] }),
@@ -36,14 +38,16 @@ function QuestionsPage() {
   const { data: session, isPending: sessionPending } = useSession();
   const userId = session?.user.id ?? null;
   const view = search.view ?? 'focus';
+  const showGrid = !hasActiveFilters(search) && !search.all;
 
   const catalog = useQuery(catalogQuery);
   const list = useInfiniteQuery({
     ...questionsInfiniteQuery(search, userId),
     // espera a sessão resolver: senão a lista carrega como anônimo e recarrega logo depois,
     // descartando o que o usuário fez nesse intervalo
-    enabled: !sessionPending,
+    enabled: !sessionPending && !showGrid,
   });
+  const progress = useQuery({ ...subjectProgressQuery(userId), enabled: !sessionPending });
   const practice = usePractice();
 
   const [cursor, setCursor] = useState(0);
@@ -63,7 +67,11 @@ function QuestionsPage() {
   );
   const reset = useCallback(() => {
     setCursor(0);
-    void navigate({ search: (prev) => ({ view: prev.view }), replace: true });
+    void navigate({ search: (prev) => ({ view: prev.view, all: true }), replace: true });
+  }, [navigate]);
+  const backToGrid = useCallback(() => {
+    setCursor(0);
+    void navigate({ search: {} });
   }, [navigate]);
 
   const goTo = useCallback(
@@ -110,6 +118,26 @@ function QuestionsPage() {
     />
   );
 
+  if (showGrid) {
+    return (
+      <>
+        <PageHeader
+          title="Banco de questões"
+          description="Resolva questões do ENEM e de vestibulares, filtradas por matéria e assunto."
+        />
+        <SubjectGrid
+          subjects={progress.data?.subjects}
+          loading={progress.isPending}
+          error={progress.isError}
+          onRetry={() => void progress.refetch()}
+          loggedIn={practice.loggedIn}
+          onSelectSubject={(subjectId) => void navigate({ search: { subjectId } })}
+          onSelectAll={() => void navigate({ search: { all: true } })}
+        />
+      </>
+    );
+  }
+
   return (
     <>
       <PageHeader
@@ -151,6 +179,14 @@ function QuestionsPage() {
         </aside>
 
         <section aria-label="Questões" className="min-w-0 space-y-4">
+          <button
+            type="button"
+            onClick={backToGrid}
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted hover:text-ink"
+          >
+            <ArrowLeft className="size-4" aria-hidden />
+            Matérias
+          </button>
           <div className="flex items-center justify-between gap-3">
             <p className="text-sm text-muted" aria-live="polite">
               {list.isPending

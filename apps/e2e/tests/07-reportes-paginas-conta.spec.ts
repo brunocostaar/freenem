@@ -11,7 +11,7 @@ import {
 test('reportar erro: aluno envia, admin vê agrupado e resolve', async ({ page, context }, info) => {
   const note = `e2e-reporte-${Date.now()}`;
   await signUp(page);
-  await page.goto('/questoes');
+  await page.goto('/questoes?all=true');
   const report = page.getByRole('button', { name: 'Reportar erro na questão' }).first();
   await expect(report).toBeVisible();
   await report.click();
@@ -51,7 +51,7 @@ test('reportar erro: aluno envia, admin vê agrupado e resolve', async ({ page, 
 });
 
 test('títulos por página e meta tags', async ({ page }) => {
-  await page.goto('/questoes');
+  await page.goto('/questoes?all=true');
   await expect(page).toHaveTitle('Questões · freenem');
   await page.goto('/sobre');
   await expect(page).toHaveTitle('Sobre · freenem');

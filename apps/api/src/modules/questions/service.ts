@@ -271,3 +271,57 @@ export async function questionIsVisible(id: string, canSeeAll: boolean): Promise
     .limit(1);
   return Boolean(row && (row.status === 'published' || canSeeAll));
 }
+
+/**
+ * Progresso por matéria (só questões publicadas). Respostas contam como nas estatísticas:
+ * avulsas e de simulados finalizados (o autosave de simulado em andamento fica de fora).
+ */
+export async function getSubjectProgress(userId: string | null) {
+  const answered = userId
+    ? sql<number>`(count(distinct ${schema.answers.questionId}))::int`
+    : sql<number>`0`;
+  const correct = userId
+    ? sql<number>`(count(distinct ${schema.answers.questionId}) filter (where ${schema.answers.isCorrect}))::int`
+    : sql<number>`0`;
+
+  const totals = await db
+    .select({
+      subjectId: subjects.id,
+      slug: subjects.slug,
+      name: subjects.name,
+      area: subjects.area,
+      total: sql<number>`count(*)::int`,
+    })
+    .from(subjects)
+    .innerJoin(
+      questions,
+      and(eq(questions.subjectId, subjects.id), eq(questions.status, 'published')),
+    )
+    .groupBy(subjects.id)
+    .orderBy(asc(subjects.position), asc(subjects.name));
+
+  const bySubject = new Map<string, { answered: number; correct: number }>();
+  if (userId) {
+    const rows = await db
+      .select({ subjectId: questions.subjectId, answered, correct })
+      .from(schema.answers)
+      .innerJoin(
+        questions,
+        and(eq(questions.id, schema.answers.questionId), eq(questions.status, 'published')),
+      )
+      .where(
+        sql`${schema.answers.userId} = ${userId} and (${schema.answers.simuladoAttemptId} is null or exists (
+          select 1 from ${schema.simuladoAttempts}
+          where ${schema.simuladoAttempts.id} = ${schema.answers.simuladoAttemptId}
+            and ${schema.simuladoAttempts.status} = 'finished'))`,
+      )
+      .groupBy(questions.subjectId);
+    for (const r of rows) if (r.subjectId) bySubject.set(r.subjectId, r);
+  }
+
+  return totals.map((t) => ({
+    ...t,
+    answered: bySubject.get(t.subjectId)?.answered ?? 0,
+    correct: bySubject.get(t.subjectId)?.correct ?? 0,
+  }));
+}

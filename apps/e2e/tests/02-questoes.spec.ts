@@ -25,6 +25,14 @@ test('anônimo: lista carrega, filtros atualizam URL e resultados, responde e co
 }, info) => {
   await page.goto('/questoes');
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Banco de questões');
+  await expect(page.getByRole('button', { name: /Matemática/ })).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+  await shot(page, info.project.name, 'questoes-materias-light');
+  await setTheme(page, 'dark');
+  await shot(page, info.project.name, 'questoes-materias-dark');
+  await setTheme(page, 'light');
+  await page.getByRole('button', { name: 'Misturar todas as matérias' }).click();
+  await expect(page).toHaveURL(/all=true/);
   await expect(page.getByRole('radio', { name: /^Alternativa A/ })).toBeVisible();
   await expect(page.getByText(/\d[\d.]* questões/).first()).toBeVisible();
   await expectNoHorizontalOverflow(page);
@@ -90,7 +98,7 @@ test('atalhos de teclado, eliminar alternativa, salvar e página da questão', a
 }, info) => {
   test.skip(info.project.name === 'mobile', 'atalhos de teclado são de desktop');
   await signUp(page);
-  await page.goto('/questoes');
+  await page.goto('/questoes?all=true');
   await expect(page.getByRole('radio', { name: /^Alternativa A/ })).toBeVisible();
 
   // teclado: C marca, Enter responde
@@ -128,7 +136,7 @@ test('atalhos de teclado, eliminar alternativa, salvar e página da questão', a
 
 test('modo lista e salvar/filtrar salvas (mobile e desktop)', async ({ page }, info) => {
   await signUp(page);
-  await page.goto('/questoes?view=list');
+  await page.goto('/questoes?all=true&view=list');
   await expect(page.getByRole('radio', { name: /^Alternativa A/ }).first()).toBeVisible();
   await expect(page.getByRole('button', { name: 'Carregar mais questões' })).toBeVisible();
   await page.getByRole('button', { name: 'Salvar questão' }).first().click();
@@ -137,4 +145,23 @@ test('modo lista e salvar/filtrar salvas (mobile e desktop)', async ({ page }, i
   await shot(page, info.project.name, 'questoes-lista');
   await page.goto('/questoes?onlySaved=true');
   await expect(page.getByText('1 questão')).toBeVisible();
+});
+
+test('grade de matérias: progresso por matéria e volta à grade', async ({ page }) => {
+  await signUp(page);
+  await page.goto('/questoes');
+  const card = page.getByRole('button', { name: /^Matemática/ });
+  await expect(card).toContainText(/0 de \d[\d.]* feitas/);
+  await card.click();
+  await expect(page).toHaveURL(/subjectId=/);
+  await answerCurrent(page, 'A');
+  await page.getByRole('button', { name: 'Matérias' }).click();
+  await expect(page).not.toHaveURL(/subjectId/);
+  await expect(page.getByRole('button', { name: /^Matemática/ })).toContainText(
+    /1 de \d[\d.]* feitas/,
+  );
+  await expect(page.getByRole('progressbar', { name: 'Progresso em Matemática' })).toHaveAttribute(
+    'aria-valuenow',
+    '1',
+  );
 });

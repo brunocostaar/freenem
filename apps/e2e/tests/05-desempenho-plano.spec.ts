@@ -7,7 +7,7 @@ test('desempenho: vazio, depois números e gráficos após responder', async ({ 
   await shot(page, info.project.name, 'desempenho-vazio');
 
   // responde algumas questões pela interface
-  await page.goto('/questoes');
+  await page.goto('/questoes?all=true');
   for (let i = 0; i < 6; i++) {
     await expect(page.getByRole('radio', { name: /^Alternativa A/ })).toBeVisible();
     await page.getByRole('radio', { name: /^Alternativa A/ }).click();

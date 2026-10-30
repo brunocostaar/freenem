@@ -128,6 +128,25 @@ export const catalogResponseSchema = z.object({
 });
 export type CatalogResponse = z.infer<typeof catalogResponseSchema>;
 
+export const subjectProgressSchema = z.object({
+  subjectId: z.string().uuid(),
+  slug: z.string(),
+  name: z.string(),
+  area: enemAreaSchema,
+  /** questões publicadas da matéria */
+  total: z.number().int(),
+  /** questões distintas já respondidas pelo usuário */
+  answered: z.number().int(),
+  /** questões distintas já acertadas pelo usuário */
+  correct: z.number().int(),
+});
+export type SubjectProgress = z.infer<typeof subjectProgressSchema>;
+
+export const subjectProgressResponseSchema = z.object({
+  subjects: z.array(subjectProgressSchema),
+});
+export type SubjectProgressResponse = z.infer<typeof subjectProgressResponseSchema>;
+
 export const answerResultSchema = z.object({
   correct: z.boolean(),
   correctLetter: alternativeLetterSchema,
@@ -238,5 +257,7 @@ export const questionSearchSchema = z.object({
   onlyWrong: z.boolean().optional().catch(undefined),
   onlySaved: z.boolean().optional().catch(undefined),
   view: z.enum(['focus', 'list']).optional().catch(undefined),
+  /** pula a grade de matérias e abre a prática com todas misturadas */
+  all: z.boolean().optional().catch(undefined),
 });
 export type QuestionSearch = z.infer<typeof questionSearchSchema>;
