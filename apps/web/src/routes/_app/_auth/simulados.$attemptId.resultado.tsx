@@ -15,12 +15,14 @@ import { Check, Clock, Info, Minus, X } from 'lucide-react';
 import type { AreaResult, AttemptResult, QuestionOutcome, ResultQuestion } from '@freenem/shared';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { QuestionView } from '@/components/simulado/QuestionView';
+import { ReportQuestionButton } from '@/components/question';
 import { RichText } from '@/components/RichText';
 import { Badge, Card, CardTitle, EmptyState, Skeleton, buttonClasses } from '@/components/ui';
 import { cn } from '@/lib/cn';
 import { AREA_SHORT, attemptResultQuery, formatDuration } from '@/lib/simulados';
 
 export const Route = createFileRoute('/_app/_auth/simulados/$attemptId/resultado')({
+  head: () => ({ meta: [{ title: 'Resultado do simulado · freenem' }] }),
   component: ResultadoPage,
 });
 
@@ -364,6 +366,7 @@ function ReviewItem({ q }: { q: ResultQuestion }) {
             correctLetter={q.correctLetter}
             readOnly
           />
+          <ReportQuestionButton questionId={q.id} variant="text" />
           {q.resolution && (
             <div className="rounded-xl border-2 border-line-soft bg-surface-2 p-4">
               <p className="mb-2 font-semibold">Resolução</p>

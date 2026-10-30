@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { Badge, buttonClasses, Card, CardTitle, Skeleton } from '@/components/ui';
 import { AppLink } from '@/components/AppLink';
+import { OnboardingChecklist } from '@/components/onboarding/OnboardingChecklist';
 import { useSession } from '@/lib/auth-client';
 import {
   formatDuration,
@@ -21,7 +22,10 @@ import {
 } from '@/lib/insights';
 import { cn } from '@/lib/cn';
 
-export const Route = createFileRoute('/_app/_auth/inicio')({ component: Inicio });
+export const Route = createFileRoute('/_app/_auth/inicio')({
+  head: () => ({ meta: [{ title: 'Início · freenem' }] }),
+  component: Inicio,
+});
 
 function greeting() {
   const h = new Date().getHours();
@@ -96,6 +100,8 @@ function Inicio() {
           </Badge>
         )}
       </header>
+
+      {session && <OnboardingChecklist userId={session.user.id} />}
 
       <section aria-label="Ações rápidas" className="grid gap-4 sm:grid-cols-3">
         {ACTIONS.map((a) => (

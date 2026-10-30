@@ -9,6 +9,7 @@ import { useSession } from '@/lib/auth-client';
 import { questionQuery } from '@/lib/questions';
 
 export const Route = createFileRoute('/_app/questoes/$id')({
+  head: () => ({ meta: [{ title: 'Questão · freenem' }] }),
   component: QuestionPage,
 });
 

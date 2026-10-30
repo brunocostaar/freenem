@@ -7,6 +7,7 @@ import { Skeleton, EmptyState, buttonClasses } from '@/components/ui';
 import { ApiError } from '@/lib/api';
 
 export const Route = createFileRoute('/_app/_auth/simulados/$attemptId/fazer')({
+  head: () => ({ meta: [{ title: 'Simulado em andamento · freenem' }] }),
   component: FazerPage,
 });
 

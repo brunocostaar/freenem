@@ -14,6 +14,9 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as AppAuthRouteImport } from './routes/_app/_auth'
+import { Route as AppPrivacidadeRouteImport } from './routes/_app/privacidade'
+import { Route as AppSobreRouteImport } from './routes/_app/sobre'
+import { Route as AppAuthContaRouteImport } from './routes/_app/_auth/conta'
 import { Route as AppAuthDesempenhoRouteImport } from './routes/_app/_auth/desempenho'
 import { Route as AppAuthInicioRouteImport } from './routes/_app/_auth/inicio'
 import { Route as AppAuthPlanoRouteImport } from './routes/_app/_auth/plano'
@@ -50,6 +53,21 @@ const EntrarRoute = EntrarRouteImport.update({
 const AppAuthRoute = AppAuthRouteImport.update({
   id: '/_auth',
   getParentRoute: () => AppRoute,
+} as any)
+const AppPrivacidadeRoute = AppPrivacidadeRouteImport.update({
+  id: '/privacidade',
+  path: '/privacidade',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSobreRoute = AppSobreRouteImport.update({
+  id: '/sobre',
+  path: '/sobre',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAuthContaRoute = AppAuthContaRouteImport.update({
+  id: '/conta',
+  path: '/conta',
+  getParentRoute: () => AppAuthRoute,
 } as any)
 const AppAuthDesempenhoRoute = AppAuthDesempenhoRouteImport.update({
   id: '/desempenho',
@@ -124,6 +142,9 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/cadastro': typeof CadastroRoute
   '/entrar': typeof EntrarRoute
+  '/privacidade': typeof AppPrivacidadeRoute
+  '/sobre': typeof AppSobreRoute
+  '/conta': typeof AppAuthContaRoute
   '/desempenho': typeof AppAuthDesempenhoRoute
   '/inicio': typeof AppAuthInicioRoute
   '/plano': typeof AppAuthPlanoRoute
@@ -142,6 +163,9 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/cadastro': typeof CadastroRoute
   '/entrar': typeof EntrarRoute
+  '/privacidade': typeof AppPrivacidadeRoute
+  '/sobre': typeof AppSobreRoute
+  '/conta': typeof AppAuthContaRoute
   '/desempenho': typeof AppAuthDesempenhoRoute
   '/inicio': typeof AppAuthInicioRoute
   '/plano': typeof AppAuthPlanoRoute
@@ -163,6 +187,9 @@ export interface FileRoutesById {
   '/cadastro': typeof CadastroRoute
   '/entrar': typeof EntrarRoute
   '/_app/_auth': typeof AppAuthRouteWithChildren
+  '/_app/privacidade': typeof AppPrivacidadeRoute
+  '/_app/sobre': typeof AppSobreRoute
+  '/_app/_auth/conta': typeof AppAuthContaRoute
   '/_app/_auth/desempenho': typeof AppAuthDesempenhoRoute
   '/_app/_auth/inicio': typeof AppAuthInicioRoute
   '/_app/_auth/plano': typeof AppAuthPlanoRoute
@@ -183,6 +210,9 @@ export interface FileRouteTypes {
     | '/'
     | '/cadastro'
     | '/entrar'
+    | '/privacidade'
+    | '/sobre'
+    | '/conta'
     | '/desempenho'
     | '/inicio'
     | '/plano'
@@ -201,6 +231,9 @@ export interface FileRouteTypes {
     | '/'
     | '/cadastro'
     | '/entrar'
+    | '/privacidade'
+    | '/sobre'
+    | '/conta'
     | '/desempenho'
     | '/inicio'
     | '/plano'
@@ -221,6 +254,9 @@ export interface FileRouteTypes {
     | '/cadastro'
     | '/entrar'
     | '/_app/_auth'
+    | '/_app/privacidade'
+    | '/_app/sobre'
+    | '/_app/_auth/conta'
     | '/_app/_auth/desempenho'
     | '/_app/_auth/inicio'
     | '/_app/_auth/plano'
@@ -279,6 +315,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof AppAuthRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/_app/privacidade': {
+      id: '/_app/privacidade'
+      path: '/privacidade'
+      fullPath: '/privacidade'
+      preLoaderRoute: typeof AppPrivacidadeRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/sobre': {
+      id: '/_app/sobre'
+      path: '/sobre'
+      fullPath: '/sobre'
+      preLoaderRoute: typeof AppSobreRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/_auth/conta': {
+      id: '/_app/_auth/conta'
+      path: '/conta'
+      fullPath: '/conta'
+      preLoaderRoute: typeof AppAuthContaRouteImport
+      parentRoute: typeof AppAuthRoute
     }
     '/_app/_auth/desempenho': {
       id: '/_app/_auth/desempenho'
@@ -375,6 +432,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppAuthRouteChildren {
+  AppAuthContaRoute: typeof AppAuthContaRoute
   AppAuthDesempenhoRoute: typeof AppAuthDesempenhoRoute
   AppAuthInicioRoute: typeof AppAuthInicioRoute
   AppAuthPlanoRoute: typeof AppAuthPlanoRoute
@@ -389,6 +447,7 @@ interface AppAuthRouteChildren {
 }
 
 const AppAuthRouteChildren: AppAuthRouteChildren = {
+  AppAuthContaRoute: AppAuthContaRoute,
   AppAuthDesempenhoRoute: AppAuthDesempenhoRoute,
   AppAuthInicioRoute: AppAuthInicioRoute,
   AppAuthPlanoRoute: AppAuthPlanoRoute,
@@ -408,12 +467,16 @@ const AppAuthRouteWithChildren =
 
 interface AppRouteChildren {
   AppAuthRoute: typeof AppAuthRouteWithChildren
+  AppPrivacidadeRoute: typeof AppPrivacidadeRoute
+  AppSobreRoute: typeof AppSobreRoute
   AppQuestoesIdRoute: typeof AppQuestoesIdRoute
   AppQuestoesIndexRoute: typeof AppQuestoesIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppAuthRoute: AppAuthRouteWithChildren,
+  AppPrivacidadeRoute: AppPrivacidadeRoute,
+  AppSobreRoute: AppSobreRoute,
   AppQuestoesIdRoute: AppQuestoesIdRoute,
   AppQuestoesIndexRoute: AppQuestoesIndexRoute,
 }

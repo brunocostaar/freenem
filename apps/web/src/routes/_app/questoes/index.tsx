@@ -25,6 +25,7 @@ import { cn } from '@/lib/cn';
 import { catalogQuery, questionsInfiniteQuery } from '@/lib/questions';
 
 export const Route = createFileRoute('/_app/questoes/')({
+  head: () => ({ meta: [{ title: 'Questões · freenem' }] }),
   validateSearch: questionSearchSchema,
   component: QuestionsPage,
 });

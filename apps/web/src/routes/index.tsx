@@ -14,8 +14,8 @@ import { Logo } from '@/components/layout/Logo';
 import { ThemeToggle } from '@/components/layout/ThemeToggle';
 import { authClient, useSession } from '@/lib/auth-client';
 import { cn } from '@/lib/cn';
-
-export const GITHUB_URL = 'https://github.com/SEU-USUARIO/freenem';
+import { GITHUB_URL } from '@/lib/site';
+import { SiteFooterLinks } from '@/components/layout/SiteFooter';
 
 export const Route = createFileRoute('/')({
   // Quem já está logado vai direto para o painel pessoal; a landing é só para visitantes.
@@ -200,6 +200,7 @@ function Landing() {
       <footer className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 py-10 text-sm text-muted sm:flex-row sm:px-6">
         <Logo className="text-xl" />
         <p>Feito por estudantes, para estudantes. Licença AGPL-3.0.</p>
+        <SiteFooterLinks />
       </footer>
     </div>
   );

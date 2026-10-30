@@ -7,6 +7,7 @@ import { EmptyState, Skeleton, buttonClasses } from '@/components/ui';
 import { essayThemesQuery } from '@/lib/essays';
 
 export const Route = createFileRoute('/_app/_auth/redacao/nova')({
+  head: () => ({ meta: [{ title: 'Nova redação · freenem' }] }),
   validateSearch: z.object({ tema: z.string().uuid().optional() }),
   component: NovaRedacao,
 });

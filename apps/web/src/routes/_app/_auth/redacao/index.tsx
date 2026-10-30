@@ -6,7 +6,10 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { Badge, Button, Card, EmptyState, Skeleton, buttonClasses } from '@/components/ui';
 import { essayListQuery, essayQuotaQuery, essayThemesQuery, formatDateTime } from '@/lib/essays';
 
-export const Route = createFileRoute('/_app/_auth/redacao/')({ component: RedacaoPage });
+export const Route = createFileRoute('/_app/_auth/redacao/')({
+  head: () => ({ meta: [{ title: 'Redação · freenem' }] }),
+  component: RedacaoPage,
+});
 
 function statusBadge(e: EssayListItem) {
   if (e.isDraft) return <Badge>Rascunho</Badge>;

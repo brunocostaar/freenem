@@ -68,3 +68,8 @@ Tudo abaixo depende de contas, chaves ou decisões suas. O app roda 100% localme
 
 - [ ] Entrar como admin e revisar a fila de rascunhos em `/admin/revisao` (~680 questões com classificação de baixa confiança).
 - [ ] Opcional: com a chave da Anthropic, rodar `pnpm --filter @freenem/ingest run classify:llm` para melhorar a classificação por assunto (gera sugestões, ainda passam por revisão).
+
+## Extras (PWA, SEO)
+
+- [ ] Em produção, troque `/og.png` por URL absoluta (`https://SEU-DOMINIO/og.png`) nas tags `og:image`/`twitter:image` de `apps/web/index.html`; os ícones e o OG são regenerados com `pnpm --filter @freenem/e2e exec node scripts/brand-assets.mjs`.
+- [ ] Confirme o texto da política de privacidade (`/privacidade`) e um contato para pedidos LGPD.

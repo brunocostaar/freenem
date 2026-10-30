@@ -1,9 +1,16 @@
-import { Link, Outlet, createRootRouteWithContext } from '@tanstack/react-router';
+import { HeadContent, Link, Outlet, createRootRouteWithContext } from '@tanstack/react-router';
 import type { QueryClient } from '@tanstack/react-query';
 import { buttonClasses } from '@/components/ui';
+import { OfflineBanner } from '@/components/layout/PwaBits';
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  component: () => <Outlet />,
+  component: () => (
+    <>
+      <HeadContent />
+      <OfflineBanner />
+      <Outlet />
+    </>
+  ),
   notFoundComponent: () => (
     <div className="grid min-h-dvh place-items-center px-4 text-center">
       <div className="flex flex-col items-center gap-4">

@@ -18,6 +18,7 @@ import {
   type ReviewQuestion,
 } from '@freenem/shared';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { ReportsPanel, reportsQuery } from '@/components/review/ReportsPanel';
 import { RichText } from '@/components/RichText';
 import {
   Badge,
@@ -36,6 +37,8 @@ import { meQuery } from '@/lib/queries';
 import { catalogQuery, reviewListInfiniteQuery, reviewQuestionQuery } from '@/lib/questions';
 
 const searchSchema = z.object({
+  tab: z.enum(['fila', 'reportes']).optional().catch(undefined),
+  reportStatus: z.enum(['open', 'resolved', 'dismissed']).optional().catch(undefined),
   id: z.string().uuid().optional().catch(undefined),
   status: z.enum(['draft', 'reviewed', 'published']).optional().catch(undefined),
   subjectId: z.string().uuid().optional().catch(undefined),
@@ -46,6 +49,7 @@ const searchSchema = z.object({
 });
 
 export const Route = createFileRoute('/_app/_auth/admin/revisao')({
+  head: () => ({ meta: [{ title: 'Revisão de questões · freenem' }] }),
   validateSearch: searchSchema,
   beforeLoad: async ({ context }) => {
     const me = await context.queryClient.ensureQueryData(meQuery);
@@ -102,136 +106,171 @@ function ReviewPage() {
     return items[i + 1]?.id ?? items[i - 1]?.id;
   };
 
+  const tab = search.tab ?? 'fila';
+  const openReports = useQuery(reportsQuery('open'));
+  const openTotal = openReports.data?.openTotal ?? 0;
+
   return (
     <>
       <PageHeader
         title="Revisão de questões"
         description="Fila de questões importadas aguardando revisão: confira enunciado, gabarito, matéria e assuntos antes de publicar."
       />
-      <div className="grid gap-6 lg:grid-cols-[22rem_1fr]">
-        <section
-          aria-label="Fila de revisão"
-          className={cn('min-w-0 space-y-3', search.id && 'hidden lg:block')}
-        >
-          <div role="tablist" aria-label="Status" className="grid grid-cols-3 gap-1.5">
-            {(Object.keys(STATUS_LABELS) as QuestionStatus[]).map((s) => (
-              <button
-                key={s}
-                type="button"
-                role="tab"
-                aria-selected={status === s}
-                onClick={() =>
-                  void navigate({ search: (p) => ({ ...p, status: s, id: undefined }) })
-                }
-                className={cn(
-                  'h-10 rounded-lg border-2 px-1 text-sm font-semibold',
-                  status === s
-                    ? 'border-line bg-highlight text-[#14213d] shadow-hard-sm'
-                    : 'border-line-soft hover:bg-surface-2',
-                )}
-              >
-                {STATUS_LABELS[s]}
-              </button>
-            ))}
-          </div>
-          <Select
-            aria-label="Matéria"
-            value={search.subjectId ?? ''}
-            onChange={(e) =>
-              void navigate({
-                search: (p) => ({ ...p, subjectId: e.target.value || undefined, id: undefined }),
-              })
-            }
+      <div role="tablist" aria-label="Seção" className="mb-6 grid max-w-sm grid-cols-2 gap-1.5">
+        {(
+          [
+            ['fila', 'Fila'],
+            ['reportes', openTotal > 0 ? `Reportes (${openTotal})` : 'Reportes'],
+          ] as const
+        ).map(([value, label]) => (
+          <button
+            key={value}
+            type="button"
+            role="tab"
+            aria-selected={tab === value}
+            onClick={() => void navigate({ search: (p) => ({ ...p, tab: value, id: undefined }) })}
+            className={cn(
+              'h-10 rounded-lg border-2 px-2 text-sm font-semibold',
+              tab === value
+                ? 'border-line bg-primary text-primary-ink shadow-hard-sm'
+                : 'border-line-soft hover:bg-surface-2',
+            )}
           >
-            <option value="">Todas as matérias</option>
-            {catalog.data?.subjects.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
-          </Select>
-          <Input
-            aria-label="Buscar"
-            type="search"
-            placeholder="Buscar no enunciado"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-          />
-          <p className="text-sm text-muted" aria-live="polite">
-            {list.isPending ? 'Carregando…' : `${total.toLocaleString('pt-BR')} na fila`}
-          </p>
-
-          {list.isPending ? (
-            <div className="space-y-2">
-              {Array.from({ length: 6 }, (_, i) => (
-                <Skeleton key={i} className="h-16 w-full" />
+            {label}
+          </button>
+        ))}
+      </div>
+      {tab === 'reportes' ? (
+        <ReportsPanel
+          status={search.reportStatus ?? 'open'}
+          onStatusChange={(s) => void navigate({ search: (p) => ({ ...p, reportStatus: s }) })}
+        />
+      ) : (
+        <div className="grid gap-6 lg:grid-cols-[22rem_1fr]">
+          <section
+            aria-label="Fila de revisão"
+            className={cn('min-w-0 space-y-3', search.id && 'hidden lg:block')}
+          >
+            <div role="tablist" aria-label="Status" className="grid grid-cols-3 gap-1.5">
+              {(Object.keys(STATUS_LABELS) as QuestionStatus[]).map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  role="tab"
+                  aria-selected={status === s}
+                  onClick={() =>
+                    void navigate({ search: (p) => ({ ...p, status: s, id: undefined }) })
+                  }
+                  className={cn(
+                    'h-10 rounded-lg border-2 px-1 text-sm font-semibold',
+                    status === s
+                      ? 'border-line bg-highlight text-[#14213d] shadow-hard-sm'
+                      : 'border-line-soft hover:bg-surface-2',
+                  )}
+                >
+                  {STATUS_LABELS[s]}
+                </button>
               ))}
             </div>
-          ) : items.length === 0 ? (
-            <EmptyState icon={<Inbox />} title="Fila vazia" description="Nada por aqui." />
-          ) : (
-            <ul className="max-h-[70dvh] space-y-2 overflow-y-auto pr-1">
-              {items.map((it) => (
-                <li key={it.id}>
-                  <button
-                    type="button"
-                    onClick={() => select(it.id)}
-                    aria-current={search.id === it.id}
-                    className={cn(
-                      'w-full rounded-xl border-2 p-3 text-left hover:bg-surface-2',
-                      search.id === it.id
-                        ? 'border-line bg-surface-2 shadow-hard-sm'
-                        : 'border-line-soft bg-surface',
-                    )}
-                  >
-                    <div className="mb-1 flex flex-wrap items-center gap-1.5">
-                      <Badge tone="primary">
-                        {it.institution} {it.year}
-                      </Badge>
-                      {it.number !== null && <Badge>Q{it.number}</Badge>}
-                      <Badge tone={it.subject ? 'accent' : 'danger'}>
-                        {it.subject ?? 'Sem matéria'}
-                      </Badge>
-                    </div>
-                    <p className="line-clamp-2 text-sm text-muted">{excerpt(it.statement)}</p>
-                  </button>
-                </li>
+            <Select
+              aria-label="Matéria"
+              value={search.subjectId ?? ''}
+              onChange={(e) =>
+                void navigate({
+                  search: (p) => ({ ...p, subjectId: e.target.value || undefined, id: undefined }),
+                })
+              }
+            >
+              <option value="">Todas as matérias</option>
+              {catalog.data?.subjects.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
               ))}
-              {list.hasNextPage && (
-                <li>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    className="w-full"
-                    loading={list.isFetchingNextPage}
-                    onClick={() => void list.fetchNextPage()}
-                  >
-                    Carregar mais
-                  </Button>
-                </li>
-              )}
-            </ul>
-          )}
-        </section>
+            </Select>
+            <Input
+              aria-label="Buscar"
+              type="search"
+              placeholder="Buscar no enunciado"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+            />
+            <p className="text-sm text-muted" aria-live="polite">
+              {list.isPending ? 'Carregando…' : `${total.toLocaleString('pt-BR')} na fila`}
+            </p>
 
-        <section aria-label="Editor" className={cn('min-w-0', !search.id && 'hidden lg:block')}>
-          {search.id ? (
-            <ReviewEditor
-              key={search.id}
-              id={search.id}
-              catalog={catalog.data}
-              onBack={() => select(undefined)}
-              onDone={(finishedId) => select(nextId(finishedId))}
-            />
-          ) : (
-            <EmptyState
-              icon={<CheckCheck />}
-              title="Selecione uma questão"
-              description="Escolha um item da fila para editar e publicar."
-            />
-          )}
-        </section>
-      </div>
+            {list.isPending ? (
+              <div className="space-y-2">
+                {Array.from({ length: 6 }, (_, i) => (
+                  <Skeleton key={i} className="h-16 w-full" />
+                ))}
+              </div>
+            ) : items.length === 0 ? (
+              <EmptyState icon={<Inbox />} title="Fila vazia" description="Nada por aqui." />
+            ) : (
+              <ul className="max-h-[70dvh] space-y-2 overflow-y-auto pr-1">
+                {items.map((it) => (
+                  <li key={it.id}>
+                    <button
+                      type="button"
+                      onClick={() => select(it.id)}
+                      aria-current={search.id === it.id}
+                      className={cn(
+                        'w-full rounded-xl border-2 p-3 text-left hover:bg-surface-2',
+                        search.id === it.id
+                          ? 'border-line bg-surface-2 shadow-hard-sm'
+                          : 'border-line-soft bg-surface',
+                      )}
+                    >
+                      <div className="mb-1 flex flex-wrap items-center gap-1.5">
+                        <Badge tone="primary">
+                          {it.institution} {it.year}
+                        </Badge>
+                        {it.number !== null && <Badge>Q{it.number}</Badge>}
+                        <Badge tone={it.subject ? 'accent' : 'danger'}>
+                          {it.subject ?? 'Sem matéria'}
+                        </Badge>
+                      </div>
+                      <p className="line-clamp-2 text-sm text-muted">{excerpt(it.statement)}</p>
+                    </button>
+                  </li>
+                ))}
+                {list.hasNextPage && (
+                  <li>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="w-full"
+                      loading={list.isFetchingNextPage}
+                      onClick={() => void list.fetchNextPage()}
+                    >
+                      Carregar mais
+                    </Button>
+                  </li>
+                )}
+              </ul>
+            )}
+          </section>
+
+          <section aria-label="Editor" className={cn('min-w-0', !search.id && 'hidden lg:block')}>
+            {search.id ? (
+              <ReviewEditor
+                key={search.id}
+                id={search.id}
+                catalog={catalog.data}
+                onBack={() => select(undefined)}
+                onDone={(finishedId) => select(nextId(finishedId))}
+              />
+            ) : (
+              <EmptyState
+                icon={<CheckCheck />}
+                title="Selecione uma questão"
+                description="Escolha um item da fila para editar e publicar."
+              />
+            )}
+          </section>
+        </div>
+      )}
     </>
   );
 }

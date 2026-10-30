@@ -10,6 +10,7 @@ import {
   LogOut,
   PenLine,
   ShieldCheck,
+  UserCog,
   type LucideIcon,
 } from 'lucide-react';
 import { signOut, useSession } from '@/lib/auth-client';
@@ -17,6 +18,8 @@ import { meQuery } from '@/lib/queries';
 import { cn } from '@/lib/cn';
 import { buttonClasses } from '@/components/ui';
 import { Logo } from './Logo';
+import { AppFooter } from './SiteFooter';
+import { InstallAppButton } from './PwaBits';
 import { ThemeToggle } from './ThemeToggle';
 
 interface NavItem {
@@ -79,6 +82,16 @@ export function AppShell() {
             </Link>
           ))}
         </nav>
+        {session && (
+          <Link
+            to="/conta"
+            className="flex items-center gap-3 rounded-xl border-2 border-transparent px-3 py-2 text-sm font-semibold text-muted hover:bg-surface-2 hover:text-ink"
+            activeProps={{ className: 'border-line bg-surface-2 text-ink' }}
+          >
+            <UserCog className="size-4" aria-hidden /> Minha conta
+          </Link>
+        )}
+        <InstallAppButton />
         <div className="flex items-center justify-between gap-2">
           {session ? (
             <button
@@ -102,7 +115,17 @@ export function AppShell() {
         <header className="sticky top-0 z-20 flex items-center justify-between border-b-2 border-line bg-surface px-4 py-3 md:hidden">
           <Logo className="text-xl" />
           <div className="flex items-center gap-2">
+            <InstallAppButton compact />
             <ThemeToggle className="size-9" />
+            {session && (
+              <Link
+                to="/conta"
+                aria-label="Minha conta"
+                className="grid size-9 place-items-center rounded-xl border-2 border-line bg-surface shadow-hard-sm"
+              >
+                <UserCog className="size-4" />
+              </Link>
+            )}
             {session ? (
               <button
                 type="button"
@@ -120,9 +143,10 @@ export function AppShell() {
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 pb-28 sm:px-6 md:py-10 md:pb-10">
+        <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:px-6 md:py-10">
           <Outlet />
         </main>
+        <AppFooter />
       </div>
 
       {/* Bottom nav (mobile) */}

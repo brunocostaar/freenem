@@ -3,3 +3,4 @@ export * from './QuestionCard';
 export * from './QuestionFilters';
 export * from './ZoomableImage';
 export * from './usePractice';
+export * from './ReportQuestionButton';

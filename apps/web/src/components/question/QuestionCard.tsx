@@ -11,6 +11,7 @@ import { RichText } from '@/components/RichText';
 import { Badge, Button, Card } from '@/components/ui';
 import { cn } from '@/lib/cn';
 import { AlternativeOption, type AlternativeState } from './AlternativeOption';
+import { ReportQuestionButton } from './ReportQuestionButton';
 
 export interface QuestionCardProps {
   question: QuestionSummary;
@@ -137,6 +138,7 @@ export function QuestionCard({
               <ExternalLink className="size-5" />
             </Link>
           )}
+          <ReportQuestionButton questionId={question.id} />
           {onToggleSave && (
             <button
               type="button"

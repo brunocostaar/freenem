@@ -33,7 +33,10 @@ import {
   subjectTopicsQuery,
 } from '@/lib/insights';
 
-export const Route = createFileRoute('/_app/_auth/desempenho')({ component: Desempenho });
+export const Route = createFileRoute('/_app/_auth/desempenho')({
+  head: () => ({ meta: [{ title: 'Desempenho · freenem' }] }),
+  component: Desempenho,
+});
 
 const RANGES: { value: StatsRange; label: string }[] = [
   { value: '7d', label: '7 dias' },

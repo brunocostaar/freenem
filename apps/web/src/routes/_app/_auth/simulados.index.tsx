@@ -20,6 +20,7 @@ import { api } from '@/lib/api';
 import { formatMinutes, simuladosQuery } from '@/lib/simulados';
 
 export const Route = createFileRoute('/_app/_auth/simulados/')({
+  head: () => ({ meta: [{ title: 'Simulados · freenem' }] }),
   component: SimuladosPage,
 });
 

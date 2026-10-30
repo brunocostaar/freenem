@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { AuthForm } from '@/components/layout/AuthForm';
 
 export const Route = createFileRoute('/entrar')({
+  head: () => ({ meta: [{ title: 'Entrar · freenem' }] }),
   validateSearch: z.object({ redirect: z.string().optional() }),
   component: function Entrar() {
     const { redirect } = Route.useSearch();

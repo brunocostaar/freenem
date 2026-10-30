@@ -39,7 +39,10 @@ import { api, ApiError } from '@/lib/api';
 import { cn } from '@/lib/cn';
 import { formatDay, formatMinutes, nextEnemDate, studyPlanQuery } from '@/lib/insights';
 
-export const Route = createFileRoute('/_app/_auth/plano')({ component: Plano });
+export const Route = createFileRoute('/_app/_auth/plano')({
+  head: () => ({ meta: [{ title: 'Plano de estudos · freenem' }] }),
+  component: Plano,
+});
 
 const FOCUS_KEY = 'freenem:plan-focus-areas';
 const AREAS = Object.keys(ENEM_AREA_LABELS) as EnemArea[];

@@ -8,7 +8,10 @@ import { Card, EmptyState, Skeleton, buttonClasses } from '@/components/ui';
 import { essayQuery } from '@/lib/essays';
 import { ApiError } from '@/lib/api';
 
-export const Route = createFileRoute('/_app/_auth/redacao/$id')({ component: RedacaoPage });
+export const Route = createFileRoute('/_app/_auth/redacao/$id')({
+  head: () => ({ meta: [{ title: 'Correção da redação · freenem' }] }),
+  component: RedacaoPage,
+});
 
 function RedacaoPage() {
   const { id } = Route.useParams();

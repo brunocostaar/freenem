@@ -5,6 +5,7 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { Badge, Card, CardTitle, buttonClasses } from '@/components/ui';
 
 export const Route = createFileRoute('/_app/_auth/redacao/competencias')({
+  head: () => ({ meta: [{ title: 'Competências da redação · freenem' }] }),
   component: CompetenciasPage,
 });
 
