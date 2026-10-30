@@ -1,9 +1,29 @@
-import ReactMarkdown from 'react-markdown';
+import { memo } from 'react';
+import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import { cn } from '@/lib/cn';
 import { ZoomableImage } from '@/components/question/ZoomableImage';
+
+// Mapas de componentes estáveis (fora do render): um objeto novo a cada render faria o
+// react-markdown remontar as imagens, zerando o estado de carregamento (imagens piscando).
+const ZOOMABLE: Components = {
+  img: ({ src, alt }) => (
+    <ZoomableImage src={typeof src === 'string' ? src : undefined} alt={alt} />
+  ),
+};
+const PLAIN: Components = {
+  img: ({ src, alt }) => (
+    <img
+      src={typeof src === 'string' ? src : undefined}
+      alt={alt ?? ''}
+      loading="lazy"
+      decoding="async"
+      className="mx-auto max-h-64 w-auto max-w-full rounded-lg border-2 border-line bg-white object-contain"
+    />
+  ),
+};
 
 /**
  * Implementação (pesada: react-markdown + KaTeX). Importe `RichText`, que a carrega sob demanda.
@@ -12,7 +32,7 @@ import { ZoomableImage } from '@/components/question/ZoomableImage';
  * Usado em enunciados, alternativas e resoluções de questões. Imagens carregam sob demanda
  * e ampliam ao toque.
  */
-export default function RichTextImpl({
+export default memo(function RichTextImpl({
   children,
   className,
   zoomable = true,
@@ -33,23 +53,10 @@ export default function RichTextImpl({
         remarkPlugins={[remarkMath]}
         rehypePlugins={[rehypeKatex]}
         skipHtml
-        components={{
-          img: ({ src, alt }) =>
-            zoomable ? (
-              <ZoomableImage src={typeof src === 'string' ? src : undefined} alt={alt} />
-            ) : (
-              <img
-                src={typeof src === 'string' ? src : undefined}
-                alt={alt ?? ''}
-                loading="lazy"
-                decoding="async"
-                className="mx-auto max-h-64 w-auto max-w-full rounded-lg border-2 border-line bg-white object-contain"
-              />
-            ),
-        }}
+        components={zoomable ? ZOOMABLE : PLAIN}
       >
         {children}
       </ReactMarkdown>
     </div>
   );
-}
+});

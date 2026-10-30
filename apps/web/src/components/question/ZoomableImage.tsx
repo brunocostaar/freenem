@@ -1,4 +1,4 @@
-import { useState, type ImgHTMLAttributes } from 'react';
+import { useCallback, useState, type ImgHTMLAttributes } from 'react';
 import { createPortal } from 'react-dom';
 import { Dialog } from '@/components/ui';
 import { cn } from '@/lib/cn';
@@ -11,6 +11,10 @@ export function ZoomableImage({ src, alt, ...rest }: ImgHTMLAttributes<HTMLImage
   const [open, setOpen] = useState(false);
   const [failed, setFailed] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  // imagem já em cache (ex.: voltar a uma questão vista): sem skeleton
+  const imgRef = useCallback((img: HTMLImageElement | null) => {
+    if (img?.complete && img.naturalWidth > 0) setLoaded(true);
+  }, []);
   if (!src || failed) {
     return (
       <span className="inline-block rounded-lg border-2 border-dashed border-line-soft px-3 py-2 text-sm text-muted">
@@ -32,6 +36,7 @@ export function ZoomableImage({ src, alt, ...rest }: ImgHTMLAttributes<HTMLImage
       >
         <img
           {...rest}
+          ref={imgRef}
           src={src}
           alt={alt ?? ''}
           loading="lazy"
