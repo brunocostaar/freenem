@@ -5,3 +5,4 @@ export * from './simulados.js';
 export * from './essays.js';
 export * from './stats.js';
 export * from './study-plan.js';
+export * from './reports.js';

@@ -15,6 +15,13 @@
       "when": 1793313307496,
       "tag": "0001_green_tarantula",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793324007750,
+      "tag": "0002_premium_aaron_stack",
+      "breakpoints": true
     }
   ]
 }
