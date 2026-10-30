@@ -6,7 +6,7 @@ Tudo abaixo depende de contas, chaves ou decisões suas. O app roda 100% localme
 
 - [ ] **Quem paga a correção de redação?** Implementado: chave do projeto no servidor (`ANTHROPIC_API_KEY`), 1 correção/dia/usuário. Custo estimado com `claude-sonnet-5-5` em esforço `low`: ~US$ 0,01–0,03 por redação. Se preferir que cada usuário use a própria chave (BYOK), é uma mudança pequena — peça.
 - [ ] **Licença**: está AGPL-3.0. O dataset de questões (enem-api) é GPL-2.0; os dados ficam no banco (não são distribuídos com o código), mas vale uma leitura jurídica rápida.
-- [ ] **Provas de vestibulares (FUVEST, UFRGS, UNICAMP)**: têm direitos das instituições. Os importadores funcionam (`pnpm ingest:vestibulares`, veja `packages/ingest/README.md`) e gravam tudo como **rascunho** (nunca publicam sozinhos), com fonte/URL/licença em cada questão e relatório de problemas em `packages/ingest/.cache/vestibulares-report.csv`. Decida a política (citar fonte + remoção a pedido, ou pedir autorização às bancas) antes de publicar qualquer questão de vestibular; sem decisão, elas ficam só na fila de revisão.
+- [ ] **Provas de vestibulares (FUVEST, UFRGS, UNICAMP)**: têm direitos das instituições. Os importadores funcionam (`pnpm ingest:vestibulares`, veja `packages/ingest/README.md`) e gravam tudo como **rascunho** (nunca publicam sozinhos), com fonte/URL/licença em cada questão e relatório de problemas em `packages/ingest/.cache/vestibulares-report.csv`. **Atenção: a auto-revisão (30/10) publicou 701 delas** (cada uma cita fonte e URL). Decida a política (citar fonte + remoção a pedido, ou pedir autorização às bancas); para despublicar todas: `update questions set status = 'draft' where external_id ~ '^(fuvest|ufrgs|unicamp)-'`.
   - **Se um site bloquear o download** (o fuvest.br devolve 403 a clientes sem `User-Agent` de navegador; a UNICAMP/UFRGS mudam as URLs a cada edição): baixe os arquivos à mão e rode com `--pdf`:
     - FUVEST: página "Acervo" em <https://www.fuvest.br/acervo-vestibular-2025/> → prova V1 (ou V) da 1ª fase + "gabarito". `pnpm --filter @freenem/ingest run import:fuvest -- --year 2026 --pdf prova.pdf --gabarito gabarito.pdf --version V1`
     - UFRGS: <https://www.ufrgs.br/coperse/> → "Concurso Vestibular <ano>" → cadernos do 1º dia e do 2º dia (Inglês); gabarito em `https://vestibular.ufrgs.br/cv<ano>/gabaritos/` (salve a página como `.html`). `... run import:ufrgs -- --year 2027 --pdf dia1.pdf --pdf2 dia2-ingles.pdf --gabarito gabaritos.html`
@@ -17,8 +17,7 @@ Tudo abaixo depende de contas, chaves ou decisões suas. O app roda 100% localme
 
 ## 2. GitHub
 
-- [ ] Criar o repositório e dar push (`git remote add origin … && git push -u origin main`).
-- [ ] Trocar o placeholder `GITHUB_URL` em `apps/web/src/routes/index.tsx` (e onde mais aparecer `SEU-USUARIO`).
+- [x] Repositório criado (privado): https://github.com/brunocostaar/freenem. Torne público quando quiser (`gh repo edit --visibility public --accept-visibility-change-consequences`); o link no rodapé aponta para ele.
 
 ## 3. Banco + API no Railway
 
@@ -42,11 +41,15 @@ Tudo abaixo depende de contas, chaves ou decisões suas. O app roda 100% localme
    GOOGLE_CLIENT_ID=… GOOGLE_CLIENT_SECRET=…  # opcional
    ```
 4. Domínio customizado `api.SEU-DOMINIO`.
-5. Popular o banco de produção (da sua máquina, apontando para o banco do Railway):
+5. Popular o banco de produção (da sua máquina; copia o conteúdo já importado e revisado do banco de dev):
    ```bash
-   DATABASE_URL=<url pública do Postgres do Railway> pnpm --filter @freenem/api db:seed
-   DATABASE_URL=<…> STORAGE_DRIVER=r2 R2_…=… pnpm ingest:enem   # importa questões + sobe imagens pro R2
-   DATABASE_URL=<…> pnpm ingest:tri                              # parâmetros TRI do INEP
+   # 1) migrations no banco novo (o pre-deploy do Railway já faz isso no primeiro deploy)
+   # 2) conteúdo (instituições, matérias, questões...) preservando os ids; aborta se o destino já tiver conteúdo
+   ./scripts/push-content.sh '<url pública do Postgres do Railway>'
+   # 3) seed depois da cópia (cria o admin com ADMIN_PASSWORD; não duplica nada)
+   DATABASE_URL='<…>' NODE_ENV=production ADMIN_PASSWORD='<senha forte>' pnpm --filter @freenem/api db:seed
+   # 4) imagens (apps/api/storage, ~126 MB) para o R2, mesmas chaves
+   cd apps/api && STORAGE_DRIVER=r2 R2_ACCOUNT_ID=… R2_ACCESS_KEY_ID=… R2_SECRET_ACCESS_KEY=… R2_BUCKET=… R2_PUBLIC_URL=… pnpm storage:sync
    ```
 
 ## 4. Imagens no Cloudflare R2
@@ -72,7 +75,7 @@ Tudo abaixo depende de contas, chaves ou decisões suas. O app roda 100% localme
 
 ## 7. Depois do deploy
 
-- [ ] Entrar como admin e revisar a fila de rascunhos em `/admin/revisao` (~680 questões com classificação de baixa confiança).
+- [ ] Entrar como admin e revisar a fila de rascunhos em `/admin/revisao` (~180 que a auto-revisão (`pnpm ingest:review`) não publicou; motivos em `packages/ingest/.cache/auto-review-report.csv`).
 - [ ] Opcional: com a chave da Anthropic, rodar `pnpm --filter @freenem/ingest run classify:llm` para melhorar a classificação por assunto (gera sugestões, ainda passam por revisão).
 
 ## Extras (PWA, SEO)
