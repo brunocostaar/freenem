@@ -311,6 +311,16 @@ describe('simulados', () => {
       expect((await call(user, 'GET', `/attempts/${attemptId}/result`)).statusCode).toBe(409);
     });
 
+    it('anti-cola: /check e /answers não revelam o gabarito de questão em simulado em andamento', async () => {
+      const qid = questionIds[0]!;
+      const check = await call(user, 'POST', `/questions/${qid}/check`, { letter: 'A' });
+      expect(check.statusCode).toBe(409);
+      expect(check.body).not.toContain('correctLetter');
+      const ans = await call(user, 'POST', '/answers', { questionId: qid, letter: 'A' });
+      expect(ans.statusCode).toBe(409);
+      expect(ans.body).not.toContain('correctLetter');
+    });
+
     it('autosave parcial, com sobrescrita e tempo', async () => {
       const q = questionIds;
       const r1 = await call(user, 'PUT', `/attempts/${attemptId}/answers`, {

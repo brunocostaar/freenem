@@ -4,6 +4,15 @@ import { db, schema } from './db/index.js';
 import { env, features } from './env.js';
 import { sendEmail } from './lib/email.js';
 
+/** Escapa o nome do usuário antes de interpolá-lo no HTML do e-mail. */
+const escapeHtml = (s: string) =>
+  s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
 export const auth = betterAuth({
   baseURL: env.BETTER_AUTH_URL,
   secret: env.BETTER_AUTH_SECRET,
@@ -31,7 +40,7 @@ export const auth = betterAuth({
       await sendEmail({
         to: user.email,
         subject: 'Redefinir sua senha - freenem',
-        html: `<p>Olá, ${user.name}.</p><p><a href="${url}">Clique aqui para redefinir sua senha</a>.</p>`,
+        html: `<p>Olá, ${escapeHtml(user.name)}.</p><p><a href="${url}">Clique aqui para redefinir sua senha</a>.</p>`,
         text: `Redefina sua senha: ${url}`,
       });
     },
@@ -43,7 +52,7 @@ export const auth = betterAuth({
       await sendEmail({
         to: user.email,
         subject: 'Confirme seu e-mail - freenem',
-        html: `<p>Olá, ${user.name}! Bem-vindo(a) ao freenem.</p><p><a href="${url}">Confirmar meu e-mail</a></p>`,
+        html: `<p>Olá, ${escapeHtml(user.name)}! Bem-vindo(a) ao freenem.</p><p><a href="${url}">Confirmar meu e-mail</a></p>`,
         text: `Confirme seu e-mail: ${url}`,
       });
     },

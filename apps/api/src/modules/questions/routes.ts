@@ -10,7 +10,11 @@ import {
   subjectProgressResponseSchema,
 } from '@freenem/shared';
 import { env } from '../../env.js';
-import { buildAnswerResponse, getQuestionKey } from '../answers/service.js';
+import {
+  buildAnswerResponse,
+  getQuestionKey,
+  questionInActiveAttempt,
+} from '../answers/service.js';
 import { getOptionalUser, isReviewer } from './optional-auth.js';
 import {
   getQuestion,
@@ -79,6 +83,10 @@ const routes: FastifyPluginAsyncZod = async (app) => {
       const key = await getQuestionKey(req.params.id);
       if (!key || (key.status !== 'published' && !isReviewer(user))) {
         throw app.httpErrors.notFound('Questão não encontrada.');
+      }
+      // Anti-cola: não revela o gabarito de uma questão que está num simulado em andamento.
+      if (user && (await questionInActiveAttempt(user.id, req.params.id))) {
+        throw app.httpErrors.conflict('Finalize o simulado para ver o gabarito desta questão.');
       }
       return buildAnswerResponse(key, req.params.id, req.body.letter);
     },

@@ -62,6 +62,33 @@ export async function buildAnswerResponse(
   };
 }
 
+/**
+ * True se a questão faz parte de um simulado EM ANDAMENTO do usuário. Nesse caso o gabarito
+ * não pode ser revelado por /check ou /answers (anti-cola): a resposta sai só no resultado,
+ * depois de finalizar. Defesa em profundidade — o fluxo do simulado grava via saveAnswers.
+ */
+export async function questionInActiveAttempt(
+  userId: string,
+  questionId: string,
+): Promise<boolean> {
+  const [row] = await db
+    .select({ x: sql`1` })
+    .from(schema.simuladoAttempts)
+    .innerJoin(
+      schema.simuladoQuestions,
+      eq(schema.simuladoQuestions.simuladoId, schema.simuladoAttempts.simuladoId),
+    )
+    .where(
+      and(
+        eq(schema.simuladoAttempts.userId, userId),
+        eq(schema.simuladoAttempts.status, 'in_progress'),
+        eq(schema.simuladoQuestions.questionId, questionId),
+      ),
+    )
+    .limit(1);
+  return Boolean(row);
+}
+
 export async function recordAnswer(
   userId: string,
   questionId: string,

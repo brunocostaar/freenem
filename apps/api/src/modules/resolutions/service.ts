@@ -9,6 +9,7 @@ import type {
   VoteResolutionResponse,
 } from '@freenem/shared';
 import { db, schema } from '../../db/index.js';
+import { questionInActiveAttempt } from '../answers/service.js';
 import { sanitizeResolutionBody } from './sanitize.js';
 
 const {
@@ -77,9 +78,7 @@ export async function listResolutions(
   questionId: string,
   viewerId: string | null,
 ): Promise<ResolutionListResponse> {
-  const approved = await selectWithViewer(viewerId)
-    .where(and(eq(R.questionId, questionId), eq(R.status, 'approved')))
-    .orderBy(desc(R.score), desc(R.createdAt));
+  // Própria resolução pendente sempre aparece (o autor escreveu, já sabe a resposta).
   let mine: Resolution | null = null;
   if (viewerId) {
     const [own] = await selectWithViewer(viewerId).where(
@@ -87,6 +86,14 @@ export async function listResolutions(
     );
     if (own && own.status !== 'approved') mine = toResolution(own, viewerId);
   }
+  // Anti-cola: as resoluções revelam a resposta; durante um simulado em andamento que contém
+  // esta questão, não as devolvemos (a listagem pública normal continua igual fora do simulado).
+  if (viewerId && (await questionInActiveAttempt(viewerId, questionId))) {
+    return { items: [], mine };
+  }
+  const approved = await selectWithViewer(viewerId)
+    .where(and(eq(R.questionId, questionId), eq(R.status, 'approved')))
+    .orderBy(desc(R.score), desc(R.createdAt));
   return { items: approved.map((r) => toResolution(r, viewerId)), mine };
 }
 
