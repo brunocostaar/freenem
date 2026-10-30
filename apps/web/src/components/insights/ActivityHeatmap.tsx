@@ -1,8 +1,11 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { DailyActivity } from '@freenem/shared';
 import { cn } from '@/lib/cn';
 
-const WEEKS = 26;
+const MIN_WEEKS = 13;
+const MAX_WEEKS = 53;
+/** largura-alvo de cada coluna (célula + espaço), em px */
+const COLUMN_PX = 18;
 const LEVELS = [
   'bg-surface-2',
   'bg-primary/25',
@@ -28,19 +31,36 @@ interface Cell {
   correct: number;
 }
 
-/** Calendário de atividade estilo GitHub (últimos ~6 meses, colunas = semanas). */
+/**
+ * Calendário de atividade estilo GitHub (colunas = semanas). Ocupa toda a largura do cartão:
+ * o número de semanas se adapta à largura (de ~3 meses no celular até 1 ano no desktop).
+ */
 export function ActivityHeatmap({ activity }: { activity: DailyActivity[] }) {
-  const scroller = useRef<HTMLDivElement>(null);
+  const box = useRef<HTMLDivElement>(null);
+  const [weeks, setWeeks] = useState(26);
+
+  useEffect(() => {
+    const el = box.current;
+    if (!el) return;
+    const measure = () =>
+      setWeeks(Math.max(MIN_WEEKS, Math.min(MAX_WEEKS, Math.floor(el.clientWidth / COLUMN_PX))));
+    measure();
+    if (typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   const { columns, months, totalDays, totalAnswers } = useMemo(() => {
     const byDate = new Map(activity.map((a) => [a.date, a]));
     const today = new Date();
     today.setHours(12, 0, 0, 0);
     const start = new Date(today);
-    start.setDate(start.getDate() - today.getDay() - (WEEKS - 1) * 7);
+    start.setDate(start.getDate() - today.getDay() - (weeks - 1) * 7);
     const cols: (Cell | null)[][] = [];
     const monthLabels: string[] = [];
     let lastMonth = -1;
-    for (let w = 0; w < WEEKS; w++) {
+    for (let w = 0; w < weeks; w++) {
       const col: (Cell | null)[] = [];
       let label = '';
       for (let d = 0; d < 7; d++) {
@@ -72,29 +92,28 @@ export function ActivityHeatmap({ activity }: { activity: DailyActivity[] }) {
       totalDays: activity.length,
       totalAnswers: activity.reduce((s, a) => s + a.total, 0),
     };
-  }, [activity]);
-
-  useEffect(() => {
-    const el = scroller.current;
-    if (el) el.scrollLeft = el.scrollWidth;
-  }, [columns]);
+  }, [activity, weeks]);
 
   return (
     <div>
       <p className="sr-only">
-        {totalAnswers} questões respondidas em {totalDays} dias nos últimos seis meses.
+        {totalAnswers} questões respondidas em {totalDays} dias nas últimas {weeks} semanas.
       </p>
-      <div ref={scroller} className="overflow-x-auto pb-2">
+      <div ref={box} className="pb-2">
         <ul
           aria-label="Calendário de atividade: cada quadrado é um dia"
-          className="inline-grid w-max gap-[3px]"
-          style={{ gridAutoFlow: 'column', gridTemplateRows: 'auto repeat(7, 0.9rem)' }}
+          className="grid w-full gap-[3px]"
+          style={{
+            gridAutoFlow: 'column',
+            gridTemplateColumns: `repeat(${weeks}, minmax(0, 1fr))`,
+            gridTemplateRows: 'auto repeat(7, auto)',
+          }}
         >
           {columns.flatMap((col, w) => [
             <li
               key={`m${w}`}
               aria-hidden
-              className="h-4 w-[0.9rem] overflow-visible text-[0.65rem] leading-none whitespace-nowrap text-muted"
+              className="h-4 overflow-visible text-[0.65rem] leading-none whitespace-nowrap text-muted"
             >
               {months[w]}
             </li>,
@@ -113,12 +132,12 @@ export function ActivityHeatmap({ activity }: { activity: DailyActivity[] }) {
                       : `${cell.label}: sem atividade`
                   }
                   className={cn(
-                    'size-[0.9rem] rounded-[3px] border border-line-soft',
+                    'aspect-square w-full rounded-[3px] border border-line-soft',
                     LEVELS[level(cell.total)],
                   )}
                 />
               ) : (
-                <li key={`e${w}-${d}`} aria-hidden className="size-[0.9rem]" />
+                <li key={`e${w}-${d}`} aria-hidden className="aspect-square w-full" />
               ),
             ),
           ])}

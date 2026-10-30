@@ -37,8 +37,8 @@ test('simulado personalizado: responder, marcar, grade, retomar após reload, fi
   await shot(page, info.project.name, 'simulado-runner-dark');
   await setTheme(page, 'light');
 
-  const radio = (l: string) => page.locator(`input[type=radio][value=${l}]`);
-  const pick = (l: string) => radio(l).locator('xpath=..');
+  const radio = (l: string) => page.getByRole('radio', { name: new RegExp(`^Alternativa ${l}`) });
+  const pick = radio;
   const next = page.getByRole('button', { name: 'Próxima' });
 
   // responde as 8 primeiras com letras variadas

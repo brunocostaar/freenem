@@ -21,6 +21,8 @@ test('desempenho: vazio, depois números e gráficos após responder', async ({ 
   const kpis = page.getByRole('region', { name: 'Resumo' });
   await expect(kpis).toContainText('Questões');
   await expect(kpis).toContainText('6');
+  // o tempo respondido é registrado (não pode aparecer como 0 min)
+  await expect(kpis).not.toContainText(/Tempo estudado\s*0 min/);
   await expect(page.getByText('Atividade').first()).toBeVisible();
   await expect(page.getByText('Acerto por área')).toBeVisible();
   await expect(page.getByText('Por matéria')).toBeVisible();

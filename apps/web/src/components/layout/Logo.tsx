@@ -14,7 +14,7 @@ export function Logo({ className }: { className?: string }) {
         f
       </span>
       <span>
-        free<span className="text-accent">nem</span>
+        free<span className="text-accent-strong">nem</span>
       </span>
     </Link>
   );

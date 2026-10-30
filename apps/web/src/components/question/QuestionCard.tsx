@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link } from '@tanstack/react-router';
 import { Bookmark, BookmarkCheck, CheckCircle2, ExternalLink, Send, XCircle } from 'lucide-react';
 import {
@@ -29,8 +29,12 @@ export interface QuestionCardProps {
   /** favoritar (omita para esconder o botão) */
   saved?: boolean;
   onToggleSave?: () => void;
+  /** avisa quando a questão entra/sai da tela (usado para medir o tempo gasto) */
+  onVisibilityChange?: (visible: boolean) => void;
   /** atalhos A–E para marcar a alternativa */
   hotkeys?: boolean;
+  /** sem cabeçalho de metadados (o contexto já aparece em volta, como no simulado) */
+  compact?: boolean;
   /** esconde o link para a página própria da questão */
   hideLink?: boolean;
   /** conteúdo extra no rodapé (ex.: navegação do simulado) */
@@ -56,13 +60,34 @@ export function QuestionCard({
   submitting = false,
   saved,
   onToggleSave,
+  onVisibilityChange,
   hotkeys = false,
   hideLink = false,
+  compact = false,
   footer,
   className,
 }: QuestionCardProps) {
   const [eliminated, setEliminated] = useState<Set<AlternativeLetter>>(new Set());
   const locked = result !== null;
+
+  const rootRef = useRef<HTMLDivElement>(null);
+  const viewCb = useRef(onVisibilityChange);
+  viewCb.current = onVisibilityChange;
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver(
+      ([entry]) => viewCb.current?.(Boolean(entry?.isIntersecting)),
+      {
+        threshold: 0.3,
+      },
+    );
+    io.observe(el);
+    return () => {
+      io.disconnect();
+      viewCb.current?.(false);
+    };
+  }, [question.id]);
 
   // nova questão: limpa as alternativas riscadas
   useEffect(() => setEliminated(new Set()), [question.id]);
@@ -105,8 +130,16 @@ export function QuestionCard({
   const difficultyTone = { easy: 'success', medium: 'highlight', hard: 'danger' } as const;
 
   return (
-    <Card className={cn('space-y-5', className)} aria-labelledby={`q-${question.id}-title`}>
-      <header className="flex flex-wrap items-start justify-between gap-3">
+    <Card
+      ref={rootRef}
+      className={cn('space-y-5', className)}
+      {...(compact
+        ? { role: 'group', 'aria-label': 'Questão' }
+        : { 'aria-labelledby': `q-${question.id}-title` })}
+    >
+      <header
+        className={cn('flex-wrap items-start justify-between gap-3', compact ? 'hidden' : 'flex')}
+      >
         <div className="flex flex-wrap items-center gap-1.5" id={`q-${question.id}-title`}>
           <Badge tone="primary">
             {question.institution} {question.year}
@@ -221,7 +254,7 @@ export function QuestionCard({
             )}
             <div>
               <p className="font-display text-lg font-bold">
-                {result.correct ? 'Você acertou!' : 'Você errou.'}
+                {result.correct ? 'Você acertou!' : selected ? 'Você errou.' : 'Em branco.'}
               </p>
               <p className="text-sm">
                 Gabarito: <strong>alternativa {result.correctLetter}</strong>

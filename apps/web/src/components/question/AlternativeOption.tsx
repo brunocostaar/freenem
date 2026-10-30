@@ -124,7 +124,7 @@ export function AlternativeOption({
             state === 'idle' && 'border-line bg-surface',
             state === 'selected' && 'border-primary bg-primary text-primary-ink',
             state === 'correct' && 'border-success bg-success text-bg',
-            state === 'wrong' && 'border-danger bg-danger text-white',
+            state === 'wrong' && 'border-danger bg-danger text-danger-ink',
           )}
           aria-hidden
         >
@@ -142,8 +142,10 @@ export function AlternativeOption({
             eliminated && !revealed && 'line-through decoration-2',
           )}
         >
-          {text && <RichText>{text}</RichText>}
-          {imageUrl && <RichText>{`![Alternativa ${letter}](${imageUrl})`}</RichText>}
+          {text && <RichText zoomable={false}>{text}</RichText>}
+          {imageUrl && (
+            <RichText zoomable={false}>{`![Alternativa ${letter}](${imageUrl})`}</RichText>
+          )}
         </div>
         {percent !== null && (
           <span className="relative z-10 shrink-0 pt-1.5 text-sm font-bold tabular-nums">

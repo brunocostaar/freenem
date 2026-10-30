@@ -14,8 +14,8 @@ import {
 import { Check, Clock, Info, Minus, X } from 'lucide-react';
 import type { AreaResult, AttemptResult, QuestionOutcome, ResultQuestion } from '@freenem/shared';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { QuestionView } from '@/components/simulado/QuestionView';
-import { RichText } from '@/components/RichText';
+import { QuestionCard } from '@/components/question';
+import { toQuestionSummary, toReviewResult } from '@/components/simulado/adapters';
 import { Badge, Card, CardTitle, EmptyState, Skeleton, buttonClasses } from '@/components/ui';
 import { cn } from '@/lib/cn';
 import { AREA_SHORT, attemptResultQuery, formatDuration } from '@/lib/simulados';
@@ -248,9 +248,16 @@ function CoherenceCard({ r }: { r: AttemptResult }) {
             {Math.round(r.coherence * 100)}%
           </p>
         ) : (
-          <p className="mt-2 text-muted">
-            Indisponível: há poucas questões com parâmetros TRI neste simulado.
-          </p>
+          <>
+            <p className="mt-2 font-display text-4xl font-bold" aria-label="Indisponível">
+              —
+            </p>
+            <p className="mt-1 text-sm text-muted">
+              Indisponível: o índice precisa de pelo menos algumas questões com parâmetros TRI e de
+              uma mistura de acertos e erros (acertar ou errar tudo não permite comparar questões
+              fáceis e difíceis).
+            </p>
+          </>
         )}
         <div className="mt-3 space-y-2 text-sm text-muted">
           <p>
@@ -269,6 +276,8 @@ function CoherenceCard({ r }: { r: AttemptResult }) {
     </section>
   );
 }
+
+const noop = () => undefined;
 
 type Filter = 'all' | QuestionOutcome;
 const FILTERS: { id: Filter; label: string }[] = [
@@ -357,19 +366,15 @@ function ReviewItem({ q }: { q: ResultQuestion }) {
           </span>
         </summary>
         <div className="space-y-5 border-t-2 border-line-soft p-4 sm:p-5">
-          <QuestionView
-            name={`rev-${q.id}`}
-            question={q}
+          <QuestionCard
+            mode="select"
+            compact
+            className="border-0 p-0 shadow-none sm:p-0"
+            question={toQuestionSummary(q)}
             selected={q.chosenLetter}
-            correctLetter={q.correctLetter}
-            readOnly
+            onSelect={noop}
+            result={toReviewResult(q.chosenLetter, q.correctLetter, q.resolution)}
           />
-          {q.resolution && (
-            <div className="rounded-xl border-2 border-line-soft bg-surface-2 p-4">
-              <p className="mb-2 font-semibold">Resolução</p>
-              <RichText>{q.resolution}</RichText>
-            </div>
-          )}
         </div>
       </details>
     </li>

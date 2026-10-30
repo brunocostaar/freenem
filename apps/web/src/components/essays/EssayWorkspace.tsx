@@ -34,6 +34,13 @@ interface Props {
 }
 
 const SAVE_DELAY_MS = 1500;
+
+/**
+ * Na primeira gravação a rota muda de `/redacao/nova` para `/redacao/$id` e o editor remonta.
+ * O texto digitado nesse intervalo viaja numa ref entregue ao novo editor, que a retoma
+ * (e agenda novo salvamento se for o caso), sem perder caracteres.
+ */
+const handoff = new Map<string, { current: string }>();
 const TARGET_SECONDS = 60 * 60;
 
 function formatClock(total: number) {
@@ -55,18 +62,33 @@ export function EssayWorkspace({
   const qc = useQueryClient();
   const quota = useQuery(essayQuotaQuery);
 
-  const [text, setText] = useState(initialText);
-  const [saveState, setSaveState] = useState<SaveState>(initialText ? 'saved' : 'idle');
+  const [carried] = useState(() => (essayId ? handoff.get(essayId) : undefined));
+  const startText = carried?.current ?? initialText;
+
+  const [text, setText] = useState(startText);
+  const [saveState, setSaveState] = useState<SaveState>(
+    startText === initialText && initialText ? 'saved' : 'idle',
+  );
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const [timerOn, setTimerOn] = useState(false);
 
   const idRef = useRef(essayId);
   const lastSaved = useRef(initialText);
-  const latestText = useRef(initialText);
+  const latestText = useRef(startText);
   const chain = useRef<Promise<unknown>>(Promise.resolve());
   const dirtyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    // texto digitado durante a troca de rota ainda não foi salvo
+    if (essayId) handoff.delete(essayId);
+    if (carried && carried.current !== initialText) {
+      if (dirtyTimer.current) clearTimeout(dirtyTimer.current);
+      dirtyTimer.current = setTimeout(() => void save(), SAVE_DELAY_MS);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const el = textareaRef.current;
@@ -99,6 +121,7 @@ export function EssayWorkspace({
         void qc.invalidateQueries({ queryKey: essayListQuery.queryKey });
         setSaveState('saved');
         if (created) {
+          handoff.set(res.id, latestText);
           await navigate({ to: '/redacao/$id', params: { id: res.id }, replace: true });
         }
         return res.id;

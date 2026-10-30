@@ -231,7 +231,7 @@ describe('coherence', () => {
     expect(c).toBeGreaterThan(0);
     expect(c).toBeLessThan(1);
   });
-  it('tudo certo / tudo errado = 1; poucos itens = null', () => {
+  it('tudo certo ou tudo errado = null (índice indefinido, não 100%)', () => {
     expect(
       coherence(
         scored(
@@ -239,7 +239,7 @@ describe('coherence', () => {
           ps.map(() => true),
         ),
       ),
-    ).toBe(1);
+    ).toBeNull();
     expect(
       coherence(
         scored(
@@ -247,7 +247,9 @@ describe('coherence', () => {
           ps.map(() => false),
         ),
       ),
-    ).toBe(1);
+    ).toBeNull();
+  });
+  it('poucos itens = null', () => {
     expect(coherence(scored(makeParams(4), [true, false, true, false]))).toBeNull();
   });
   it('ignora itens sem parâmetros', () => {

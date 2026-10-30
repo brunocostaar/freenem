@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   answerResponseSchema,
@@ -31,7 +31,9 @@ export function usePractice() {
   const qc = useQueryClient();
   const [entries, setEntries] = useState<Record<string, Entry>>({});
   const [saved, setSaved] = useState<Record<string, boolean>>({});
-  const shownAt = useRef<Record<string, number>>({});
+  // tempo "ativo" por questão: só conta com a questão visível E a aba em primeiro plano
+  const timers = useRef<Record<string, { acc: number; since: number | null }>>({});
+  const inView = useRef(new Set<string>());
 
   const patch = useCallback((id: string, p: Partial<Entry>) => {
     setEntries((cur) => ({ ...cur, [id]: { ...(cur[id] ?? EMPTY), ...p } }));
@@ -39,7 +41,6 @@ export function usePractice() {
 
   const select = useCallback(
     (id: string, letter: AlternativeLetter) => {
-      shownAt.current[id] ??= Date.now();
       setEntries((cur) => {
         const e = cur[id] ?? EMPTY;
         if (e.result) return cur; // já corrigida
@@ -49,10 +50,50 @@ export function usePractice() {
     [setEntries],
   );
 
-  /** Marca o instante em que a questão apareceu (para o tempo gasto). */
-  const markShown = useCallback((id: string) => {
-    shownAt.current[id] ??= Date.now();
+  const elapsed = useCallback((id: string) => {
+    const t = timers.current[id];
+    if (!t) return 0;
+    return t.acc + (t.since !== null ? Date.now() - t.since : 0);
   }, []);
+
+  const startTimer = useCallback((id: string) => {
+    const t = (timers.current[id] ??= { acc: 0, since: null });
+    if (t.since === null && !document.hidden) t.since = Date.now();
+  }, []);
+
+  const stopTimer = useCallback((id: string) => {
+    const t = timers.current[id];
+    if (t && t.since !== null) {
+      t.acc += Date.now() - t.since;
+      t.since = null;
+    }
+  }, []);
+
+  /** Chamado pelo `QuestionCard` quando a questão entra/sai da tela (para o tempo gasto). */
+  const setVisible = useCallback(
+    (id: string, visible: boolean) => {
+      if (visible) {
+        inView.current.add(id);
+        startTimer(id);
+      } else {
+        inView.current.delete(id);
+        stopTimer(id);
+      }
+    },
+    [startTimer, stopTimer],
+  );
+
+  // aba oculta: pausa; volta: retoma as questões que seguem na tela
+  useEffect(() => {
+    function onVisibility() {
+      for (const id of inView.current) {
+        if (document.hidden) stopTimer(id);
+        else startTimer(id);
+      }
+    }
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => document.removeEventListener('visibilitychange', onVisibility);
+  }, [startTimer, stopTimer]);
 
   const submit = useCallback(
     async (id: string) => {
@@ -60,10 +101,7 @@ export function usePractice() {
       if (!e?.selected || e.result || e.submitting) return;
       patch(id, { submitting: true });
       try {
-        const timeSpentMs = Math.min(
-          3_600_000,
-          Math.max(0, Date.now() - (shownAt.current[id] ?? Date.now())),
-        );
+        const timeSpentMs = Math.min(3_600_000, Math.max(0, Math.round(elapsed(id))));
         const result = loggedIn
           ? await api('/api/v1/answers', {
               method: 'POST',
@@ -75,6 +113,7 @@ export function usePractice() {
               body: { letter: e.selected },
               schema: answerResponseSchema,
             });
+        stopTimer(id);
         patch(id, { result, submitting: false });
         if (loggedIn) void qc.invalidateQueries({ queryKey: ['stats'] });
       } catch (err) {
@@ -82,7 +121,7 @@ export function usePractice() {
         toast.error(err instanceof ApiError ? err.message : 'Não foi possível corrigir agora.');
       }
     },
-    [entries, loggedIn, patch, qc, toast],
+    [elapsed, entries, loggedIn, patch, qc, stopTimer, toast],
   );
 
   const toggleSave = useCallback(
@@ -114,6 +153,7 @@ export function usePractice() {
       question: q,
       selected: e.selected,
       onSelect: (letter: AlternativeLetter) => select(q.id, letter),
+      onVisibilityChange: (visible: boolean) => setVisible(q.id, visible),
       result: e.result,
       submitting: e.submitting,
       onSubmit: () => void submit(q.id),
@@ -122,5 +162,5 @@ export function usePractice() {
     };
   };
 
-  return { loggedIn, entries, select, submit, markShown, toggleSave, bind };
+  return { loggedIn, entries, select, submit, toggleSave, bind };
 }

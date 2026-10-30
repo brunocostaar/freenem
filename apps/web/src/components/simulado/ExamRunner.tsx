@@ -17,7 +17,8 @@ import { cn } from '@/lib/cn';
 import { formatClock } from '@/lib/simulados';
 import { Badge, Button, Dialog, useToast } from '@/components/ui';
 import { QuestionNavigator } from './QuestionNavigator';
-import { QuestionView } from './QuestionView';
+import { QuestionCard } from '@/components/question';
+import { toQuestionSummary } from './adapters';
 
 const AUTOSAVE_DEBOUNCE_MS = 1200;
 const AUTOSAVE_INTERVAL_MS = 15_000;
@@ -280,6 +281,7 @@ export function ExamRunner({ session }: { session: AttemptSession }) {
   );
 
   const q = questions[index];
+  const summary = useMemo(() => (q ? toQuestionSummary(q) : null), [q]);
   const items = useMemo(
     () =>
       questions.map((x) => ({
@@ -292,7 +294,7 @@ export function ExamRunner({ session }: { session: AttemptSession }) {
   const blanks = items.filter((i) => !i.answered).length;
   const flaggedCount = items.filter((i) => i.flagged).length;
 
-  if (!q) return null;
+  if (!q || !summary) return null;
   const isFlagged = flagged.has(q.id);
   const lowTime = remaining !== null && remaining <= 5 * 60_000;
   const critical = remaining !== null && remaining <= 60_000;
@@ -324,7 +326,7 @@ export function ExamRunner({ session }: { session: AttemptSession }) {
             className={cn(
               'flex items-center gap-1.5 rounded-xl border-2 border-line px-3 py-1.5 font-mono text-base font-bold tabular-nums sm:text-lg',
               lowTime && !critical && 'bg-highlight text-[#14213d]',
-              critical && 'animate-pulse bg-danger text-white',
+              critical && 'animate-pulse bg-danger text-danger-ink',
             )}
           >
             <Clock className="size-4" aria-hidden />
@@ -354,10 +356,12 @@ export function ExamRunner({ session }: { session: AttemptSession }) {
                 </Badge>
               )}
             </div>
-            <QuestionView
+            <QuestionCard
               key={q.id}
-              name={`q-${q.id}`}
-              question={q}
+              mode="select"
+              compact
+              className="border-0 p-0 shadow-none sm:p-0"
+              question={summary}
               selected={letters[q.id] ?? null}
               onSelect={select}
             />

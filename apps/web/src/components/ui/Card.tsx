@@ -1,7 +1,7 @@
-import type { HTMLAttributes } from 'react';
+import type { ComponentProps, HTMLAttributes } from 'react';
 import { cn } from '@/lib/cn';
 
-export interface CardProps extends HTMLAttributes<HTMLDivElement> {
+export interface CardProps extends ComponentProps<'div'> {
   /** sombra dura estilo adesivo */
   raised?: boolean;
 }
