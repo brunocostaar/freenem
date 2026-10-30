@@ -175,7 +175,17 @@ export async function updateDraft(userId: string, id: string, text: string): Pro
   return getEssay(userId, id);
 }
 
-export async function getQuota(userId: string): Promise<EssayQuota> {
+/** Admins corrigem sem limite diário (para testar a correção). */
+export interface EssayUser {
+  id: string;
+  role: string;
+}
+const isUnlimited = (u: EssayUser) => u.role === 'admin';
+
+export async function getQuota(user: EssayUser): Promise<EssayQuota> {
+  const aiEnabled = !getCorrector().isDemo;
+  if (isUnlimited(user)) return { availableToday: true, nextAvailableAt: null, aiEnabled };
+  const userId = user.id;
   const date = saoPauloDate();
   const [used] = await db
     .select({ id: schema.essayCorrections.id })
@@ -190,7 +200,7 @@ export async function getQuota(userId: string): Promise<EssayQuota> {
   return {
     availableToday: !used,
     nextAvailableAt: used ? nextMidnightSaoPaulo() : null,
-    aiEnabled: !getCorrector().isDemo,
+    aiEnabled,
   };
 }
 
@@ -200,9 +210,12 @@ export async function getQuota(userId: string): Promise<EssayQuota> {
  * 1 correção/dia/usuário. O slot é reservado ANTES de chamar o modelo, inserindo a linha em
  * essay_corrections: o índice único (user_id, correction_date) garante exclusão mútua mesmo
  * com requisições concorrentes (o perdedor recebe 429). Se a chamada falhar, a linha é
- * apagada (o aluno não perde o slot), com no máximo 3 falhas por dia.
+ * apagada (o aluno não perde o slot), com no máximo 3 falhas por dia. Admins não têm limite
+ * (correction_date null não conflita no índice).
  */
-export async function correctEssay(userId: string, id: string): Promise<EssayResult> {
+export async function correctEssay(user: EssayUser, id: string): Promise<EssayResult> {
+  const userId = user.id;
+  const unlimited = isUnlimited(user);
   const row = await loadEssay(userId, id);
   if (row.correction) {
     throw new AppError(
@@ -222,7 +235,7 @@ export async function correctEssay(userId: string, id: string): Promise<EssayRes
     throw e;
   }
 
-  if (failedToday(userId) >= MAX_FAILED_ATTEMPTS_PER_DAY) {
+  if (!unlimited && failedToday(userId) >= MAX_FAILED_ATTEMPTS_PER_DAY) {
     throw new AppError(
       429,
       'TOO_MANY_FAILURES',
@@ -245,7 +258,7 @@ export async function correctEssay(userId: string, id: string): Promise<EssayRes
 
   const [claim] = await db
     .insert(schema.essayCorrections)
-    .values({ essayId: id, userId, correctionDate: date })
+    .values({ essayId: id, userId, correctionDate: unlimited ? null : date })
     .onConflictDoNothing()
     .returning({ id: schema.essayCorrections.id });
   if (!claim) {

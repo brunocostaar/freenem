@@ -1,0 +1,1 @@
+ALTER TABLE "essay_corrections" ALTER COLUMN "correction_date" DROP NOT NULL;

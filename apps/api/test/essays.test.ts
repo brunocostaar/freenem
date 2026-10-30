@@ -168,6 +168,24 @@ describe('essays API', () => {
     expect(again.statusCode).toBe(409);
   });
 
+  it('admin corrige sem limite diário', async () => {
+    const admin = await createAuthedUser(app, { role: 'admin' });
+    try {
+      for (let i = 0; i < 3; i++) {
+        const res = await correct(admin, await draft(admin));
+        expect(res.statusCode).toBe(200);
+      }
+      const quota = await app.inject({
+        method: 'GET',
+        url: '/api/v1/essays/quota',
+        headers: headers(admin),
+      });
+      expect(quota.json()).toMatchObject({ availableToday: true, nextAvailableAt: null });
+    } finally {
+      await deleteUser(admin.id);
+    }
+  });
+
   it('5 correções simultâneas do mesmo usuário: exatamente 1 passa', async () => {
     await clearCorrections(other);
     const ids = await Promise.all([1, 2, 3, 4, 5].map(() => draft(other)));

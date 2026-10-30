@@ -58,8 +58,11 @@ export const essayCorrections = pgTable(
     userId: text('user_id')
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
-    /** data (America/Sao_Paulo) usada para limitar 1 correção por dia */
-    correctionDate: date('correction_date').notNull(),
+    /**
+     * data (America/Sao_Paulo) usada para limitar 1 correção por dia; null = fora do limite
+     * (admin). O índice único ignora nulls.
+     */
+    correctionDate: date('correction_date'),
     c1: integer('c1'),
     c2: integer('c2'),
     c3: integer('c3'),

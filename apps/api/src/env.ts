@@ -18,6 +18,9 @@ const envSchema = z.object({
   GOOGLE_CLIENT_SECRET: optionalString,
   RESEND_API_KEY: optionalString,
   EMAIL_FROM: z.string().default('freenem <onboarding@resend.dev>'),
+  DEEPSEEK_API_KEY: optionalString,
+  DEEPSEEK_MODEL: z.string().default('deepseek-chat'),
+  DEEPSEEK_BASE_URL: z.string().url().default('https://api.deepseek.com'),
   ANTHROPIC_API_KEY: optionalString,
   ANTHROPIC_MODEL: z.string().default('claude-sonnet-5-5'),
   ANTHROPIC_EFFORT: z.enum(['low', 'medium', 'high']).default('low'),
@@ -51,5 +54,5 @@ export const isTest = env.NODE_ENV === 'test';
 export const features = {
   googleLogin: Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET),
   emailVerification: Boolean(env.RESEND_API_KEY),
-  essayAi: Boolean(env.ANTHROPIC_API_KEY),
+  essayAi: Boolean(env.DEEPSEEK_API_KEY || env.ANTHROPIC_API_KEY),
 };

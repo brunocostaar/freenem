@@ -32,7 +32,7 @@ const routes: FastifyPluginAsyncZod = async (app) => {
   app.get(
     '/essays/quota',
     { ...auth, schema: { response: { 200: essayQuotaSchema } } },
-    async (req) => getQuota(req.sessionUser!.id),
+    async (req) => getQuota(req.sessionUser!),
   );
 
   app.get('/essays', { ...auth, schema: { response: { 200: essayListSchema } } }, async (req) => ({
@@ -83,7 +83,7 @@ const routes: FastifyPluginAsyncZod = async (app) => {
           'Verifique seu e-mail para enviar redações para correção.',
         );
       }
-      return correctEssay(req.sessionUser!.id, req.params.id);
+      return correctEssay(req.sessionUser!, req.params.id);
     },
   );
 };

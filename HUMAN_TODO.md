@@ -4,7 +4,7 @@ Tudo abaixo depende de contas, chaves ou decisões suas. O app roda 100% localme
 
 ## 1. Decisões a confirmar
 
-- [ ] **Quem paga a correção de redação?** Implementado: chave do projeto no servidor (`ANTHROPIC_API_KEY`), 1 correção/dia/usuário. Custo estimado com `claude-sonnet-5-5` em esforço `low`: ~US$ 0,01–0,03 por redação. Se preferir que cada usuário use a própria chave (BYOK), é uma mudança pequena — peça.
+- [x] **Correção de redação**: DeepSeek (`DEEPSEEK_API_KEY`, modelo `deepseek-chat`), 1 correção/dia/usuário (admins sem limite). Defina um limite de gasto no painel do DeepSeek. Alternativa: Claude (`ANTHROPIC_API_KEY`). Custo estimado com `claude-sonnet-5-5` em esforço `low`: ~US$ 0,01–0,03 por redação. Se preferir que cada usuário use a própria chave (BYOK), é uma mudança pequena — peça.
 - [ ] **Licença**: está AGPL-3.0. O dataset de questões (enem-api) é GPL-2.0; os dados ficam no banco (não são distribuídos com o código), mas vale uma leitura jurídica rápida.
 - [ ] **Provas de vestibulares (FUVEST, UFRGS, UNICAMP)**: têm direitos das instituições. Os importadores funcionam (`pnpm ingest:vestibulares`, veja `packages/ingest/README.md`) e gravam tudo como **rascunho** (nunca publicam sozinhos), com fonte/URL/licença em cada questão e relatório de problemas em `packages/ingest/.cache/vestibulares-report.csv`. **Atenção: a auto-revisão (30/10) publicou 701 delas** (cada uma cita fonte e URL). Decida a política (citar fonte + remoção a pedido, ou pedir autorização às bancas); para despublicar todas: `update questions set status = 'draft' where external_id ~ '^(fuvest|ufrgs|unicamp)-'`.
   - **Se um site bloquear o download** (o fuvest.br devolve 403 a clientes sem `User-Agent` de navegador; a UNICAMP/UFRGS mudam as URLs a cada edição): baixe os arquivos à mão e rode com `--pdf`:
@@ -36,7 +36,7 @@ Tudo abaixo depende de contas, chaves ou decisões suas. O app roda 100% localme
    ADMIN_PASSWORD=<senha forte>
    STORAGE_DRIVER=r2
    R2_ACCOUNT_ID=… R2_ACCESS_KEY_ID=… R2_SECRET_ACCESS_KEY=… R2_BUCKET=… R2_PUBLIC_URL=https://…
-   ANTHROPIC_API_KEY=…            # opcional (sem ela: modo demonstração)
+   DEEPSEEK_API_KEY=…             # correção de redação (prioridade); sem ela, usa ANTHROPIC_API_KEY ou o modo demonstração
    RESEND_API_KEY=… EMAIL_FROM=…  # opcional (sem ela: sem verificação de e-mail)
    GOOGLE_CLIENT_ID=… GOOGLE_CLIENT_SECRET=…  # opcional
    ```

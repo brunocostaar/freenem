@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildRequestParams } from '../src/modules/essays/corrector.js';
+import { buildDeepSeekRequest } from '../src/modules/essays/deepseek.js';
 
 const FORBIDDEN = ['minimum', 'maximum', 'minLength', 'maxLength', 'multipleOf'];
 
@@ -39,5 +40,17 @@ describe('buildRequestParams', () => {
         );
       }
     });
+  });
+});
+
+describe('buildDeepSeekRequest', () => {
+  const req = buildDeepSeekRequest({ theme: 'Tema', text: 'Texto do aluno' }, 'deepseek-chat');
+
+  it('pede JSON e mantém a redação fora do system prompt', () => {
+    expect(req.response_format.type).toBe('json_object');
+    expect(req.messages[0]!.role).toBe('system');
+    expect(req.messages[0]!.content).not.toContain('Texto do aluno');
+    expect(req.messages[0]!.content).toContain('JSON');
+    expect(req.messages[1]!.content).toContain('<redacao>\nTexto do aluno\n</redacao>');
   });
 });
