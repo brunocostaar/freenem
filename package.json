@@ -19,6 +19,7 @@
     "db:migrate": "pnpm --filter @freenem/api db:migrate",
     "db:seed": "pnpm --filter @freenem/api db:seed",
     "ingest:enem": "pnpm --filter @freenem/ingest run import:enem",
+    "ingest:ppl": "pnpm --filter @freenem/ingest run import:enem-ppl",
     "ingest:tri": "pnpm --filter @freenem/ingest run import:tri",
     "ingest:vestibulares": "pnpm --filter @freenem/ingest run import:vestibulares",
     "ingest:review": "pnpm --filter @freenem/ingest run review:auto",

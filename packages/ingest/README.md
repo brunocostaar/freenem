@@ -43,6 +43,25 @@ Mapeamento: caderno AZUL, área (`SG_AREA`), posição (`CO_POSICAO`, com a nume
 variantes por ano) e língua (`TP_LINGUA`). Só gravamos `irt_a/b/c` quando `TX_GABARITO` coincide com o
 gabarito da nossa questão; itens abandonados (sem parâmetros) ficam em branco.
 
+## ENEM PPL (2ª aplicação) — PDFs oficiais do INEP
+
+```bash
+pnpm ingest:ppl                                                  # 2020–2024
+pnpm --filter @freenem/ingest run import:enem-ppl --years 2022 --dry-run
+```
+
+- **Fonte:** `download.inep.gov.br/enem/provas_e_gabaritos/<ano>_PV_reaplicacao_PPL_D1_CD1.pdf` (dia 1) e `..._D2_CD7.pdf`
+  (dia 2) + `<ano>_GB_...` (gabarito); caderno azul. Download com a cadeia TLS completa (`downloadInep` em
+  `remote-zip.ts`, mesmo intermediário do TRI). Os PDFs de 2016–2019 não estão neste padrão de URL e **não foram
+  importados**; o de **2021 tem fonte sem mapeamento Unicode** (texto ilegível, sem OCR) e é ignorado.
+- Parser em `src/sources/enem-ppl.ts` (reusa `pdf/flow.ts`): marcador `QUESTÃO NN` em negrito, letra da alternativa
+  como elemento solto (duplicado no PDF), marca d'água/rodapé descartados; inglês/espanhol (1–5) separados por
+  cabeçalho. `external_id`: `enem-ppl-2022-50`, `enem-ppl-2022-1-ingles`. Exam `ENEM PPL <ano> · Dia N` na instituição `enem`.
+- Classificação pelo classificador do ENEM (área pela posição). Status `published` sem problemas de
+  parser/qualidade e com gabarito; fórmulas/alternativas-figura ficam `draft` (veja `.cache/enem-ppl-report.csv`).
+  Anuladas não entram; reimportar não mexe em questões revisadas.
+- **TRI:** não mapeado para PPL (os `CO_PROVA` dos cadernos PPL não são tratados em `tri.ts`).
+
 ## Vestibulares (FUVEST, UFRGS, UNICAMP) — sempre rascunho
 
 ```bash

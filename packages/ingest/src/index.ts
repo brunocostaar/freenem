@@ -3,6 +3,8 @@
  * O ENEM usa o pipeline dedicado de `import-enem.ts` (dataset aberto + TRI do INEP); os
  * vestibulares passam por `import-vestibular.ts` e entram SEMPRE como rascunho.
  */
+import type { EnemArea } from '@freenem/shared';
+
 export type Letter = 'A' | 'B' | 'C' | 'D' | 'E';
 
 export interface ExamRef {
@@ -24,6 +26,12 @@ export interface ExamRef {
   expectedQuestions?: number;
   /** URL do gabarito oficial */
   gabaritoUrl?: string;
+  /** cor do caderno (ENEM PPL: "azul") */
+  color?: string;
+  /** ENEM PPL: classifica pela área do ENEM e publica quando não há problemas (padrão: tudo draft) */
+  publishable?: boolean;
+  /** texto de licença (padrão: direitos da instituição, uso educacional) */
+  license?: string;
 }
 
 export interface ExtractedQuestion {
@@ -34,6 +42,8 @@ export interface ExtractedQuestion {
   /** matéria conhecida pela posição na prova (nome da taxonomia), quando houver */
   subject?: string;
   language?: 'ingles' | 'espanhol';
+  /** área do ENEM pela posição na prova (usa o classificador do ENEM em vez do de vestibulares) */
+  area?: EnemArea;
   /** figuras recortadas do PDF (PNG) */
   images?: Buffer[];
   /** `external_id` explícito (padrão: `${externalPrefix}-${number}`) */

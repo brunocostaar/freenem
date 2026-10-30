@@ -8,6 +8,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
     "import:enem": "tsx --env-file-if-exists=../../apps/api/.env src/cli.ts enem",
+    "import:enem-ppl": "tsx --env-file-if-exists=../../apps/api/.env src/cli.ts enem-ppl",
     "import:tri": "tsx --env-file-if-exists=../../apps/api/.env src/cli.ts tri",
     "import:fuvest": "tsx --env-file-if-exists=../../apps/api/.env src/cli.ts fuvest",
     "import:ufrgs": "tsx --env-file-if-exists=../../apps/api/.env src/cli.ts ufrgs",

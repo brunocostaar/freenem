@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { eq } from 'drizzle-orm';
+import { classify } from './classify.js';
 import { classifyVestibular } from './classify-vestibular.js';
 import { CACHE_DIR, db, getStorage, schema } from './db.js';
 import type { ExamRef, ExtractedQuestion, Source } from './index.js';
@@ -19,6 +20,7 @@ export interface VestibularStats {
   annulled: number;
   skippedReviewed: number;
   withGabarito: number;
+  published: number;
   withImages: number;
   withSubject: number;
   /** questões com algum problema de qualidade/parser (todas ficam em draft de qualquer forma) */
@@ -78,6 +80,7 @@ export async function importVestibular(
       annulled: 0,
       skippedReviewed: 0,
       withGabarito: 0,
+      published: 0,
       withImages: 0,
       withSubject: 0,
       flagged: 0,
@@ -91,12 +94,17 @@ export async function importVestibular(
           institutionId: inst.id,
           year: exam.year,
           phase: exam.phase ?? null,
+          color: exam.color ?? null,
           label: exam.label,
           sourceUrl: exam.sourceUrl ?? null,
         })
         .onConflictDoUpdate({
           target: [schema.exams.institutionId, schema.exams.year, schema.exams.label],
-          set: { phase: exam.phase ?? null, sourceUrl: exam.sourceUrl ?? null },
+          set: {
+            phase: exam.phase ?? null,
+            color: exam.color ?? null,
+            sourceUrl: exam.sourceUrl ?? null,
+          },
         })
         .returning();
       examId = row!.id;
@@ -133,11 +141,19 @@ export async function importVestibular(
         imageUrl: null as string | null,
         isCorrect: q.correctLetter === a.letter,
       }));
-      const c = classifyVestibular({
-        text: `${q.statement}\n${q.alternatives.map((a) => a.text).join('\n')}`,
-        subject: q.subject,
-        language: q.language,
-      });
+      const fullText = `${q.statement}\n${q.alternatives.map((a) => a.text).join('\n')}`;
+      const c =
+        ex.publishable && q.area
+          ? (() => {
+              const r = classify({ text: fullText, area: q.area, language: q.language });
+              return {
+                subject: r.subject,
+                topics: r.topics,
+                confidence: r.confidence,
+                how: 'enem',
+              };
+            })()
+          : classifyVestibular({ text: fullText, subject: q.subject, language: q.language });
 
       const reasons: string[] = [...(q.warnings ?? [])];
       for (const issue of checkQuality(
@@ -148,6 +164,10 @@ export async function importVestibular(
       }
       if (!c.subject) reasons.push('matéria não identificada');
       if (c.how === 'palavras-chave' && c.confidence < 0.5) reasons.push('classificação incerta');
+      // ENEM PPL: avisos de figura não impedem a publicação (a figura vai anexada)
+      const blocking = reasons.filter((r) => !/^(possível figura|figura vetorial)/.test(r));
+      const status: 'draft' | 'published' =
+        ex.publishable && blocking.length === 0 && q.correctLetter ? 'published' : 'draft';
       const flagged = reasons.length > 0;
       if (flagged) stats.flagged++;
       if (q.correctLetter) stats.withGabarito++;
@@ -163,12 +183,13 @@ export async function importVestibular(
           c.how,
           q.correctLetter ?? '',
           imageUrls.length,
-          'draft',
+          status,
           reasons.join(' ; '),
         ]
           .map(csvCell)
           .join(','),
       );
+      if (status === 'published') stats.published++;
       if (opts.dryRun) return;
 
       const [existing] = await db
@@ -190,16 +211,20 @@ export async function importVestibular(
         imageUrls,
         sourceName: ex.attribution ?? `${ex.label} — prova oficial`,
         sourceUrl: ex.sourceUrl ?? null,
-        sourceLicense: VESTIBULAR_LICENSE,
+        sourceLicense: ex.license ?? VESTIBULAR_LICENSE,
         externalId,
         updatedAt: new Date(),
       };
       await db.transaction(async (tx) => {
-        // `status` só entra no INSERT (draft): reimportar nunca rebaixa/promove nada
+        // vestibulares: `status` só entra no INSERT (draft): reimportar nunca rebaixa/promove nada.
+        // ENEM PPL (`publishable`): o status acompanha a validação, exceto questões revisadas (puladas acima).
         const [row] = await tx
           .insert(schema.questions)
-          .values({ ...base, status: 'draft' })
-          .onConflictDoUpdate({ target: schema.questions.externalId, set: base })
+          .values({ ...base, status })
+          .onConflictDoUpdate({
+            target: schema.questions.externalId,
+            set: ex.publishable ? { ...base, status } : base,
+          })
           .returning({ id: schema.questions.id });
         const qid = row!.id;
         await tx.delete(schema.alternatives).where(eq(schema.alternatives.questionId, qid));
@@ -233,7 +258,7 @@ export async function importVestibular(
     allStats.push(stats);
     console.log(
       `  ${stats.exam}: ${stats.extracted}/${stats.expected ?? '?'} extraídas, ` +
-        `${stats.imported} gravadas (draft), ${stats.annulled} anuladas, ` +
+        `${stats.imported} gravadas (${stats.published} publicadas), ${stats.annulled} anuladas, ` +
         `${stats.withGabarito} com gabarito, ${stats.withImages} com figura, ` +
         `${stats.withSubject} com matéria, ${stats.flagged} com avisos`,
     );

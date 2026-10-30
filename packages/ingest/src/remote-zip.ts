@@ -97,6 +97,50 @@ async function rangeRequestOnce(
   });
 }
 
+/** Baixa um arquivo do INEP (cadeia TLS completa, sem desligar a verificação). `null` em 404. */
+export async function downloadInep(url: string): Promise<Buffer | null> {
+  const ca = await trustedCas();
+  const u = new URL(url);
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= 4; attempt++) {
+    try {
+      return await new Promise<Buffer | null>((resolve, reject) => {
+        const req = https.request(
+          {
+            host: u.hostname,
+            path: u.pathname + u.search,
+            method: 'GET',
+            ca,
+            maxVersion: 'TLSv1.2',
+          },
+          (res) => {
+            if (res.statusCode === 404) {
+              res.resume();
+              resolve(null);
+              return;
+            }
+            if (res.statusCode !== 200) {
+              res.resume();
+              reject(new Error(`HTTP ${res.statusCode} em ${url}`));
+              return;
+            }
+            const chunks: Buffer[] = [];
+            res.on('data', (c: Buffer) => chunks.push(c));
+            res.on('end', () => resolve(Buffer.concat(chunks)));
+          },
+        );
+        req.on('error', reject);
+        req.setTimeout(180_000, () => req.destroy(new Error('timeout')));
+        req.end();
+      });
+    } catch (e) {
+      lastError = e;
+      await new Promise((r) => setTimeout(r, 1000 * attempt));
+    }
+  }
+  throw lastError;
+}
+
 export interface ZipEntry {
   name: string;
   method: number;
