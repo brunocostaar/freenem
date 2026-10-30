@@ -2,8 +2,10 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
+import { RouteError } from '@/components/RouteError';
 import { ToastProvider } from '@/components/ui';
 import { routeTree } from './routeTree.gen';
+import './lib/chunk-reload';
 import './lib/pwa';
 import './index.css';
 
@@ -15,6 +17,7 @@ const router = createRouter({
   routeTree,
   context: { queryClient },
   defaultPreload: 'intent',
+  defaultErrorComponent: RouteError,
 });
 
 declare module '@tanstack/react-router' {

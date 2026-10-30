@@ -95,4 +95,8 @@ export default defineConfig({
   ],
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
   server: { port: 5173, strictPort: true },
+  // dependências só usadas em imports dinâmicos: pré-empacotadas na largada do dev server, para o
+  // Vite não reotimizar no meio da sessão (o que quebra abas abertas com "error loading
+  // dynamically imported module")
+  optimizeDeps: { include: ['react-markdown', 'remark-math', 'rehype-katex', 'qrcode'] },
 });
