@@ -5,12 +5,7 @@ import { col, pageXml, pdfXml, type T } from './pdf/fixtures.js';
 import { joinParagraphs, mdEscape, mergeRows, parsePdfXml } from './pdf/layout.js';
 import { splitAlternatives } from './pdf/question.js';
 import { checkQuality, expectedAlternativesOf } from './quality.js';
-import {
-  extractFuvest,
-  fuvestSpec,
-  parseFuvestGabarito,
-  type Gabarito,
-} from './sources/fuvest.js';
+import { extractFuvest, fuvestSpec, parseFuvestGabarito, type Gabarito } from './sources/fuvest.js';
 import { extractUfrgs, parseUfrgsGabarito } from './sources/ufrgs.js';
 import { extractUnicamp, parseUnicampGabarito } from './sources/unicamp.js';
 
@@ -37,13 +32,31 @@ describe('parsePdfXml', () => {
 
 describe('mergeRows / joinParagraphs / mdEscape', () => {
   const mk = (top: number, left: number, text: string, width = 40) =>
-    ({ page: 1, top, left, width, height: 10, text, bold: false, size: 10, color: '#000' }) as const;
+    ({
+      page: 1,
+      top,
+      left,
+      width,
+      height: 10,
+      text,
+      bold: false,
+      size: 10,
+      color: '#000',
+    }) as const;
   it('cola elementos da mesma linha, mesmo com `top` 1px diferente', () => {
-    const rows = mergeRows([mk(100, 34, 'Instrução:'), mk(101, 80, 'As questões'), mk(120, 34, 'x')]);
+    const rows = mergeRows([
+      mk(100, 34, 'Instrução:'),
+      mk(101, 80, 'As questões'),
+      mk(120, 34, 'x'),
+    ]);
     expect(rows.map((r) => r.text)).toEqual(['Instrução: As questões', 'x']);
   });
   it('splitBefore separa células de uma grade de alternativas', () => {
-    const rows = mergeRows([mk(100, 34, 'a) 1300 km.', 60), mk(100, 200, 'c) 1500 km.', 60)], 3, /^[a-d]\)/);
+    const rows = mergeRows(
+      [mk(100, 34, 'a) 1300 km.', 60), mk(100, 200, 'c) 1500 km.', 60)],
+      3,
+      /^[a-d]\)/,
+    );
     expect(rows.map((r) => r.text)).toEqual(['a) 1300 km.', 'c) 1500 km.']);
   });
   it('junta linhas em parágrafos e desfaz a hifenização do Unicamp', () => {
@@ -63,7 +76,17 @@ describe('mergeRows / joinParagraphs / mdEscape', () => {
 
 describe('splitAlternatives', () => {
   const ln = (text: string, top: number) =>
-    ({ page: 1, top, left: 34, width: 200, height: 10, text, bold: false, size: 10, color: '#000' }) as const;
+    ({
+      page: 1,
+      top,
+      left: 34,
+      width: 200,
+      height: 10,
+      text,
+      bold: false,
+      size: 10,
+      color: '#000',
+    }) as const;
   it('usa a última cadeia A..E (ignora "(A)" citado no enunciado)', () => {
     const lines = [
       ln('Considere as opções (A) e (B) do texto', 10),
@@ -101,10 +124,16 @@ GABARITO DE CORRESPONDÊNCIA
 
   const page1: T[] = [
     { top: 40, left: 34, text: '01', bold: true, font: 1, width: 15 },
-    ...col(34, 70, ['Texto-base da primeira questão com bastante conteúdo para o enunciado.', 'Qual é a resposta correta?']),
+    ...col(34, 70, [
+      'Texto-base da primeira questão com bastante conteúdo para o enunciado.',
+      'Qual é a resposta correta?',
+    ]),
     ...col(34, 110, alts5('Q1')),
     { top: 40, left: 312, text: '02', bold: true, font: 1, width: 15 },
-    ...col(312, 70, ['Enunciado da segunda questão sobre um tema qualquer da prova.', 'Assinale a correta:']),
+    ...col(312, 70, [
+      'Enunciado da segunda questão sobre um tema qualquer da prova.',
+      'Assinale a correta:',
+    ]),
     ...col(312, 110, alts5('Q2')),
   ];
   const page2: T[] = [
@@ -195,7 +224,14 @@ describe('UNICAMP', () => {
   ];
   it('lê QUESTÃO N, alternativas a)–d), desfaz hifenização e descarta rodapé/rascunho', () => {
     const pages = parsePdfXml(pdfXml([pageXml(1, page)]));
-    const qs = extractUnicamp('x.pdf', new Map([[1, 'B'], [2, 'ANULADA']]), pages);
+    const qs = extractUnicamp(
+      'x.pdf',
+      new Map([
+        [1, 'B'],
+        [2, 'ANULADA'],
+      ]),
+      pages,
+    );
     expect(qs.map((q) => q.number)).toEqual([1, 2]);
     expect(qs[0]?.statement).toContain('essencialmente política');
     expect(qs[0]?.statement).toContain('tem-se mostrado');
@@ -225,7 +261,10 @@ describe('UFRGS', () => {
   const page1: T[] = [
     { top: 88, left: 112, text: 'LÍNGUA PORTUGUESA', bold: true, font: 1, width: 130 },
     { top: 115, left: 71, text: 'Instrução: As questões de 01 a 02 estão', width: 200 },
-    ...ucol(92, 140, ['Primeira linha do texto comum às questões.', 'Segunda linha do texto comum.']),
+    ...ucol(92, 140, [
+      'Primeira linha do texto comum às questões.',
+      'Segunda linha do texto comum.',
+    ]),
     gutter(140, 1),
     gutter(152, 2),
     { top: 190, left: 71, text: '01.', bold: true, font: 1, width: 16 },

@@ -17,7 +17,8 @@ export const UNICAMP_EDITIONS: Record<number, { prova: string; gabarito: string 
   },
   2025: {
     prova: 'https://www.comvest.unicamp.br/vest2025/F1/f12025Q_Z.pdf',
-    gabarito: 'https://www.comvest.unicamp.br/wp-content/uploads/2024/10/QZ_gabarito_2025_FINAL_site.pdf',
+    gabarito:
+      'https://www.comvest.unicamp.br/wp-content/uploads/2024/10/QZ_gabarito_2025_FINAL_site.pdf',
   },
 };
 
@@ -88,13 +89,17 @@ export function extractUnicamp(
   return out;
 }
 
-export function unicampSource(opts: { year?: number; pdf?: string; gabarito?: string } = {}): Source {
+export function unicampSource(
+  opts: { year?: number; pdf?: string; gabarito?: string } = {},
+): Source {
   const year = opts.year ?? Math.max(...UNICAMP_YEARS);
   const ed = UNICAMP_EDITIONS[year];
   const pdfUrl = opts.pdf ?? ed?.prova;
   const gabUrl = opts.gabarito ?? ed?.gabarito;
   if (!pdfUrl || !gabUrl) {
-    throw new Error(`UNICAMP ${year}: sem URL conhecida. Use --pdf <arquivo|url> --gabarito <arquivo|url>.`);
+    throw new Error(
+      `UNICAMP ${year}: sem URL conhecida. Use --pdf <arquivo|url> --gabarito <arquivo|url>.`,
+    );
   }
   const ref: ExamRef = {
     institution: 'unicamp',

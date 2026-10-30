@@ -100,7 +100,9 @@ export function extractFuvest(
   return out;
 }
 
-export function fuvestSource(opts: { year?: number; pdf?: string; gabarito?: string; version?: string } = {}): Source {
+export function fuvestSource(
+  opts: { year?: number; pdf?: string; gabarito?: string; version?: string } = {},
+): Source {
   const year = opts.year ?? Math.max(...FUVEST_YEARS);
   const ed = FUVEST_EDITIONS[year];
   const pdfUrl = opts.pdf ?? ed?.prova;

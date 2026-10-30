@@ -112,7 +112,10 @@ const BANNER =
   /^(L[ÍI]NGUA PORTUGUESA|LITERATURA|HIST[ÓO]RIA|GEOGRAFIA|MATEM[ÁA]TICA|INGL[ÊE]S|ESPANHOL|FRANC[ÊE]S|ITALIANO|ALEM[ÃA]O|F[ÍI]SICA|QU[ÍI]MICA|BIOLOGIA|LITERATURA EM L[ÍI]NGUA PORTUGUESA)$/;
 
 const isJunk = (l: PdfLine, page: PdfPage) =>
-  /^UFRGS-VESTIBULAR/i.test(l.text) ||
+  /UFRGS\s*[-–]\s*(VESTIBULAR|CV)/i.test(l.text) ||
+  // rodapé do caderno de 2024 vem em dois trechos: "8 … UFRGS" e "– CV/2024 – 1º DIA"
+  /^[–-]\s*CV\/\d{4}/.test(l.text) ||
+  (l.top > page.height - 90 && /^(\d{1,2}\s+)?UFRGS$/.test(l.text)) ||
   (/^\d{1,2}$/.test(l.text) && !l.bold && (l.top > page.height - 120 || l.top < 40)) ||
   // numeração de linhas dos textos ("49.") fica na margem; os marcadores de questão são negrito
   (/^\d{1,3}\.$/.test(l.text) && !l.bold) ||
@@ -186,7 +189,9 @@ export function extractUfrgs(
       subject: LANGS.includes(subject) && !lang ? undefined : subject,
       language: lang,
       // idiomas repetem a numeração 01–15: o idioma entra no id
-      externalId: isLang ? `${opts.tag}-${lang ?? subject.toLowerCase()}-${pad(raw.number)}` : `${opts.tag}-${pad(raw.number)}`,
+      externalId: isLang
+        ? `${opts.tag}-${lang ?? subject.toLowerCase()}-${pad(raw.number)}`
+        : `${opts.tag}-${pad(raw.number)}`,
       images: built.images,
       warnings: [...built.warnings, ...(g ? [] : ['sem gabarito'])],
     });

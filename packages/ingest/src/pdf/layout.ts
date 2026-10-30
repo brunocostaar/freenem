@@ -64,7 +64,8 @@ const ENTITIES: Record<string, string> = {
 export function decodeEntities(s: string): string {
   return s.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (m, e: string) => {
     if (e[0] === '#') {
-      const code = e[1]?.toLowerCase() === 'x' ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10);
+      const code =
+        e[1]?.toLowerCase() === 'x' ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10);
       return Number.isFinite(code) ? String.fromCodePoint(code) : m;
     }
     return ENTITIES[e.toLowerCase()] ?? m;
@@ -93,7 +94,10 @@ export function parsePdfXml(xml: string): PdfPage[] {
     };
     for (const fm of body.matchAll(/<fontspec\b([^>]*)\/>/g)) {
       const f = fm[1] ?? '';
-      fonts.set(attr(f, 'id') ?? '', { size: num(f, 'size'), color: attr(f, 'color') ?? '#000000' });
+      fonts.set(attr(f, 'id') ?? '', {
+        size: num(f, 'size'),
+        color: attr(f, 'color') ?? '#000000',
+      });
     }
     for (const im of body.matchAll(/<image\b([^>]*)\/>/g)) {
       const a = im[1] ?? '';

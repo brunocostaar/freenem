@@ -82,7 +82,9 @@ export function flowLines(pages: PdfPage[], opts: FlowOptions): FlowLine[] {
     const twoCols = rts !== null && isNormal(page);
     const half = page.width * 0.5;
     const rightEls = els.filter((l) => l.left >= half && l.width < page.width * 0.6);
-    page.col1Lo = twoCols ? Math.min(half + 10, ...rightEls.map((l) => l.left), rts!) - 2 : undefined;
+    page.col1Lo = twoCols
+      ? Math.min(half + 10, ...rightEls.map((l) => l.left), rts!) - 2
+      : undefined;
     page.col0Hi = twoCols ? rts! - 4 : undefined;
     const isRight = (l: PdfLine) => l.left >= half;
     // linhas "cruzadas": largura total, ou tabela de alternativas (3+ células cruzando as colunas)
@@ -246,15 +248,17 @@ function ownerOfImages(
       if (img.width * img.height < 900) continue;
       const cx = img.left + img.width / 2;
       const spans =
-        page.col1Lo !== undefined && img.left < page.width * 0.5 - 10 && img.left + img.width > cb.col0Hi + 8;
-      const same = here.filter((f) => spans || f.col === 2 || f.col === (cx < page.width * 0.5 ? 0 : 1));
+        page.col1Lo !== undefined &&
+        img.left < page.width * 0.5 - 10 &&
+        img.left + img.width > cb.col0Hi + 8;
+      const same = here.filter(
+        (f) => spans || f.col === 2 || f.col === (cx < page.width * 0.5 ? 0 : 1),
+      );
       const cy = img.top + img.height / 2;
       const above = same
         .filter((f) => f.line.top + f.line.height <= cy + 2)
         .sort((a, b) => b.line.top - a.line.top)[0];
-      const below = same
-        .filter((f) => f.line.top > cy)
-        .sort((a, b) => a.line.top - b.line.top)[0];
+      const below = same.filter((f) => f.line.top > cy).sort((a, b) => a.line.top - b.line.top)[0];
       const pick = above ?? below;
       const block = pick ? blockOf.get(pick) : undefined;
       if (block) res.set(block, [...(res.get(block) ?? []), img]);

@@ -43,15 +43,58 @@ Mapeamento: caderno AZUL, área (`SG_AREA`), posição (`CO_POSICAO`, com a nume
 variantes por ano) e língua (`TP_LINGUA`). Só gravamos `irt_a/b/c` quando `TX_GABARITO` coincide com o
 gabarito da nossa questão; itens abandonados (sem parâmetros) ficam em branco.
 
-## Vestibulares (rascunhos)
+## Vestibulares (FUVEST, UFRGS, UNICAMP) — sempre rascunho
 
 ```bash
-pnpm --filter @freenem/ingest run import:fuvest --year 2024 [--pdf prova.pdf|url]
-pnpm --filter @freenem/ingest run import:ufrgs  --year 2024 [--pdf prova.pdf|url]
+pnpm ingest:vestibulares                                        # todos os anos conhecidos das 3 instituições
+pnpm --filter @freenem/ingest run import:fuvest  -- --year 2025 # 1ª fase, 90 questões (A–E)
+pnpm --filter @freenem/ingest run import:ufrgs   -- --year 2025 # dias 1 e 2 (A–E)
+pnpm --filter @freenem/ingest run import:unicamp -- --year 2025 # 1ª fase, 72 questões (a–d)
+# arquivos manuais (site bloqueou o download etc.):
+pnpm --filter @freenem/ingest run import:fuvest  -- --year 2026 --pdf prova.pdf --gabarito gab.pdf --version V1
+pnpm --filter @freenem/ingest run import:ufrgs   -- --year 2027 --pdf dia1.pdf --pdf2 dia2-ingles.pdf --gabarito gabaritos.html
+pnpm --filter @freenem/ingest run import:unicamp -- --year 2026 --pdf prova-Q.pdf --gabarito gab.pdf
 ```
 
-Baixam o PDF oficial, extraem o texto com `pdftotext -layout` (poppler-utils) e importam como `draft`
-sem matéria/gabarito (parser de melhor esforço; provas com duas colunas/figuras exigem revisão).
+Flags: `--dry-run` (extrai e gera o relatório sem gravar no banco/storage), `--years 2023,2024`.
+Para compartilhar PDFs/relatório e imagens entre worktrees: `INGEST_CACHE_DIR=<.../packages/ingest/.cache>`
+e `STORAGE_DIR=<.../apps/api/storage>`.
+
+- **Fontes** (`src/sources/`): FUVEST — `fuvest.br/wp-content/uploads/fuvest<ano>_primeira_fase_prova_V*.pdf` +
+  `fuvest<ano>_gabarito_primeira_fase.pdf` (2023–2025); UFRGS — cadernos de prova em
+  `ufrgs.br/coperse/wp-content/uploads/…` + gabarito (HTML, por matéria) em `vestibular.ufrgs.br/cv<ano>/gabaritos/`
+  (2024–2026); UNICAMP — `comvest.unicamp.br/vest<ano>/F1/f1<ano>Q_*.pdf` (caderno Q) + gabarito Q/Z em
+  `comvest.unicamp.br/wp-content/uploads/…` (2024–2025). O "ano" é o do vestibular (FUVEST 2025 = prova de nov/2024).
+- **Parser** (`src/pdf/`): `pdftohtml -xml` devolve cada linha com posição, fonte e negrito (e as imagens
+  embutidas). `flow.ts` descobre as colunas (a esquerda e a direita, com linhas de largura total e tabelas
+  de alternativas), lê na ordem certa, e separa questões pelos marcadores de cada prova (FUVEST: número em
+  negrito; UNICAMP: `QUESTÃO N`; UFRGS: `NN.` em negrito). Textos-base compartilhados ("TEXTO PARA AS
+  QUESTÕES 04 E 05", "Instrução: as questões de 01 a 08…") entram no enunciado de todas as questões do intervalo.
+  Cabeçalhos/rodapés, marcadores brancos (`{ 02}`, `#####`) e a numeração de linhas do UFRGS são descartados.
+- **Gabarito oficial** é lido do PDF/HTML (FUVEST por versão do caderno; UNICAMP `*` = anulada; UFRGS
+  `ANULADA`) e marca a alternativa correta. **Questões anuladas não são importadas.**
+- **Figuras**: imagens embutidas viram recortes PNG (`pdftoppm -x -y -W -H`); gráficos vetoriais (rótulos de
+  eixo), fórmulas (glifos matemáticos/sobrescritos) e alternativas que são figuras geram o recorte da
+  questão inteira; na dúvida (palavra "figura/gráfico/tabela/mapa/charge…" no enunciado) anexa o recorte do
+  enunciado. Os PNG vão para o storage (`vestibulares/<inst>/<ano>/<hash>.png`, deduplicados) e para
+  `questions.image_urls`.
+- **Matéria/assunto** (`classify-vestibular.ts`): UFRGS usa a posição (banner de cada matéria no caderno);
+  as demais usam palavras-chave entre todas as matérias (`classify.ts` aceita `subjects` no lugar das áreas
+  do ENEM) e detecção de inglês/espanhol; evidência fraca deixa a matéria em branco.
+- **Idempotência**: `external_id` = `fuvest-2025-1f-12`, `unicamp-2025-1f-12`, `ufrgs-2025-d1-01`,
+  `ufrgs-2025-d2-ingles-01`. Reimportar atualiza texto/alternativas/imagens, **nunca muda `status`** e pula
+  questões já revisadas (`reviewed_by`).
+- **Atribuição**: `source_name` = "FUVEST 2025 · 1ª fase — prova oficial (fuvest.br)", `source_url` = PDF da prova,
+  `source_license` = direitos da instituição, uso educacional, remoção a pedido.
+- **Qualidade**: `quality.ts` com nº de alternativas por instituição (`EXPECTED_ALTERNATIVES`: UNICAMP = 4).
+  Problemas e avisos do parser (figura incerta, fórmula, alternativa vazia, sem gabarito…) vão para
+  `.cache/vestibulares-report.csv` (coluna `motivos`); como tudo é `draft`, a revisão em `/admin/revisao` decide.
+- **Limitações conhecidas**: fórmulas e quadros (tabelas) saem como texto bagunçado — por isso a questão
+  inteira vai como imagem; alternativas em tabela cruzando colunas (UFRGS) dependem de heurística; só
+  Inglês/Espanhol do UFRGS são importados (Francês/Italiano/Alemão não têm matéria na taxonomia); o caderno
+  importado é o V1/V (FUVEST) e Q (UNICAMP).
+- Testes: `src/vestibulares.test.ts` (fixtures XML mínimas, sem PDFs reais).
+
 Direitos das provas pertencem às instituições: sempre citamos a fonte e atendemos pedidos de remoção.
 
 ## Qualidade dos dados

@@ -14,7 +14,11 @@ export interface T {
 
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-export function pageXml(number: number, texts: T[], images: [number, number, number, number][] = []) {
+export function pageXml(
+  number: number,
+  texts: T[],
+  images: [number, number, number, number][] = [],
+) {
   const fonts =
     number === 1
       ? `<fontspec id="0" size="10" family="X+Calibri" color="#000000"/>
@@ -29,7 +33,10 @@ export function pageXml(number: number, texts: T[], images: [number, number, num
     })
     .join('\n');
   const imgs = images
-    .map(([top, left, w, h]) => `<image top="${top}" left="${left}" width="${w}" height="${h}" src="x.png"/>`)
+    .map(
+      ([top, left, w, h]) =>
+        `<image top="${top}" left="${left}" width="${w}" height="${h}" src="x.png"/>`,
+    )
     .join('\n');
   return `<page number="${number}" position="absolute" top="0" left="0" height="842" width="595">\n${fonts}\n${imgs}\n${body}\n</page>`;
 }

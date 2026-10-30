@@ -34,11 +34,7 @@ const LETTERS: Letter[] = ['A', 'B', 'C', 'D', 'E'];
  * ("(A) texto" ou "a) texto"). Procura a MAIOR cadeia A, B, C... a partir da última
  * linha "A" que fecha a cadeia esperada (evita confundir enumerações dentro do enunciado).
  */
-export function splitAlternatives(
-  lines: PdfLine[],
-  markerRe: RegExp,
-  expected = 5,
-): SplitResult {
+export function splitAlternatives(lines: PdfLine[], markerRe: RegExp, expected = 5): SplitResult {
   const hits: { idx: number; letter: Letter }[] = [];
   lines.forEach((l, idx) => {
     const m = markerRe.exec(l.text);
@@ -300,7 +296,9 @@ export function buildQuestion(
   }));
   const warnings: string[] = [];
   if (alts.length !== opts.expectedAlternatives) {
-    warnings.push(`${alts.length} alternativas encontradas (esperado ${opts.expectedAlternatives})`);
+    warnings.push(
+      `${alts.length} alternativas encontradas (esperado ${opts.expectedAlternatives})`,
+    );
   }
   const stemPlain = stemLines.map((l) => l.text).join(' ');
   const fig = detectFigures(
