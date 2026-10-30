@@ -10,7 +10,7 @@ Plataforma de estudos ENEM/vestibulares. UI em português do Brasil; código e i
 
 ## Comandos
 
-`pnpm dev | build | typecheck | lint | test | db:generate | db:migrate | db:seed`. Postgres: `docker compose up -d` (porta 5442; bancos `freenem` e `freenem_test`).
+`pnpm dev | build | typecheck | lint | test | e2e | db:generate | db:migrate | db:seed`. Postgres: `docker compose up -d` (porta 5442; bancos `freenem` e `freenem_test`). `pnpm e2e` sobe API (3350) + web (5183) próprios no banco descartável `freenem_e2e` (recriado a cada execução); nunca aponte o E2E para o banco de dev.
 
 ## API: adicionar um módulo
 

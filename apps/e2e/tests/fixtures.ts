@@ -3,8 +3,8 @@ import { test as base, expect, type Page } from '@playwright/test';
 
 export { expect };
 
-const BASE = process.env.E2E_BASE_URL ?? 'http://localhost:5173';
-const API = process.env.E2E_API_URL ?? 'http://localhost:3340';
+const BASE = process.env.E2E_BASE_URL ?? 'http://localhost:5183';
+const API = process.env.E2E_API_URL ?? 'http://localhost:3350';
 export const SCREENSHOT_DIR = new URL('../screenshots/', import.meta.url).pathname;
 
 export interface Guard {

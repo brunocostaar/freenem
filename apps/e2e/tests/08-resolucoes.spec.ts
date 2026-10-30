@@ -11,7 +11,7 @@ import {
   expectNoHorizontalOverflow,
 } from './fixtures';
 
-const API = process.env.E2E_API_URL ?? 'http://localhost:3340';
+const API = process.env.E2E_API_URL ?? 'http://localhost:3350';
 
 async function audit(page: Page, label: string) {
   await page.waitForLoadState('networkidle');
