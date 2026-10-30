@@ -5,8 +5,14 @@ const USAGE = `Uso: pnpm --filter @freenem/ingest run <comando> [opções]
 Comandos (via scripts do pacote):
   import:enem   [--years 2022,2023] [--no-images]   Importa questões do ENEM (dataset enem-api)
   import:tri    [--years 2022,2023]                 Importa parâmetros TRI (a,b,c) dos microdados do INEP
-  import:fuvest [--year 2024] [--pdf arquivo.pdf]   Rascunhos de questões da FUVEST (PDF oficial)
-  import:ufrgs  [--year 2024] [--pdf arquivo.pdf]   Rascunhos de questões da UFRGS (PDF oficial)
+  import:fuvest [--year 2024] [--pdf prova.pdf --gabarito gab.pdf] [--version V1]
+                                                    Rascunhos da FUVEST 1ª fase (PDF oficial + gabarito)
+  import:ufrgs  [--year 2025] [--pdf dia1.pdf --pdf2 dia2-ingles.pdf --gabarito pagina.html]
+                                                    Rascunhos do Vestibular UFRGS (dias 1 e 2)
+  import:unicamp [--year 2025] [--pdf prova.pdf --gabarito gab.pdf]
+                                                    Rascunhos da UNICAMP 1ª fase (72 questões, a–d)
+  import:vestibulares [--dry-run]                   Todos os vestibulares/anos conhecidos (sem --year = todos os anos)
+                                                    Opções comuns: --dry-run (não grava no banco)
   classify:llm  [--limit 200] [--status draft]      Classifica matéria/assunto com a API da Anthropic
   quality:report [--dry-run]                        Checa qualidade das questões; rebaixa suspeitas publicadas para draft
   classify:report                                   Contagens por ano, status e matéria no banco
@@ -45,20 +51,20 @@ try {
       await importTri({ years: parseYears() });
       break;
     }
-    case 'fuvest': {
-      const { fuvestSource } = await import('./sources/fuvest.js');
-      const { importDrafts } = await import('./import-drafts.js');
-      await importDrafts(
-        fuvestSource({ year: Number(arg('year') ?? 0) || undefined, pdf: arg('pdf') }),
-      );
-      break;
-    }
-    case 'ufrgs': {
-      const { ufrgsSource } = await import('./sources/ufrgs.js');
-      const { importDrafts } = await import('./import-drafts.js');
-      await importDrafts(
-        ufrgsSource({ year: Number(arg('year') ?? 0) || undefined, pdf: arg('pdf') }),
-      );
+    case 'fuvest':
+    case 'ufrgs':
+    case 'unicamp':
+    case 'vestibulares': {
+      const { runVestibulares } = await import('./run-vestibulares.js');
+      await runVestibulares(command, {
+        years: arg('year') ? [Number(arg('year'))] : arg('years') ? parseYears() : undefined,
+        pdf: arg('pdf'),
+        pdf2: arg('pdf2'),
+        gabarito: arg('gabarito'),
+        version: arg('version'),
+        languages: arg('langs')?.split(',') as ('ingles' | 'espanhol')[] | undefined,
+        dryRun: flag('dry-run'),
+      });
       break;
     }
     case 'classify-llm': {

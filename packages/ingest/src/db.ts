@@ -34,4 +34,4 @@ export function getStorage(): Storage {
   });
 }
 
-export const CACHE_DIR = path.resolve(here, '../.cache');
+export { CACHE_DIR } from './paths.js';

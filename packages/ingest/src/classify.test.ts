@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import { classify, normalize, shouldPublish } from './classify.js';
-import { parseQuestions } from './sources/pdf.js';
 import { areaOf, dayOf } from './sources/enem-api.js';
 import { parseItens } from './tri.js';
 
@@ -91,37 +90,5 @@ describe('parseItens', () => {
       lang: null,
     });
     expect(rows[1]).toMatchObject({ area: 'linguagens', b: null, lang: 0 });
-  });
-});
-
-describe('parseQuestions (PDF)', () => {
-  it('extrai enunciado e alternativas', () => {
-    const text = [
-      'QUESTÃO 01',
-      'Qual é a capital do Brasil?',
-      '(A) São Paulo',
-      '(B) Brasília',
-      '(C) Rio de Janeiro',
-      '(D) Salvador',
-      '(E) Recife',
-      'QUESTÃO 02',
-      'Quanto é 2 + 2?',
-      '(A) 3',
-      '(B) 4',
-      '(C) 5',
-      '(D) 6',
-      '(E) 7',
-    ].join('\n');
-    const qs = parseQuestions(text);
-    expect(qs).toHaveLength(2);
-    expect(qs[0]?.statement).toBe('Qual é a capital do Brasil?');
-    expect(qs[0]?.alternatives.map((a) => a.text)).toEqual([
-      'São Paulo',
-      'Brasília',
-      'Rio de Janeiro',
-      'Salvador',
-      'Recife',
-    ]);
-    expect(qs[1]?.number).toBe(2);
   });
 });

@@ -20,6 +20,7 @@
     "db:seed": "pnpm --filter @freenem/api db:seed",
     "ingest:enem": "pnpm --filter @freenem/ingest run import:enem",
     "ingest:tri": "pnpm --filter @freenem/ingest run import:tri",
+    "ingest:vestibulares": "pnpm --filter @freenem/ingest run import:vestibulares",
     "e2e": "pnpm --filter @freenem/e2e e2e"
   },
   "devDependencies": {
