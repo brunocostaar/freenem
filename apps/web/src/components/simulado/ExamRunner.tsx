@@ -360,7 +360,7 @@ export function ExamRunner({ session }: { session: AttemptSession }) {
               key={q.id}
               mode="select"
               compact
-              className="border-0 p-0 shadow-none sm:p-0"
+              className="border-line-soft p-4 shadow-none sm:p-6"
               question={summary}
               selected={letters[q.id] ?? null}
               onSelect={select}
