@@ -66,7 +66,6 @@ export default defineConfig({
             VITE_PIX_KEY: 'apoie@freenem.local',
             VITE_PIX_NAME: 'FREENEM',
             VITE_PIX_CITY: 'PORTO ALEGRE',
-            VITE_DONATION_CARD_URL: 'https://donate.example.com/freenem',
           },
         },
       ],

@@ -73,7 +73,7 @@ Tudo abaixo depende de contas, chaves ou decisões suas. O app roda 100% localme
   - Authorized JavaScript origins: `https://SEU-DOMINIO`
   - Redirect URI: `https://api.SEU-DOMINIO/api/auth/callback/google`
 
-- [ ] **Doações (`/apoiar`)**: no Cloudflare Pages (variáveis do web) defina `VITE_PIX_KEY` (sua chave Pix), `VITE_PIX_NAME` (nome do recebedor, até 25 caracteres) e `VITE_PIX_CITY` (cidade, até 15). Para cartão: crie conta no Stripe e um Payment Link "cliente escolhe o valor" em BRL, e coloque a URL em `VITE_DONATION_CARD_URL`. Sem nenhuma das duas, a página mostra "doações em breve". Obs.: o Pix pelo Stripe é só por convite (após ~60 dias de processamento), por isso o Pix usa QR estático direto na sua chave.
+- [ ] **Doações (`/apoiar`)**: no Cloudflare Pages (variáveis do web) defina `VITE_PIX_KEY` (sua chave Pix), `VITE_PIX_NAME` (nome do recebedor, até 25 caracteres) e `VITE_PIX_CITY` (cidade, até 15). Sem `VITE_PIX_KEY`, a página mostra "doações em breve". O Pix usa QR estático direto na sua chave (doação por cartão/Stripe foi removida por ora).
 
 ## 7. Depois do deploy
 

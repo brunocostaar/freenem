@@ -3,7 +3,7 @@ import { test, expect, expectNoHorizontalOverflow, setTheme, shot } from './fixt
 
 test.use({ permissions: ['clipboard-read', 'clipboard-write'] });
 
-test('/apoiar: Pix com valor, copia-e-cola e cartão', async ({ page }, info) => {
+test('/apoiar: Pix com valor, copia-e-cola', async ({ page }, info) => {
   await page.goto('/');
   await page
     .getByRole('navigation', { name: 'Institucional' })
@@ -39,9 +39,7 @@ test('/apoiar: Pix com valor, copia-e-cola e cartão', async ({ page }, info) =>
   await page.getByRole('button', { name: 'Copiar código Pix' }).click();
   expect(await page.evaluate(() => navigator.clipboard.readText())).not.toContain('5404');
 
-  const card = page.getByRole('link', { name: /Doar com cartão/ });
-  await expect(card).toHaveAttribute('href', 'https://donate.example.com/freenem');
-  await expect(card).toHaveAttribute('target', '_blank');
+  await expect(page.getByText('Doar com cartão')).toHaveCount(0);
 
   await expectNoHorizontalOverflow(page);
   await shot(page, info.project.name, 'apoiar');

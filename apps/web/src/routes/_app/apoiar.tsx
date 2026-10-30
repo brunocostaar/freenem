@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import QRCode from 'qrcode';
-import { Copy, CreditCard, Heart } from 'lucide-react';
+import { Copy, Heart } from 'lucide-react';
 import { InfoPage, InfoSection } from '@/components/layout/InfoPage';
-import { Button, Card, Input, buttonClasses, useToast } from '@/components/ui';
+import { Button, Card, Input, useToast } from '@/components/ui';
 import { cn } from '@/lib/cn';
-import { donations, hasCard, hasPix } from '@/lib/donations';
+import { donations, hasPix } from '@/lib/donations';
 import { buildPixPayload } from '@/lib/pix';
 
 export const Route = createFileRoute('/_app/apoiar')({
@@ -15,7 +15,7 @@ export const Route = createFileRoute('/_app/apoiar')({
       {
         name: 'description',
         content:
-          'O freenem é gratuito e open-source. Doações voluntárias via Pix ou cartão ajudam a pagar servidor, banco de dados e a correção de redações com IA.',
+          'O freenem é gratuito e open-source. Doações voluntárias via Pix ajudam a pagar servidor, banco de dados e a correção de redações com IA.',
       },
     ],
   }),
@@ -59,7 +59,7 @@ function Apoiar() {
         </p>
       </InfoSection>
 
-      {hasPix || hasCard ? <Donate /> : <ComingSoon />}
+      {hasPix ? <PixCard /> : <ComingSoon />}
     </InfoPage>
   );
 }
@@ -76,34 +76,6 @@ function ComingSoon() {
         </p>
       </div>
     </Card>
-  );
-}
-
-function Donate() {
-  return (
-    <div className="space-y-6">
-      {hasPix && <PixCard />}
-      {hasCard && (
-        <Card>
-          <h2 className="flex items-center gap-2 text-2xl">
-            <CreditCard className="size-6" aria-hidden /> Doar com cartão
-          </h2>
-          <p className="mt-2 text-muted">
-            Você escolhe o valor em uma página segura do Stripe. O Pix pelo Stripe não é usado: para
-            doar por Pix, use o QR code acima.
-          </p>
-          <a
-            href={donations.cardUrl}
-            target="_blank"
-            rel="noreferrer noopener"
-            className={cn(buttonClasses('accent', 'lg'), 'mt-4')}
-          >
-            <CreditCard className="size-5" aria-hidden /> Doar com cartão
-            <span className="sr-only"> (abre em nova aba)</span>
-          </a>
-        </Card>
-      )}
-    </div>
   );
 }
 
