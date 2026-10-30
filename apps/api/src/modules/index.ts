@@ -11,6 +11,7 @@ import questions from './questions/routes.js';
 import answers from './answers/routes.js';
 import review from './review/routes.js';
 import reports from './reports/routes.js';
+import resolutions from './resolutions/routes.js';
 
 /** Registrados na raiz (ex.: /health). */
 export const rootModules = [health];
@@ -27,6 +28,7 @@ export const v1Modules = [
   answers,
   review,
   reports,
+  resolutions,
   simulados,
   stats,
   studyPlan,

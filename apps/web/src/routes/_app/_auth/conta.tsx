@@ -2,9 +2,14 @@ import { useState, type FormEvent } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Trash2 } from 'lucide-react';
-import { DELETE_ACCOUNT_CONFIRMATION } from '@freenem/shared';
+import {
+  DELETE_ACCOUNT_CONFIRMATION,
+  RESOLUTION_STATUS_LABELS,
+  myResolutionsSchema,
+} from '@freenem/shared';
+import { Link } from '@tanstack/react-router';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { Button, Card, CardTitle, Input, Skeleton, useToast } from '@/components/ui';
+import { Badge, Button, Card, CardTitle, Input, Skeleton, useToast } from '@/components/ui';
 import { api, ApiError } from '@/lib/api';
 import { authClient } from '@/lib/auth-client';
 import { meQuery } from '@/lib/queries';
@@ -24,6 +29,7 @@ function Conta() {
       ) : (
         <div className="space-y-6">
           <ProfileCard name={me.data.name} email={me.data.email} />
+          <ResolutionsCard />
           <PasswordCard />
           <DeleteCard />
         </div>
@@ -69,6 +75,61 @@ function ProfileCard({ name: initial, email }: { name: string; email: string }) 
           Salvar nome
         </Button>
       </form>
+    </Card>
+  );
+}
+
+function ResolutionsCard() {
+  const q = useQuery({
+    queryKey: ['me', 'resolutions'],
+    queryFn: () => api('/api/v1/me/resolutions', { schema: myResolutionsSchema }),
+  });
+  return (
+    <Card>
+      <CardTitle className="mb-2">Minhas resoluções</CardTitle>
+      {q.isPending ? (
+        <Skeleton className="h-12 w-full" />
+      ) : q.isError ? (
+        <p className="text-sm text-muted">Não foi possível carregar suas resoluções.</p>
+      ) : q.data.total === 0 ? (
+        <p className="text-sm text-muted">
+          Você ainda não escreveu resoluções. Depois de responder uma questão, compartilhe seu
+          raciocínio com a comunidade.
+        </p>
+      ) : (
+        <div className="space-y-3">
+          <p className="text-sm">
+            <strong>{q.data.total}</strong> {q.data.total === 1 ? 'resolução' : 'resoluções'}:{' '}
+            {q.data.approved} aprovada(s), {q.data.pending} em análise, {q.data.rejected}{' '}
+            rejeitada(s).
+          </p>
+          <ul className="space-y-2">
+            {q.data.items.slice(0, 5).map((r) => (
+              <li key={r.id} className="flex flex-wrap items-center gap-2 text-sm">
+                <Badge
+                  tone={
+                    r.status === 'approved'
+                      ? 'success'
+                      : r.status === 'rejected'
+                        ? 'danger'
+                        : 'highlight'
+                  }
+                >
+                  {RESOLUTION_STATUS_LABELS[r.status]}
+                </Badge>
+                <Link
+                  to="/questoes/$id"
+                  params={{ id: r.questionId }}
+                  className="min-w-0 flex-1 truncate underline"
+                >
+                  {r.institution} {r.year}: {r.excerpt}
+                </Link>
+                {r.status === 'approved' && <span className="text-muted">{r.score} pts</span>}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </Card>
   );
 }

@@ -19,6 +19,7 @@ import {
 } from '@freenem/shared';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ReportsPanel, reportsQuery } from '@/components/review/ReportsPanel';
+import { ResolutionsPanel, resolutionsReviewQuery } from '@/components/review/ResolutionsPanel';
 import { RichText } from '@/components/RichText';
 import {
   Badge,
@@ -37,7 +38,8 @@ import { meQuery } from '@/lib/queries';
 import { catalogQuery, reviewListInfiniteQuery, reviewQuestionQuery } from '@/lib/questions';
 
 const searchSchema = z.object({
-  tab: z.enum(['fila', 'reportes']).optional().catch(undefined),
+  tab: z.enum(['fila', 'reportes', 'resolucoes']).optional().catch(undefined),
+  resStatus: z.enum(['pending', 'approved', 'rejected']).optional().catch(undefined),
   reportStatus: z.enum(['open', 'resolved', 'dismissed']).optional().catch(undefined),
   id: z.string().uuid().optional().catch(undefined),
   status: z.enum(['draft', 'reviewed', 'published']).optional().catch(undefined),
@@ -109,6 +111,8 @@ function ReviewPage() {
   const tab = search.tab ?? 'fila';
   const openReports = useQuery(reportsQuery('open'));
   const openTotal = openReports.data?.openTotal ?? 0;
+  const pendingRes = useQuery(resolutionsReviewQuery('pending'));
+  const pendingResTotal = pendingRes.data?.pendingTotal ?? 0;
 
   return (
     <>
@@ -116,11 +120,12 @@ function ReviewPage() {
         title="Revisão de questões"
         description="Fila de questões importadas aguardando revisão: confira enunciado, gabarito, matéria e assuntos antes de publicar."
       />
-      <div role="tablist" aria-label="Seção" className="mb-6 grid max-w-sm grid-cols-2 gap-1.5">
+      <div role="tablist" aria-label="Seção" className="mb-6 grid max-w-lg grid-cols-3 gap-1.5">
         {(
           [
             ['fila', 'Fila'],
             ['reportes', openTotal > 0 ? `Reportes (${openTotal})` : 'Reportes'],
+            ['resolucoes', pendingResTotal > 0 ? `Resoluções (${pendingResTotal})` : 'Resoluções'],
           ] as const
         ).map(([value, label]) => (
           <button
@@ -140,7 +145,12 @@ function ReviewPage() {
           </button>
         ))}
       </div>
-      {tab === 'reportes' ? (
+      {tab === 'resolucoes' ? (
+        <ResolutionsPanel
+          status={search.resStatus ?? 'pending'}
+          onStatusChange={(s) => void navigate({ search: (p) => ({ ...p, resStatus: s }) })}
+        />
+      ) : tab === 'reportes' ? (
         <ReportsPanel
           status={search.reportStatus ?? 'open'}
           onStatusChange={(s) => void navigate({ search: (p) => ({ ...p, reportStatus: s }) })}

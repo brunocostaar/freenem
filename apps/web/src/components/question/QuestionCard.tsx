@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link } from '@tanstack/react-router';
 import { Bookmark, BookmarkCheck, CheckCircle2, ExternalLink, Send, XCircle } from 'lucide-react';
 import {
@@ -12,6 +12,9 @@ import { Badge, Button, Card } from '@/components/ui';
 import { cn } from '@/lib/cn';
 import { AlternativeOption, type AlternativeState } from './AlternativeOption';
 import { ReportQuestionButton } from './ReportQuestionButton';
+
+// Resoluções da comunidade: fora do bundle da página da questão, carregam após responder.
+const ResolutionsSection = lazy(() => import('./ResolutionsSection'));
 
 export interface QuestionCardProps {
   question: QuestionSummary;
@@ -267,10 +270,13 @@ export function QuestionCard({
           </div>
           {result.resolution && (
             <div className="rounded-xl border-2 border-line-soft bg-surface-2 p-4">
-              <h3 className="mb-2 text-base">Resolução</h3>
+              <h3 className="mb-2 text-base">Resolução oficial</h3>
               <RichText>{result.resolution}</RichText>
             </div>
           )}
+          <Suspense fallback={<p className="text-sm text-muted">Carregando resoluções…</p>}>
+            <ResolutionsSection questionId={question.id} />
+          </Suspense>
         </div>
       )}
 
