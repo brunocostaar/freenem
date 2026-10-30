@@ -33,12 +33,17 @@ export const Route = createFileRoute('/_app/questoes/')({
 function QuestionsPage() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
-  const { data: session } = useSession();
+  const { data: session, isPending: sessionPending } = useSession();
   const userId = session?.user.id ?? null;
   const view = search.view ?? 'focus';
 
   const catalog = useQuery(catalogQuery);
-  const list = useInfiniteQuery(questionsInfiniteQuery(search, userId));
+  const list = useInfiniteQuery({
+    ...questionsInfiniteQuery(search, userId),
+    // espera a sessão resolver: senão a lista carrega como anônimo e recarrega logo depois,
+    // descartando o que o usuário fez nesse intervalo
+    enabled: !sessionPending,
+  });
   const practice = usePractice();
 
   const [cursor, setCursor] = useState(0);

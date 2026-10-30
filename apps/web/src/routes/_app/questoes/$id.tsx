@@ -16,8 +16,8 @@ export const Route = createFileRoute('/_app/questoes/$id')({
 /** Página de uma questão (compartilhável). */
 function QuestionPage() {
   const { id } = Route.useParams();
-  const { data: session } = useSession();
-  const q = useQuery(questionQuery(id, session?.user.id ?? null));
+  const { data: session, isPending: sessionPending } = useSession();
+  const q = useQuery({ ...questionQuery(id, session?.user.id ?? null), enabled: !sessionPending });
   const practice = usePractice();
 
   useEffect(() => {
