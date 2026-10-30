@@ -27,6 +27,26 @@ export function sanitizeText(value: string, max: number): string {
     .trim();
 }
 
+const NAME_PARTICLES = new Set(['DE', 'DA', 'DO', 'DAS', 'DOS', 'E']);
+
+/**
+ * Nome do recebedor no limite de 25 caracteres sem cortar no meio de uma palavra: tira
+ * partículas (de, da, dos...) e depois abrevia sobrenomes do meio para a inicial.
+ * Ex.: "Bruno Costa Lucena de Araújo" -> "BRUNO COSTA LUCENA ARAUJO".
+ */
+export function fitName(value: string, max = 25): string {
+  const full = sanitizeText(value, Number.MAX_SAFE_INTEGER).replace(/\s+/g, ' ');
+  if (full.length <= max) return full;
+  const words = full.split(' ').filter((w, i, all) => {
+    const middle = i > 0 && i < all.length - 1;
+    return !(middle && NAME_PARTICLES.has(w));
+  });
+  for (let i = words.length - 2; i > 0 && words.join(' ').length > max; i--) {
+    words[i] = words[i]!.charAt(0);
+  }
+  return words.join(' ').slice(0, max).trim();
+}
+
 /** CRC16-CCITT-FALSE (polinômio 0x1021, valor inicial 0xFFFF), 4 dígitos hexadecimais maiúsculos. */
 export function crc16(data: string): string {
   let crc = 0xffff;
@@ -45,7 +65,7 @@ export function buildPixPayload({ key, name, city, amount }: PixPayloadInput): s
   if (amount !== undefined && amount > 0) payload += field('54', amount.toFixed(2));
   payload +=
     field('58', 'BR') +
-    field('59', sanitizeText(name, 25)) +
+    field('59', fitName(name)) +
     field('60', sanitizeText(city, 15)) +
     field('62', field('05', '***'));
   payload += '6304';

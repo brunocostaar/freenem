@@ -6,7 +6,7 @@ import { InfoPage, InfoSection } from '@/components/layout/InfoPage';
 import { Button, Card, Input, buttonClasses, useToast } from '@/components/ui';
 import { cn } from '@/lib/cn';
 import { donations, hasCard, hasPix } from '@/lib/donations';
-import { buildPixPayload, sanitizeText } from '@/lib/pix';
+import { buildPixPayload } from '@/lib/pix';
 
 export const Route = createFileRoute('/_app/apoiar')({
   head: () => ({
@@ -248,7 +248,7 @@ function PixCard() {
             </div>
             <div className="flex flex-wrap gap-x-2">
               <dt className="font-semibold">Recebedor:</dt>
-              <dd>{sanitizeText(donations.pixName, 25)}</dd>
+              <dd>{donations.pixName}</dd>
             </div>
           </dl>
         </div>

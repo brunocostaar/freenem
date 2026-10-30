@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildPixPayload, crc16, sanitizeText } from './pix';
+import { buildPixPayload, crc16, fitName, sanitizeText } from './pix';
 
 /** CRC16-CCITT-FALSE por tabela, independente da implementação bit a bit de pix.ts. */
 function crcTable(data: string): string {
@@ -58,5 +58,11 @@ describe('pix', () => {
     expect(buildPixPayload({ key: 'k', name: 'José', city: 'São Paulo' })).toContain(
       '5904JOSE6009SAO PAULO',
     );
+  });
+
+  it('encaixa nomes longos em 25 caracteres sem cortar palavras', () => {
+    expect(fitName('Bruno Costa Lucena de Araújo')).toBe('BRUNO COSTA LUCENA ARAUJO');
+    expect(fitName('Maria Aparecida dos Santos Oliveira Ferreira')).toBe('MARIA A S O FERREIRA');
+    expect(fitName('Ana Lima')).toBe('ANA LIMA');
   });
 });
