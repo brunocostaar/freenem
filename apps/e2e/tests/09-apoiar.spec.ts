@@ -26,18 +26,11 @@ test('/apoiar: Pix com valor, copia-e-cola', async ({ page }, info) => {
   expect(code).toContain('540510.00');
   expect(code).toContain('br.gov.bcb.pix0119apoie@freenem.local');
 
-  // outro valor: valida e regenera
+  // outro valor: QR sem valor (campo 54), escolhido no app do banco
   await page.getByRole('button', { name: 'Outro valor' }).click();
-  await page.getByLabel('Outro valor (R$)').fill('0');
-  await expect(page.getByRole('alert')).toContainText('entre');
-  await page.getByLabel('Outro valor (R$)').fill('12,50');
+  await expect(page.getByText('Você digita o valor no app do seu banco')).toBeVisible();
   await page.getByRole('button', { name: 'Copiar código Pix' }).click();
-  expect(await page.evaluate(() => navigator.clipboard.readText())).toContain('540512.50');
-
-  // sem valor definido: sem campo 54
-  await page.getByRole('button', { name: 'Sem valor definido' }).click();
-  await page.getByRole('button', { name: 'Copiar código Pix' }).click();
-  expect(await page.evaluate(() => navigator.clipboard.readText())).not.toContain('5404');
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toContain('53039865802BR');
 
   await expect(page.getByText('Doar com cartão')).toHaveCount(0);
 

@@ -3,7 +3,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import QRCode from 'qrcode';
 import { Copy, Heart } from 'lucide-react';
 import { InfoPage, InfoSection } from '@/components/layout/InfoPage';
-import { Button, Card, Input, useToast } from '@/components/ui';
+import { Button, Card, useToast } from '@/components/ui';
 import { cn } from '@/lib/cn';
 import { donations, hasPix } from '@/lib/donations';
 import { buildPixPayload } from '@/lib/pix';
@@ -23,22 +23,10 @@ export const Route = createFileRoute('/_app/apoiar')({
 });
 
 const PRESETS = [5, 10, 25, 50] as const;
-const MIN = 1;
-const MAX = 10_000;
 const brl = (n: number) => n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-type Choice = { kind: 'preset'; value: number } | { kind: 'custom' } | { kind: 'none' };
-
-/** Interpreta "12,50" ou "12.5"; devolve valor válido (1–10000) ou mensagem de erro. */
-function parseCustom(raw: string): { value?: number; error?: string } {
-  const text = raw.trim().replace(',', '.');
-  if (text === '') return { error: 'Informe um valor.' };
-  if (!/^\d+(\.\d{1,2})?$/.test(text)) return { error: 'Use apenas números, ex.: 15 ou 15,50.' };
-  const value = Number(text);
-  if (value < MIN || value > MAX)
-    return { error: `O valor deve ficar entre ${brl(MIN)} e ${brl(MAX)}.` };
-  return { value };
-}
+/** Valor fixo no QR code, ou `null` = "Outro valor" (sem valor no QR; escolhido no app do banco). */
+type Choice = number | null;
 
 function Apoiar() {
   return (
@@ -81,26 +69,19 @@ function ComingSoon() {
 
 function PixCard() {
   const toast = useToast();
-  const [choice, setChoice] = useState<Choice>({ kind: 'preset', value: 10 });
-  const [customRaw, setCustomRaw] = useState('');
+  const [choice, setChoice] = useState<Choice>(10);
   const [svg, setSvg] = useState('');
 
-  const custom = useMemo(() => parseCustom(customRaw), [customRaw]);
-  const amount =
-    choice.kind === 'preset' ? choice.value : choice.kind === 'custom' ? custom.value : undefined;
-  const invalid = choice.kind === 'custom' && custom.value === undefined;
-
+  const amount = choice ?? undefined;
   const payload = useMemo(
     () =>
-      invalid
-        ? ''
-        : buildPixPayload({
-            key: donations.pixKey,
-            name: donations.pixName,
-            city: donations.pixCity,
-            amount,
-          }),
-    [invalid, amount],
+      buildPixPayload({
+        key: donations.pixKey,
+        name: donations.pixName,
+        city: donations.pixCity,
+        amount,
+      }),
+    [amount],
   );
 
   useEffect(() => {
@@ -133,7 +114,7 @@ function PixCard() {
         ? 'bg-highlight text-[#14213d] shadow-hard-sm'
         : 'bg-surface text-ink hover:bg-surface-2',
     );
-  const label = amount !== undefined ? brl(amount) : 'sem valor definido';
+  const label = amount !== undefined ? brl(amount) : 'com valor a escolher no banco';
 
   return (
     <Card>
@@ -145,45 +126,22 @@ function PixCard() {
           <button
             key={v}
             type="button"
-            aria-pressed={choice.kind === 'preset' && choice.value === v}
-            onClick={() => setChoice({ kind: 'preset', value: v })}
-            className={chip(choice.kind === 'preset' && choice.value === v)}
+            aria-pressed={choice === v}
+            onClick={() => setChoice(v)}
+            className={chip(choice === v)}
           >
             R$ {v}
           </button>
         ))}
         <button
           type="button"
-          aria-pressed={choice.kind === 'custom'}
-          onClick={() => setChoice({ kind: 'custom' })}
-          className={chip(choice.kind === 'custom')}
+          aria-pressed={choice === null}
+          onClick={() => setChoice(null)}
+          className={chip(choice === null)}
         >
           Outro valor
         </button>
-        <button
-          type="button"
-          aria-pressed={choice.kind === 'none'}
-          onClick={() => setChoice({ kind: 'none' })}
-          className={chip(choice.kind === 'none')}
-        >
-          Sem valor definido
-        </button>
       </div>
-
-      {choice.kind === 'custom' && (
-        <div className="mt-4 max-w-xs">
-          <Input
-            label="Outro valor (R$)"
-            inputMode="decimal"
-            autoComplete="off"
-            placeholder="Ex.: 15,50"
-            hint={`Entre ${brl(MIN)} e ${brl(MAX)}.`}
-            value={customRaw}
-            onChange={(e) => setCustomRaw(e.target.value)}
-            error={customRaw !== '' && custom.error ? custom.error : undefined}
-          />
-        </div>
-      )}
 
       <div className="mt-6 grid gap-6 md:grid-cols-[auto_1fr] md:items-start">
         <div
@@ -198,9 +156,7 @@ function PixCard() {
               dangerouslySetInnerHTML={{ __html: svg }}
             />
           ) : (
-            <p className="px-4 text-center text-sm font-medium text-black">
-              Informe um valor válido para gerar o QR code.
-            </p>
+            <p className="px-4 text-center text-sm font-medium text-black">Gerando QR code…</p>
           )}
         </div>
 
@@ -208,8 +164,13 @@ function PixCard() {
           <p className="text-lg font-semibold">
             {amount !== undefined
               ? `Doação de ${brl(amount)}`
-              : 'Você escolhe o valor no seu banco'}
+              : 'Você digita o valor no app do seu banco'}
           </p>
+          {amount === undefined && (
+            <p className="text-sm text-muted">
+              Escaneie o QR code ou cole o código Pix: o banco vai pedir o valor da doação.
+            </p>
+          )}
           <Button onClick={copy} disabled={!payload} size="lg">
             <Copy className="size-5" aria-hidden /> Copiar código Pix
           </Button>
