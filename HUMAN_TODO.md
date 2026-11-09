@@ -19,51 +19,26 @@ Tudo abaixo depende de contas, chaves ou decisões suas. O app roda 100% localme
 
 - [x] Repositório criado (privado): https://github.com/brunocostaar/freenem. Torne público quando quiser (`gh repo edit --visibility public --accept-visibility-change-consequences`); o link no rodapé aponta para ele.
 
-## 3. Banco + API no Railway
+## 3. Deploy (Railway) — feito em 09/11/2026
 
-1. Novo projeto → **Add Postgres**.
-2. **New service → GitHub repo** (este repositório). Em _Settings_:
-   - Root directory: `/` (o Dockerfile usa a raiz como contexto)
-   - Builder: Dockerfile, caminho `apps/api/Dockerfile` (o `railway.json` já configura isso, o pre-deploy `node dist/migrate.js` e o healthcheck `/health`).
-3. Variáveis do serviço:
-   ```
-   DATABASE_URL=${{Postgres.DATABASE_URL}}
-   NODE_ENV=production
-   BETTER_AUTH_SECRET=<openssl rand -base64 32>
-   BETTER_AUTH_URL=https://api.SEU-DOMINIO
-   WEB_ORIGIN=https://SEU-DOMINIO
-   ADMIN_EMAIL=<seu e-mail>
-   ADMIN_PASSWORD=<senha forte>
-   STORAGE_DRIVER=r2
-   R2_ACCOUNT_ID=… R2_ACCESS_KEY_ID=… R2_SECRET_ACCESS_KEY=… R2_BUCKET=… R2_PUBLIC_URL=https://…
-   DEEPSEEK_API_KEY=…             # correção de redação (prioridade); sem ela, usa ANTHROPIC_API_KEY ou o modo demonstração
-   RESEND_API_KEY=… EMAIL_FROM=…  # opcional (sem ela: sem verificação de e-mail)
-   GOOGLE_CLIENT_ID=… GOOGLE_CLIENT_SECRET=…  # opcional
-   ```
-4. Domínio customizado `api.SEU-DOMINIO`.
-5. Popular o banco de produção (da sua máquina; copia o conteúdo já importado e revisado do banco de dev):
-   ```bash
-   # 1) migrations no banco novo (o pre-deploy do Railway já faz isso no primeiro deploy)
-   # 2) conteúdo (instituições, matérias, questões...) preservando os ids; aborta se o destino já tiver conteúdo
-   ./scripts/push-content.sh '<url pública do Postgres do Railway>'
-   # 3) seed depois da cópia (cria o admin com ADMIN_PASSWORD; não duplica nada)
-   DATABASE_URL='<…>' NODE_ENV=production ADMIN_PASSWORD='<senha forte>' pnpm --filter @freenem/api db:seed
-   # 4) imagens (apps/api/storage, ~126 MB) para o R2, mesmas chaves
-   cd apps/api && STORAGE_DRIVER=r2 R2_ACCOUNT_ID=… R2_ACCESS_KEY_ID=… R2_SECRET_ACCESS_KEY=… R2_BUCKET=… R2_PUBLIC_URL=… pnpm storage:sync
-   ```
+Tudo roda no projeto `freenem` do Railway, em **https://freenem.up.railway.app**:
 
-## 4. Imagens no Cloudflare R2
+- `Postgres`
+- `api`: `apps/api/Dockerfile`, pre-deploy `node dist/migrate.js`, healthcheck `/health`, volume `api-volume` em `/app/storage` com as imagens (`STORAGE_DRIVER=local`)
+- `web`: `apps/web/Dockerfile` (build do Vite + Caddy). O Caddy serve a SPA e repassa `/api`, `/files` e `/health` para `API_UPSTREAM=http://api.railway.internal:3340`.
 
-- [ ] Criar bucket (ex.: `freenem-files`), habilitar acesso público via domínio (ex.: `files.SEU-DOMINIO`) e criar um token S3 (Access Key/Secret) com escrita no bucket. Preencher as variáveis `R2_*` acima.
-- O driver R2 foi implementado mas **nunca testado com chaves reais** — rode o `ingest:enem` com 1 ano primeiro e confira uma imagem.
+Front e API ficam na **mesma origem** de propósito: `*.up.railway.app` está na Public Suffix List, e com subdomínios separados o cookie de sessão não funcionaria. As configurações de build/deploy ficam nos próprios serviços (o Railway não aceita mais `railway.json` em serviços novos). Cada push na `main` publica sozinho via GitHub.
 
-## 5. Frontend no Cloudflare Pages
+- [ ] **Domínio próprio** (opcional): `railway domain SEU-DOMINIO --service web`. Depois atualize `BETTER_AUTH_URL` e `WEB_ORIGIN` (api) e `VITE_API_URL` (web).
+- [ ] Trocar a senha do admin depois do primeiro login.
 
-- [ ] **Create project → Connect to Git**:
-  - Build command: `pnpm install --frozen-lockfile && pnpm --filter @freenem/web build`
-  - Output directory: `apps/web/dist`
-  - Variáveis: `VITE_API_URL=https://api.SEU-DOMINIO`, `NODE_VERSION=22`
-- [ ] Domínio customizado `SEU-DOMINIO`. Mantenha front e API no **mesmo domínio raiz** (`x.com` e `api.x.com`) para os cookies de sessão funcionarem.
+Operações (exigem uma chave SSH registrada: `railway ssh keys add`):
+
+```bash
+railway ssh -s api -- node dist/seed.js                     # seed (idempotente)
+railway volume files --volume api-volume upload <dir> /<dir>  # novas imagens
+pg_dump … | railway ssh -s Postgres -- psql -U postgres -d railway   # copiar dados sem expor o banco
+```
 
 ## 6. Chaves externas (opcionais, mas recomendadas)
 
@@ -73,7 +48,7 @@ Tudo abaixo depende de contas, chaves ou decisões suas. O app roda 100% localme
   - Authorized JavaScript origins: `https://SEU-DOMINIO`
   - Redirect URI: `https://api.SEU-DOMINIO/api/auth/callback/google`
 
-- [ ] **Doações (`/apoiar`)**: no Cloudflare Pages (variáveis do web) defina `VITE_PIX_KEY` (sua chave Pix), `VITE_PIX_NAME` (nome do recebedor, até 25 caracteres) e `VITE_PIX_CITY` (cidade, até 15). Sem `VITE_PIX_KEY`, a página mostra "doações em breve". O Pix usa QR estático direto na sua chave (doação por cartão/Stripe foi removida por ora).
+- [x] **Doações (`/apoiar`)**: no serviço `web` do Railway defina `VITE_PIX_KEY` (sua chave Pix), `VITE_PIX_NAME` (nome do recebedor, até 25 caracteres) e `VITE_PIX_CITY` (cidade, até 15). Sem `VITE_PIX_KEY`, a página mostra "doações em breve". O Pix usa QR estático direto na sua chave (doação por cartão/Stripe foi removida por ora).
 
 ## 7. Depois do deploy
 

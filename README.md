@@ -11,7 +11,7 @@ Plataforma de estudos **gratuita e open-source** para o ENEM e vestibulares: ban
 - **`apps/api`**: Fastify 5, Drizzle ORM, Postgres, Zod (`fastify-type-provider-zod`), Better Auth
 - **`packages/shared`**: schemas Zod e tipos do contrato da API (usados por web e api)
 - **`packages/ingest`**: scripts de importação de provas (INEP, FUVEST, UFRGS...)
-- Deploy: front na Cloudflare Pages, API e banco no Railway
+- Deploy: tudo no Railway (Postgres, API e web com Caddy na mesma origem); veja HUMAN_TODO.md
 
 ## Rodando localmente
 
