@@ -11,6 +11,7 @@ import {
   LogOut,
   PenLine,
   ShieldCheck,
+  Sparkles,
   UserCog,
   type LucideIcon,
 } from 'lucide-react';
@@ -32,7 +33,8 @@ interface NavItem {
     | '/desempenho'
     | '/plano'
     | '/apoiar'
-    | '/admin/revisao';
+    | '/admin/revisao'
+    | '/admin/revisao-ia';
   label: string;
   icon: LucideIcon;
 }
@@ -47,6 +49,8 @@ const NAV: NavItem[] = [
   { to: '/apoiar', label: 'Apoiar', icon: Heart },
 ];
 const ADMIN_NAV: NavItem = { to: '/admin/revisao', label: 'Revisão', icon: ShieldCheck };
+/** Temporário: revisão de questões por IA (só admin). */
+const AI_REVIEW_NAV: NavItem = { to: '/admin/revisao-ia', label: 'Revisão IA', icon: Sparkles };
 
 export function AppShell() {
   const { data: session } = useSession();
@@ -54,9 +58,11 @@ export function AppShell() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const canReview = me?.role === 'admin' || me?.role === 'reviewer';
-  const items = canReview ? [...NAV, ADMIN_NAV] : NAV;
+  const items = canReview
+    ? [...NAV, ADMIN_NAV, ...(me?.role === 'admin' ? [AI_REVIEW_NAV] : [])]
+    : NAV;
   // no mobile o "Apoiar" vai para a barra do topo (a de baixo já fica cheia)
-  const mobileItems = items.filter((i) => i.to !== '/apoiar');
+  const mobileItems = items.filter((i) => i.to !== '/apoiar' && i.to !== '/admin/revisao-ia');
 
   async function handleSignOut() {
     await signOut();

@@ -24,6 +24,7 @@ import { Route as AppAuthPlanoRouteImport } from './routes/_app/_auth/plano'
 import { Route as AppQuestoesIndexRouteImport } from './routes/_app/questoes/index'
 import { Route as AppQuestoesIdRouteImport } from './routes/_app/questoes/$id'
 import { Route as AppAuthAdminRevisaoRouteImport } from './routes/_app/_auth/admin/revisao'
+import { Route as AppAuthAdminRevisaoIaRouteImport } from './routes/_app/_auth/admin/revisao-ia'
 import { Route as AppAuthRedacaoIndexRouteImport } from './routes/_app/_auth/redacao/index'
 import { Route as AppAuthRedacaoIdRouteImport } from './routes/_app/_auth/redacao/$id'
 import { Route as AppAuthRedacaoCompetenciasRouteImport } from './routes/_app/_auth/redacao/competencias'
@@ -105,6 +106,11 @@ const AppAuthAdminRevisaoRoute = AppAuthAdminRevisaoRouteImport.update({
   path: '/admin/revisao',
   getParentRoute: () => AppAuthRoute,
 } as any)
+const AppAuthAdminRevisaoIaRoute = AppAuthAdminRevisaoIaRouteImport.update({
+  id: '/admin/revisao-ia',
+  path: '/admin/revisao-ia',
+  getParentRoute: () => AppAuthRoute,
+} as any)
 const AppAuthRedacaoIndexRoute = AppAuthRedacaoIndexRouteImport.update({
   id: '/redacao/',
   path: '/redacao/',
@@ -158,6 +164,7 @@ export interface FileRoutesByFullPath {
   '/questoes/$id': typeof AppQuestoesIdRoute
   '/questoes/': typeof AppQuestoesIndexRoute
   '/admin/revisao': typeof AppAuthAdminRevisaoRoute
+  '/admin/revisao-ia': typeof AppAuthAdminRevisaoIaRoute
   '/redacao/$id': typeof AppAuthRedacaoIdRoute
   '/redacao/competencias': typeof AppAuthRedacaoCompetenciasRoute
   '/redacao/nova': typeof AppAuthRedacaoNovaRoute
@@ -180,6 +187,7 @@ export interface FileRoutesByTo {
   '/questoes/$id': typeof AppQuestoesIdRoute
   '/questoes': typeof AppQuestoesIndexRoute
   '/admin/revisao': typeof AppAuthAdminRevisaoRoute
+  '/admin/revisao-ia': typeof AppAuthAdminRevisaoIaRoute
   '/redacao/$id': typeof AppAuthRedacaoIdRoute
   '/redacao/competencias': typeof AppAuthRedacaoCompetenciasRoute
   '/redacao/nova': typeof AppAuthRedacaoNovaRoute
@@ -205,6 +213,7 @@ export interface FileRoutesById {
   '/_app/questoes/$id': typeof AppQuestoesIdRoute
   '/_app/questoes/': typeof AppQuestoesIndexRoute
   '/_app/_auth/admin/revisao': typeof AppAuthAdminRevisaoRoute
+  '/_app/_auth/admin/revisao-ia': typeof AppAuthAdminRevisaoIaRoute
   '/_app/_auth/redacao/$id': typeof AppAuthRedacaoIdRoute
   '/_app/_auth/redacao/competencias': typeof AppAuthRedacaoCompetenciasRoute
   '/_app/_auth/redacao/nova': typeof AppAuthRedacaoNovaRoute
@@ -229,6 +238,7 @@ export interface FileRouteTypes {
     | '/questoes/$id'
     | '/questoes/'
     | '/admin/revisao'
+    | '/admin/revisao-ia'
     | '/redacao/$id'
     | '/redacao/competencias'
     | '/redacao/nova'
@@ -251,6 +261,7 @@ export interface FileRouteTypes {
     | '/questoes/$id'
     | '/questoes'
     | '/admin/revisao'
+    | '/admin/revisao-ia'
     | '/redacao/$id'
     | '/redacao/competencias'
     | '/redacao/nova'
@@ -275,6 +286,7 @@ export interface FileRouteTypes {
     | '/_app/questoes/$id'
     | '/_app/questoes/'
     | '/_app/_auth/admin/revisao'
+    | '/_app/_auth/admin/revisao-ia'
     | '/_app/_auth/redacao/$id'
     | '/_app/_auth/redacao/competencias'
     | '/_app/_auth/redacao/nova'
@@ -398,6 +410,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAuthAdminRevisaoRouteImport
       parentRoute: typeof AppAuthRoute
     }
+    '/_app/_auth/admin/revisao-ia': {
+      id: '/_app/_auth/admin/revisao-ia'
+      path: '/admin/revisao-ia'
+      fullPath: '/admin/revisao-ia'
+      preLoaderRoute: typeof AppAuthAdminRevisaoIaRouteImport
+      parentRoute: typeof AppAuthRoute
+    }
     '/_app/_auth/redacao/': {
       id: '/_app/_auth/redacao/'
       path: '/redacao'
@@ -456,6 +475,7 @@ interface AppAuthRouteChildren {
   AppAuthInicioRoute: typeof AppAuthInicioRoute
   AppAuthPlanoRoute: typeof AppAuthPlanoRoute
   AppAuthAdminRevisaoRoute: typeof AppAuthAdminRevisaoRoute
+  AppAuthAdminRevisaoIaRoute: typeof AppAuthAdminRevisaoIaRoute
   AppAuthRedacaoIdRoute: typeof AppAuthRedacaoIdRoute
   AppAuthRedacaoCompetenciasRoute: typeof AppAuthRedacaoCompetenciasRoute
   AppAuthRedacaoNovaRoute: typeof AppAuthRedacaoNovaRoute
@@ -471,6 +491,7 @@ const AppAuthRouteChildren: AppAuthRouteChildren = {
   AppAuthInicioRoute: AppAuthInicioRoute,
   AppAuthPlanoRoute: AppAuthPlanoRoute,
   AppAuthAdminRevisaoRoute: AppAuthAdminRevisaoRoute,
+  AppAuthAdminRevisaoIaRoute: AppAuthAdminRevisaoIaRoute,
   AppAuthRedacaoIdRoute: AppAuthRedacaoIdRoute,
   AppAuthRedacaoCompetenciasRoute: AppAuthRedacaoCompetenciasRoute,
   AppAuthRedacaoNovaRoute: AppAuthRedacaoNovaRoute,

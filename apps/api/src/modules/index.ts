@@ -10,6 +10,7 @@ import catalog from './catalog/routes.js';
 import questions from './questions/routes.js';
 import answers from './answers/routes.js';
 import review from './review/routes.js';
+import aiReview from './ai-review/routes.js';
 import reports from './reports/routes.js';
 import resolutions from './resolutions/routes.js';
 
@@ -27,6 +28,7 @@ export const v1Modules = [
   questions,
   answers,
   review,
+  aiReview,
   reports,
   resolutions,
   simulados,
