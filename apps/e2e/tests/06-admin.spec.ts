@@ -2,12 +2,12 @@ import { test, expect, signInAdmin, signUp, shot, expectNoHorizontalOverflow } f
 
 test('usuário comum não vê o item Revisão no menu', async ({ page }) => {
   await signUp(page);
-  await expect(page.getByRole('link', { name: 'Revisão' })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'Revisão', exact: true })).toHaveCount(0);
 });
 
 test('admin: lista rascunhos, abre um, edita assunto e publica', async ({ page }, info) => {
   await signInAdmin(page);
-  await page.getByRole('link', { name: 'Revisão' }).filter({ visible: true }).click();
+  await page.getByRole('link', { name: 'Revisão', exact: true }).filter({ visible: true }).click();
   await expect(page).toHaveURL(/\/admin\/revisao/);
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Revisão');
 
