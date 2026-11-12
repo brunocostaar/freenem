@@ -12,6 +12,7 @@ import { Badge, Button, Card } from '@/components/ui';
 import { cn } from '@/lib/cn';
 import { AlternativeOption, type AlternativeState } from './AlternativeOption';
 import { ReportQuestionButton } from './ReportQuestionButton';
+import { ZoomableImage } from './ZoomableImage';
 
 // Resoluções da comunidade: fora do bundle da página da questão, carregam após responder.
 const ResolutionsSection = lazy(() => import('./ResolutionsSection'));
@@ -73,6 +74,8 @@ export function QuestionCard({
 }: QuestionCardProps) {
   const [eliminated, setEliminated] = useState<Set<AlternativeLetter>>(new Set());
   const locked = result !== null;
+  // figuras guardadas fora do enunciado (recortes dos vestibulares/PPL); as já citadas no texto não repetem
+  const figures = question.imageUrls.filter((url) => !question.statement.includes(url));
 
   const rootRef = useRef<HTMLDivElement>(null);
   const viewCb = useRef(onVisibilityChange);
@@ -205,6 +208,14 @@ export function QuestionCard({
       )}
 
       <RichText className="text-base sm:text-lg">{question.statement}</RichText>
+
+      {figures.length > 0 && (
+        <div className="space-y-3">
+          {figures.map((url) => (
+            <ZoomableImage key={url} src={url} alt="Figura da questão" />
+          ))}
+        </div>
+      )}
 
       <div role="radiogroup" aria-label="Alternativas" className="space-y-2.5">
         {question.alternatives.map((alt) => (
