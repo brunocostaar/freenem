@@ -19,24 +19,21 @@ Tudo abaixo depende de contas, chaves ou decisões suas. O app roda 100% localme
 
 - [x] Repositório criado (privado): https://github.com/brunocostaar/freenem. Torne público quando quiser (`gh repo edit --visibility public --accept-visibility-change-consequences`); o link no rodapé aponta para ele.
 
-## 3. Deploy (Railway) — feito em 09/11/2026
+## 3. Deploy — feito em 09/11/2026
 
-Tudo roda no projeto `freenem` do Railway, em **https://freenem.up.railway.app**:
+- **Front**: Cloudflare Pages, projeto `freenem`, em **https://freenem.com.br**. Publica a cada push na `main`. Variáveis de build: `VITE_API_URL=https://api.freenem.com.br` e `VITE_PIX_*`.
+- **API + Postgres**: Railway, projeto `freenem`, em **https://api.freenem.com.br** (CNAME sem proxy para o domínio do Railway). Serviço `api`: `apps/api/Dockerfile`, pre-deploy `node dist/migrate.js`, healthcheck `/health`, `BETTER_AUTH_URL=https://api.freenem.com.br`, `WEB_ORIGIN=https://freenem.com.br`. Push na `main` publica sozinho via GitHub (o Railway não aceita mais `railway.json` em serviços novos; as configs ficam no próprio serviço).
+- **Imagens**: bucket R2 `freenem-files`, servido em **https://files.freenem.com.br** (`STORAGE_DRIVER=r2` + `R2_*` na API). No banco ficam só referências `storage://chave`.
 
-- `Postgres`
-- `api`: `apps/api/Dockerfile`, pre-deploy `node dist/migrate.js`, healthcheck `/health`, volume `api-volume` em `/app/storage` com as imagens (`STORAGE_DRIVER=local`)
-- `web`: `apps/web/Dockerfile` (build do Vite + Caddy). O Caddy serve a SPA e repassa `/api`, `/files` e `/health` para `API_UPSTREAM=http://api.railway.internal:3340`.
+Front e API ficam em subdomínios do mesmo site (freenem.com.br), então o cookie de sessão (`SameSite=Lax`) funciona.
 
-Front e API ficam na **mesma origem** de propósito: `*.up.railway.app` está na Public Suffix List, e com subdomínios separados o cookie de sessão não funcionaria. As configurações de build/deploy ficam nos próprios serviços (o Railway não aceita mais `railway.json` em serviços novos). Cada push na `main` publica sozinho via GitHub.
-
-- [ ] **Domínio próprio** (opcional): `railway domain SEU-DOMINIO --service web`. Depois atualize `BETTER_AUTH_URL` e `WEB_ORIGIN` (api) e `VITE_API_URL` (web).
 - [ ] Trocar a senha do admin depois do primeiro login.
 
 Operações (exigem uma chave SSH registrada: `railway ssh keys add`):
 
 ```bash
 railway ssh -s api -- node dist/seed.js                     # seed (idempotente)
-railway volume files --volume api-volume upload <dir> /<dir>  # novas imagens
+(cd apps/api && set -a && . ./.env.r2 && set +a && pnpm storage:sync)   # envia imagens novas de apps/api/storage para o R2
 pg_dump … | railway ssh -s Postgres -- psql -U postgres -d railway   # copiar dados sem expor o banco
 ```
 
@@ -48,7 +45,7 @@ pg_dump … | railway ssh -s Postgres -- psql -U postgres -d railway   # copiar 
   - Authorized JavaScript origins: `https://SEU-DOMINIO`
   - Redirect URI: `https://api.SEU-DOMINIO/api/auth/callback/google`
 
-- [x] **Doações (`/apoiar`)**: no serviço `web` do Railway defina `VITE_PIX_KEY` (sua chave Pix), `VITE_PIX_NAME` (nome do recebedor, até 25 caracteres) e `VITE_PIX_CITY` (cidade, até 15). Sem `VITE_PIX_KEY`, a página mostra "doações em breve". O Pix usa QR estático direto na sua chave (doação por cartão/Stripe foi removida por ora).
+- [x] **Doações (`/apoiar`)**: no Cloudflare Pages (variáveis de build) defina `VITE_PIX_KEY` (sua chave Pix), `VITE_PIX_NAME` (nome do recebedor, até 25 caracteres) e `VITE_PIX_CITY` (cidade, até 15). Sem `VITE_PIX_KEY`, a página mostra "doações em breve". O Pix usa QR estático direto na sua chave (doação por cartão/Stripe foi removida por ora).
 
 ## 7. Depois do deploy
 
