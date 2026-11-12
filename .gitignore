@@ -16,3 +16,4 @@ packages/ingest/.cache
 apps/e2e/screenshots
 apps/e2e/test-results
 apps/e2e/playwright-report
+.claude/settings.local.json
