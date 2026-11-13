@@ -4,9 +4,10 @@ import { AuthForm } from '@/components/layout/AuthForm';
 
 export const Route = createFileRoute('/entrar')({
   head: () => ({ meta: [{ title: 'Entrar · freenem' }] }),
-  validateSearch: z.object({ redirect: z.string().optional() }),
+  // `error` chega quando o login com Google/Apple falha (errorCallbackURL do Better Auth)
+  validateSearch: z.object({ redirect: z.string().optional(), error: z.string().optional() }),
   component: function Entrar() {
-    const { redirect } = Route.useSearch();
-    return <AuthForm mode="signin" redirect={redirect} />;
+    const { redirect, error } = Route.useSearch();
+    return <AuthForm mode="signin" redirect={redirect} socialError={error} />;
   },
 });
