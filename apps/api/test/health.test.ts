@@ -21,6 +21,5 @@ describe('GET /health', () => {
     const res = await app.inject({ method: 'GET', url: '/api/v1/config' });
     expect(res.statusCode).toBe(200);
     expect(res.json().features.googleLogin).toBe(false);
-    expect(res.json().features.appleLogin).toBe(false);
   });
 });

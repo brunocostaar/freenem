@@ -47,13 +47,6 @@ pg_dump … | railway ssh -s Postgres -- psql -U postgres -d railway   # copiar 
      - Origens JavaScript autorizadas: `https://freenem.com.br`
      - URIs de redirecionamento: `https://api.freenem.com.br/api/auth/callback/google` (para testar local, inclua também `http://localhost:3340/api/auth/callback/google`)
   3. No Railway (serviço `api`): `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET`.
-- [ ] **Login com Apple** (exige a conta paga do Apple Developer Program, US$ 99/ano; o botão aparece quando as 4 variáveis existem):
-  1. developer.apple.com → **Certificates, IDs & Profiles → Identifiers → +** → **App IDs** (tipo App): bundle `br.com.freenem`, marque **Sign in with Apple**.
-  2. **Identifiers → + → Services IDs**: identificador `br.com.freenem.web` (esse é o `APPLE_CLIENT_ID`). Abra-o, marque **Sign in with Apple → Configure**: Primary App ID = o do passo 1; Domains: `freenem.com.br` e `api.freenem.com.br`; Return URLs: `https://api.freenem.com.br/api/auth/callback/apple`. (A Apple não aceita localhost: só dá para testar em produção.)
-  3. **Keys → +**: nome "freenem SIWA", marque **Sign in with Apple** (Configure → o App ID do passo 1). Baixe o `.p8` (só dá para baixar uma vez) e anote o **Key ID**.
-  4. O **Team ID** fica no canto superior direito (ou em Membership).
-  5. No Railway (serviço `api`): `APPLE_CLIENT_ID`, `APPLE_TEAM_ID`, `APPLE_KEY_ID` e `APPLE_PRIVATE_KEY` (cole o conteúdo inteiro do `.p8`, com as linhas `BEGIN`/`END`). O client secret (JWT de até 6 meses) é gerado a cada deploy, não precisa renovar à mão.
-  - Observações: a Apple só envia o nome no primeiro login, e o usuário pode escolher "ocultar meu e-mail" (aí o e-mail é um `@privaterelay.appleid.com`). Quem já tem conta com o mesmo e-mail (senha ou Google) é vinculado à conta existente.
 
 - [x] **Doações (`/apoiar`)**: no Cloudflare Pages (variáveis de build) defina `VITE_PIX_KEY` (sua chave Pix), `VITE_PIX_NAME` (nome do recebedor, até 25 caracteres) e `VITE_PIX_CITY` (cidade, até 15). Sem `VITE_PIX_KEY`, a página mostra "doações em breve". O Pix usa QR estático direto na sua chave (doação por cartão/Stripe foi removida por ora).
 

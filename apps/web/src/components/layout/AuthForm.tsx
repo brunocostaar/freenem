@@ -22,7 +22,7 @@ const SOCIAL_ERRORS: Record<string, string> = {
     'Já existe uma conta com este e-mail. Entre com e-mail e senha e tente de novo.',
 };
 
-type SocialProvider = 'google' | 'apple';
+type SocialProvider = 'google';
 
 export function AuthForm({
   mode,
@@ -86,17 +86,14 @@ export function AuthForm({
       callbackURL: window.location.origin + target,
       errorCallbackURL: `${window.location.origin}/entrar`,
     });
-    // em caso de sucesso o navegador já foi redirecionado ao Google/Apple
+    // em caso de sucesso o navegador já foi redirecionado ao Google
     if (res.error) {
       setError('Não foi possível iniciar o login. Tente novamente.');
       setSocialLoading(null);
     }
   }
 
-  const socialProviders = [
-    config?.features.googleLogin && ('google' as const),
-    config?.features.appleLogin && ('apple' as const),
-  ].filter((p): p is SocialProvider => Boolean(p));
+  const socialProviders: SocialProvider[] = config?.features.googleLogin ? ['google'] : [];
 
   return (
     <div className="dotgrid grid min-h-dvh place-items-center px-4 py-10">
@@ -181,8 +178,8 @@ export function AuthForm({
                     disabled={socialLoading !== null && socialLoading !== p}
                     onClick={() => void social(p)}
                   >
-                    {p === 'google' ? <GoogleIcon /> : <AppleIcon />}
-                    Continuar com {p === 'google' ? 'Google' : 'Apple'}
+                    <GoogleIcon />
+                    Continuar com Google
                   </Button>
                 ))}
               </div>
@@ -212,19 +209,11 @@ export function AuthForm({
   );
 }
 
-/** Logos em `currentColor` (o projeto só usa cores por token, e assim funcionam no modo escuro). */
+/** Logo em `currentColor` (o projeto só usa cores por token, e assim funciona no modo escuro). */
 function GoogleIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden className="size-5" fill="currentColor">
       <path d="M21.35 11.1H12v2.98h5.38c-.24 1.38-1.6 4.04-5.38 4.04-3.24 0-5.88-2.68-5.88-5.98S8.76 6.16 12 6.16c1.84 0 3.08.78 3.78 1.46l2.58-2.48C16.7 3.6 14.56 2.6 12 2.6 6.82 2.6 2.62 6.8 2.62 12s4.2 9.4 9.38 9.4c5.42 0 9-3.8 9-9.16 0-.62-.06-1.08-.15-1.54z" />
-    </svg>
-  );
-}
-
-function AppleIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden className="size-5" fill="currentColor">
-      <path d="M16.37 12.6c-.02-2.2 1.8-3.26 1.88-3.31-1.02-1.5-2.62-1.7-3.19-1.72-1.36-.14-2.65.8-3.34.8-.69 0-1.75-.78-2.88-.76-1.48.02-2.85.86-3.61 2.19-1.54 2.67-.39 6.62 1.11 8.79.73 1.06 1.6 2.25 2.75 2.2 1.1-.04 1.52-.71 2.85-.71 1.33 0 1.71.71 2.88.69 1.19-.02 1.94-1.08 2.67-2.14.84-1.23 1.19-2.42 1.21-2.48-.03-.01-2.32-.89-2.33-3.55zM14.18 6.13c.61-.74 1.02-1.76.91-2.78-.88.04-1.94.59-2.57 1.32-.56.65-1.06 1.69-.93 2.69.98.08 1.98-.5 2.59-1.23z" />
     </svg>
   );
 }

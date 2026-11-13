@@ -16,13 +16,6 @@ const envSchema = z.object({
   BETTER_AUTH_URL: z.string().url().default('http://localhost:3340'),
   GOOGLE_CLIENT_ID: optionalString,
   GOOGLE_CLIENT_SECRET: optionalString,
-  // Sign in with Apple (web): Services ID + chave .p8; o client_secret é gerado na inicialização
-  APPLE_CLIENT_ID: optionalString,
-  APPLE_TEAM_ID: optionalString,
-  APPLE_KEY_ID: optionalString,
-  APPLE_PRIVATE_KEY: optionalString,
-  /** bundle ID do app nativo (opcional; só para login com ID token vindo de app iOS) */
-  APPLE_APP_BUNDLE_ID: optionalString,
   RESEND_API_KEY: optionalString,
   EMAIL_FROM: z.string().default('freenem <onboarding@resend.dev>'),
   DEEPSEEK_API_KEY: optionalString,
@@ -63,9 +56,6 @@ export const isTest = env.NODE_ENV === 'test';
 /** Flags públicas derivadas da configuração (expostas em GET /api/v1/config). */
 export const features = {
   googleLogin: Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET),
-  appleLogin: Boolean(
-    env.APPLE_CLIENT_ID && env.APPLE_TEAM_ID && env.APPLE_KEY_ID && env.APPLE_PRIVATE_KEY,
-  ),
   emailVerification: Boolean(env.RESEND_API_KEY),
   essayAi: Boolean(env.DEEPSEEK_API_KEY || env.ANTHROPIC_API_KEY),
 };

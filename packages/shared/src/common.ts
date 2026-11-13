@@ -27,7 +27,6 @@ export type HealthResponse = z.infer<typeof healthResponseSchema>;
 export const publicConfigSchema = z.object({
   features: z.object({
     googleLogin: z.boolean(),
-    appleLogin: z.boolean(),
     emailVerification: z.boolean(),
     essayAi: z.boolean(),
   }),
