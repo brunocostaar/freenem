@@ -97,6 +97,18 @@ test('/sobre e /privacidade: conteúdo, links no rodapé e sem overflow', async 
   await expect(page.getByText(/requisitos de Uso Limitado/)).toBeVisible();
   await expectNoHorizontalOverflow(page);
   await shot(page, info.project.name, 'privacidade');
+
+  await page
+    .getByRole('navigation', { name: 'Institucional' })
+    .getByRole('link', { name: 'Termos' })
+    .click();
+  await expect(page).toHaveURL(/\/termos$/);
+  await expect(page).toHaveTitle('Termos de uso · freenem');
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Termos de uso');
+  await expect(
+    page.getByRole('heading', { name: 'Notas, gabaritos e correção por IA' }),
+  ).toBeVisible();
+  await expectNoHorizontalOverflow(page);
 });
 
 test('onboarding: checklist em /inicio mostra progresso e pode ser dispensado', async ({

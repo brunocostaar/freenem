@@ -16,6 +16,9 @@ export function SiteFooterLinks({ className }: { className?: string }) {
       <Link to="/privacidade" className={link}>
         Privacidade
       </Link>
+      <Link to="/termos" className={link}>
+        Termos
+      </Link>
       <a href={GITHUB_URL} target="_blank" rel="noreferrer noopener" className={link}>
         GitHub
       </a>

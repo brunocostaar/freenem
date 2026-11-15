@@ -17,6 +17,7 @@ import { Route as AppAuthRouteImport } from './routes/_app/_auth'
 import { Route as AppApoiarRouteImport } from './routes/_app/apoiar'
 import { Route as AppPrivacidadeRouteImport } from './routes/_app/privacidade'
 import { Route as AppSobreRouteImport } from './routes/_app/sobre'
+import { Route as AppTermosRouteImport } from './routes/_app/termos'
 import { Route as AppAuthContaRouteImport } from './routes/_app/_auth/conta'
 import { Route as AppAuthDesempenhoRouteImport } from './routes/_app/_auth/desempenho'
 import { Route as AppAuthInicioRouteImport } from './routes/_app/_auth/inicio'
@@ -69,6 +70,11 @@ const AppPrivacidadeRoute = AppPrivacidadeRouteImport.update({
 const AppSobreRoute = AppSobreRouteImport.update({
   id: '/sobre',
   path: '/sobre',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppTermosRoute = AppTermosRouteImport.update({
+  id: '/termos',
+  path: '/termos',
   getParentRoute: () => AppRoute,
 } as any)
 const AppAuthContaRoute = AppAuthContaRouteImport.update({
@@ -157,6 +163,7 @@ export interface FileRoutesByFullPath {
   '/apoiar': typeof AppApoiarRoute
   '/privacidade': typeof AppPrivacidadeRoute
   '/sobre': typeof AppSobreRoute
+  '/termos': typeof AppTermosRoute
   '/conta': typeof AppAuthContaRoute
   '/desempenho': typeof AppAuthDesempenhoRoute
   '/inicio': typeof AppAuthInicioRoute
@@ -180,6 +187,7 @@ export interface FileRoutesByTo {
   '/apoiar': typeof AppApoiarRoute
   '/privacidade': typeof AppPrivacidadeRoute
   '/sobre': typeof AppSobreRoute
+  '/termos': typeof AppTermosRoute
   '/conta': typeof AppAuthContaRoute
   '/desempenho': typeof AppAuthDesempenhoRoute
   '/inicio': typeof AppAuthInicioRoute
@@ -206,6 +214,7 @@ export interface FileRoutesById {
   '/_app/apoiar': typeof AppApoiarRoute
   '/_app/privacidade': typeof AppPrivacidadeRoute
   '/_app/sobre': typeof AppSobreRoute
+  '/_app/termos': typeof AppTermosRoute
   '/_app/_auth/conta': typeof AppAuthContaRoute
   '/_app/_auth/desempenho': typeof AppAuthDesempenhoRoute
   '/_app/_auth/inicio': typeof AppAuthInicioRoute
@@ -231,6 +240,7 @@ export interface FileRouteTypes {
     | '/apoiar'
     | '/privacidade'
     | '/sobre'
+    | '/termos'
     | '/conta'
     | '/desempenho'
     | '/inicio'
@@ -254,6 +264,7 @@ export interface FileRouteTypes {
     | '/apoiar'
     | '/privacidade'
     | '/sobre'
+    | '/termos'
     | '/conta'
     | '/desempenho'
     | '/inicio'
@@ -279,6 +290,7 @@ export interface FileRouteTypes {
     | '/_app/apoiar'
     | '/_app/privacidade'
     | '/_app/sobre'
+    | '/_app/termos'
     | '/_app/_auth/conta'
     | '/_app/_auth/desempenho'
     | '/_app/_auth/inicio'
@@ -359,6 +371,13 @@ declare module '@tanstack/react-router' {
       path: '/sobre'
       fullPath: '/sobre'
       preLoaderRoute: typeof AppSobreRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/termos': {
+      id: '/_app/termos'
+      path: '/termos'
+      fullPath: '/termos'
+      preLoaderRoute: typeof AppTermosRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/_auth/conta': {
@@ -510,6 +529,7 @@ interface AppRouteChildren {
   AppApoiarRoute: typeof AppApoiarRoute
   AppPrivacidadeRoute: typeof AppPrivacidadeRoute
   AppSobreRoute: typeof AppSobreRoute
+  AppTermosRoute: typeof AppTermosRoute
   AppQuestoesIdRoute: typeof AppQuestoesIdRoute
   AppQuestoesIndexRoute: typeof AppQuestoesIndexRoute
 }
@@ -519,6 +539,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppApoiarRoute: AppApoiarRoute,
   AppPrivacidadeRoute: AppPrivacidadeRoute,
   AppSobreRoute: AppSobreRoute,
+  AppTermosRoute: AppTermosRoute,
   AppQuestoesIdRoute: AppQuestoesIdRoute,
   AppQuestoesIndexRoute: AppQuestoesIndexRoute,
 }

@@ -186,6 +186,19 @@ export function AuthForm({
             </>
           )}
 
+          {/* em /entrar também: o login com Google cria a conta no primeiro acesso */}
+          <p className="mt-5 text-center text-xs text-muted">
+            Ao continuar, você concorda com os{' '}
+            <Link to="/termos" className="underline">
+              Termos de uso
+            </Link>{' '}
+            e a{' '}
+            <Link to="/privacidade" className="underline">
+              Política de privacidade
+            </Link>
+            .
+          </p>
+
           <p className="mt-6 text-center text-sm">
             {isSignup ? (
               <>

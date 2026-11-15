@@ -31,7 +31,12 @@ function Privacidade() {
       <InfoSection title="Quem somos">
         <p>
           O freenem (freenem.com.br) é uma plataforma gratuita e de código aberto para estudar para
-          o ENEM e vestibulares. Ele é o responsável (controlador) pelos dados descritos aqui.
+          o ENEM e vestibulares. Ele é o responsável (controlador) pelos dados descritos aqui. As
+          regras de uso do site estão nos{' '}
+          <Link to="/termos" className={extLink}>
+            Termos de uso
+          </Link>
+          .
         </p>
       </InfoSection>
 
