@@ -93,7 +93,8 @@ test('/sobre e /privacidade: conteúdo, links no rodapé e sem overflow', async 
     .click();
   await expect(page).toHaveURL(/\/privacidade$/);
   await expect(page.getByRole('heading', { level: 1 })).toContainText('privacidade');
-  await expect(page.getByText(/enviado à Anthropic/)).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Login com o Google' })).toBeVisible();
+  await expect(page.getByText(/requisitos de Uso Limitado/)).toBeVisible();
   await expectNoHorizontalOverflow(page);
   await shot(page, info.project.name, 'privacidade');
 });
