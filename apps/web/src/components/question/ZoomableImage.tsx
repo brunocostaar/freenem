@@ -1,6 +1,6 @@
 import { useCallback, useState, type ImgHTMLAttributes } from 'react';
 import { createPortal } from 'react-dom';
-import { Dialog } from '@/components/ui';
+import { ImageLightbox } from './ImageLightbox';
 import { cn } from '@/lib/cn';
 
 /**
@@ -48,13 +48,7 @@ export function ZoomableImage({ src, alt, ...rest }: ImgHTMLAttributes<HTMLImage
       </button>
       {open &&
         createPortal(
-          <Dialog open onClose={() => setOpen(false)} title="Imagem" className="max-w-5xl">
-            <img
-              src={src}
-              alt={alt ?? ''}
-              className="mx-auto max-h-[75dvh] w-auto max-w-full rounded-lg bg-white object-contain"
-            />
-          </Dialog>,
+          <ImageLightbox src={src} alt={alt ?? ''} onClose={() => setOpen(false)} />,
           document.body,
         )}
     </>

@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import ReactMarkdown, { type Components } from 'react-markdown';
+import remarkBreaks from 'remark-breaks';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
@@ -50,7 +51,9 @@ export default memo(function RichTextImpl({
       )}
     >
       <ReactMarkdown
-        remarkPlugins={[remarkMath]}
+        // remark-breaks: quebra simples = quebra de linha (versos, diálogos, fonte e comando
+        // da questão vêm separados por um só \n nos dados do ENEM)
+        remarkPlugins={[remarkMath, remarkBreaks]}
         rehypePlugins={[rehypeKatex]}
         skipHtml
         components={zoomable ? ZOOMABLE : PLAIN}
