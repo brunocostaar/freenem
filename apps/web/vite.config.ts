@@ -75,20 +75,6 @@ export default defineConfig({
               cacheableResponse: { statuses: [0, 200] },
             },
           },
-          {
-            urlPattern: ({ url }) => url.origin === 'https://fonts.googleapis.com',
-            handler: 'StaleWhileRevalidate',
-            options: { cacheName: 'freenem-font-css' },
-          },
-          {
-            urlPattern: ({ url }) => url.origin === 'https://fonts.gstatic.com',
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'freenem-fonts',
-              expiration: { maxEntries: 20, maxAgeSeconds: 365 * DAY },
-              cacheableResponse: { statuses: [0, 200] },
-            },
-          },
         ],
       },
     }),

@@ -131,7 +131,7 @@ function Privacidade() {
           </li>
           <li>
             <strong>Cloudflare</strong>: hospedagem do site e das imagens das questões, e proteção
-            contra ataques.
+            contra ataques. As fontes de texto são servidas por nós mesmos, sem consultar o Google.
           </li>
           <li>
             <strong>Google</strong>: somente se você usar o login com Google.
@@ -169,14 +169,15 @@ function Privacidade() {
           Você pode ver e corrigir seu nome na página{' '}
           <Link to="/conta" className={extLink}>
             Minha conta
-          </Link>{' '}
-          e <strong>excluir a conta a qualquer momento</strong>. A exclusão apaga a conta e tudo o
-          que está ligado a ela: respostas, simulados, plano, redações, correções e reportes
-          enviados. Não é possível desfazer.
+          </Link>
+          , <strong>baixar uma cópia dos seus dados</strong> em JSON (botão "Baixar meus dados",
+          portabilidade) e <strong>excluir a conta a qualquer momento</strong>. A exclusão apaga a
+          conta e tudo o que está ligado a ela: respostas, simulados, plano, redações, correções e
+          reportes enviados. Não é possível desfazer.
         </p>
         <p>
-          Pela LGPD você também pode pedir confirmação de que tratamos seus dados, acesso, cópia,
-          correção ou exclusão, e informações sobre compartilhamento. Faça o pedido pelas{' '}
+          Pela LGPD você também pode pedir confirmação de que tratamos seus dados, acesso, correção
+          ou exclusão, e informações sobre compartilhamento. Faça o pedido pelas{' '}
           <a href={REPO_ISSUES} target="_blank" rel="noreferrer" className={extLink}>
             issues do repositório do projeto
           </a>{' '}

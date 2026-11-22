@@ -7,6 +7,7 @@ import { ToastProvider } from '@/components/ui';
 import { routeTree } from './routeTree.gen';
 import './lib/chunk-reload';
 import './lib/pwa';
+import './fonts.css';
 import './index.css';
 
 const queryClient = new QueryClient({

@@ -1,10 +1,11 @@
 import { useState, type FormEvent } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Trash2 } from 'lucide-react';
+import { Download, Trash2 } from 'lucide-react';
 import {
   DELETE_ACCOUNT_CONFIRMATION,
   RESOLUTION_STATUS_LABELS,
+  dataExportSchema,
   myResolutionsSchema,
 } from '@freenem/shared';
 import { Link } from '@tanstack/react-router';
@@ -31,6 +32,7 @@ function Conta() {
           <ProfileCard name={me.data.name} email={me.data.email} />
           <ResolutionsCard />
           <PasswordCard />
+          <ExportCard />
           <DeleteCard />
         </div>
       )}
@@ -191,6 +193,48 @@ function PasswordCard() {
           Alterar senha
         </Button>
       </form>
+    </Card>
+  );
+}
+
+function ExportCard() {
+  const toast = useToast();
+  const exportData = useMutation({
+    mutationFn: () => api('/api/v1/me/export', { schema: dataExportSchema }),
+    onSuccess: (data) => {
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'freenem-dados.json';
+      document.body.append(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    },
+    onError: (err) =>
+      toast.error(
+        err instanceof ApiError && err.status === 429
+          ? 'Você já baixou seus dados várias vezes. Tente novamente mais tarde.'
+          : 'Não foi possível baixar seus dados.',
+      ),
+  });
+
+  return (
+    <Card>
+      <CardTitle className="mb-2">Seus dados</CardTitle>
+      <p className="mb-4 text-sm text-muted">
+        Baixe uma cópia de tudo o que guardamos sobre você (perfil, respostas, simulados, redações,
+        plano de estudos, resoluções e reportes) em um arquivo JSON.
+      </p>
+      <Button
+        type="button"
+        variant="secondary"
+        loading={exportData.isPending}
+        onClick={() => exportData.mutate()}
+      >
+        <Download className="size-4" aria-hidden /> Baixar meus dados
+      </Button>
     </Card>
   );
 }
