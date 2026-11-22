@@ -20,7 +20,9 @@ import { registerModules } from './modules/index.js';
 export async function buildApp() {
   const app = Fastify({
     logger: isTest ? false : { level: env.NODE_ENV === 'production' ? 'info' : 'debug' },
-    trustProxy: true,
+    // Só confia nos N saltos de proxy configurados; o cliente não consegue forjar o IP.
+    // (Fastify 5 trata `trustProxy: <número>` como "não confiar em ninguém", então usamos função.)
+    trustProxy: (_addr: string, hop: number) => hop < env.TRUST_PROXY_HOPS,
   }).withTypeProvider<ZodTypeProvider>();
 
   app.setValidatorCompiler(validatorCompiler);

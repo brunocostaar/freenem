@@ -4,6 +4,7 @@ import { MockCorrector } from '../src/modules/essays/corrector.js';
 import { scanForInjection } from '../src/modules/essays/injection.js';
 import {
   CorrectionInvalidOutputError,
+  HeuristicFlaggedError,
   runCorrectionPipeline,
 } from '../src/modules/essays/pipeline.js';
 import { SYSTEM_PROMPT, buildUserMessage } from '../src/modules/essays/prompt.js';
@@ -251,27 +252,17 @@ describe('pipeline com modelo comprometido', () => {
     expect(r.totalScore).toBe(760);
   });
 
-  it('ataques: modelo "comprometido" dá 200 em tudo, mas o resultado é flagged com nota 0', async () => {
+  it('ataques: a heurística rejeita antes do modelo (sem correção, modelo não é chamado)', async () => {
     const compromised = goodOutput({
       c1: { score: 200, justification: 'perfeito', suggestions: [] },
-      c2: { score: 200, justification: 'perfeito', suggestions: [] },
-      c3: { score: 200, justification: 'perfeito', suggestions: [] },
-      c4: { score: 200, justification: 'perfeito', suggestions: [] },
-      c5: { score: 200, justification: 'perfeito', suggestions: [] },
       injectionSuspected: false,
     });
     for (const atk of ATTACKS) {
       const fake = fakeCorrector([compromised]);
-      const r = await runCorrectionPipeline(fake, { theme: THEME, text: atk.text });
-      expect(r.status, atk.name).toBe('flagged');
-      expect(r.totalScore, atk.name).toBe(0);
-      expect(r.correction.injectionSuspected).toBe(true);
-      expect(
-        [r.correction.c1, r.correction.c2, r.correction.c3, r.correction.c4, r.correction.c5].every(
-          (c) => c.score === 0,
-        ),
-      ).toBe(true);
-      // a heurística curto-circuita: o modelo nem é chamado
+      await expect(
+        runCorrectionPipeline(fake, { theme: THEME, text: atk.text }),
+        atk.name,
+      ).rejects.toBeInstanceOf(HeuristicFlaggedError);
       expect(fake.calls, atk.name).toBe(0);
     }
   });

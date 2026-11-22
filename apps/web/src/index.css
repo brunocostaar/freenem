@@ -152,8 +152,9 @@
   --color-subj-espanhol: var(--subj-espanhol);
   --color-subj-artes: var(--subj-artes);
   --color-subj-educacao-fisica: var(--subj-educacao-fisica);
-  --font-display: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
-  --font-sans: 'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-display:
+    'Bricolage Grotesque Variable', 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Hanken Grotesk Variable', 'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif;
   --shadow-hard: 4px 4px 0 0 var(--shadow);
   --shadow-hard-sm: 2px 2px 0 0 var(--shadow);
 }

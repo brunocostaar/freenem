@@ -1,17 +1,23 @@
 import { scanForInjection, type InjectionScan } from './injection.js';
 import type { EssayCorrector } from './corrector.js';
 import { sanitizeEssayText } from './sanitize.js';
-import {
-  finalizeCorrection,
-  flaggedCorrection,
-  validateModelOutput,
-  type FinalizedCorrection,
-} from './validate.js';
+import { finalizeCorrection, validateModelOutput, type FinalizedCorrection } from './validate.js';
 
 export class CorrectionInvalidOutputError extends Error {
   constructor() {
     super('A IA devolveu uma resposta inválida.');
     this.name = 'CorrectionInvalidOutputError';
+  }
+}
+
+/**
+ * A heurística pré-modelo sinalizou o texto. Não vira correção: o service trata como tentativa
+ * falha (não consome a cota diária) e pede ao aluno que revise o texto.
+ */
+export class HeuristicFlaggedError extends Error {
+  constructor(public scan: InjectionScan) {
+    super('Texto sinalizado pela heurística de injeção.');
+    this.name = 'HeuristicFlaggedError';
   }
 }
 
@@ -26,9 +32,10 @@ export interface PipelineResult extends FinalizedCorrection {
  * Pipeline completo e independente de transporte:
  * sanitiza -> heurística de injection -> (se limpo) modelo -> valida (1 retry) -> política final.
  *
- * Se a heurística já sinaliza manipulação, o modelo NEM É CHAMADO: o resultado seria `flagged`
- * de qualquer jeito, e evitamos custo e superfície de ataque.
- * Lança `SanitizeError` (texto inválido; não consome a cota) ou `CorrectionInvalidOutputError`.
+ * Se a heurística já sinaliza manipulação, o modelo NEM É CHAMADO (evita custo e superfície de
+ * ataque) e lança `HeuristicFlaggedError`: nada é gravado e a cota diária não é consumida.
+ * Sinalização vinda do modelo continua gerando uma correção `flagged` com nota 0.
+ * Lança também `SanitizeError` (texto inválido) ou `CorrectionInvalidOutputError`.
  */
 export async function runCorrectionPipeline(
   corrector: EssayCorrector,
@@ -37,15 +44,7 @@ export async function runCorrectionPipeline(
   const sanitized = sanitizeEssayText(input.text);
   const scan = scanForInjection(sanitized.text, sanitized);
 
-  if (scan.flagged) {
-    return {
-      ...flaggedCorrection('heuristic', corrector.isDemo),
-      model: corrector.isDemo ? 'mock' : 'heuristic',
-      inputTokens: null,
-      outputTokens: null,
-      scan,
-    };
-  }
+  if (scan.flagged) throw new HeuristicFlaggedError(scan);
 
   let inputTokens = 0;
   let outputTokens = 0;

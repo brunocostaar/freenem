@@ -8,3 +8,4 @@ export * from './study-plan.js';
 export * from './reports.js';
 export * from './resolutions.js';
 export * from './ai-review.js';
+export * from './data-export.js';

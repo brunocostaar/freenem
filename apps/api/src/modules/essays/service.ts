@@ -9,7 +9,11 @@ import {
 import { db, schema } from '../../db/index.js';
 import { AppError } from '../../lib/app-error.js';
 import { getCorrector } from './active.js';
-import { CorrectionInvalidOutputError, runCorrectionPipeline } from './pipeline.js';
+import {
+  CorrectionInvalidOutputError,
+  HeuristicFlaggedError,
+  runCorrectionPipeline,
+} from './pipeline.js';
 import { SanitizeError, sanitizeEssayText } from './sanitize.js';
 
 export const MAX_FAILED_ATTEMPTS_PER_DAY = 3;
@@ -297,6 +301,13 @@ export async function correctEssay(user: EssayUser, id: string): Promise<EssayRe
     await db.delete(schema.essayCorrections).where(eq(schema.essayCorrections.id, claim.id));
     if (e instanceof SanitizeError) throw new AppError(422, e.code, e.message);
     registerFailure(userId);
+    if (e instanceof HeuristicFlaggedError) {
+      throw new AppError(
+        422,
+        'INJECTION_SUSPECTED',
+        'Encontramos trechos que parecem instruções para o corretor (ex.: pedidos de nota ou comandos dirigidos à IA). Revise o texto e envie de novo; essa tentativa não contou no seu limite diário.',
+      );
+    }
     const detail =
       e instanceof CorrectionInvalidOutputError ? 'resposta inválida' : 'erro no serviço';
     throw new AppError(

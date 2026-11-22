@@ -6,41 +6,59 @@ const optionalString = z.preprocess(
   z.string().optional(),
 );
 
-const envSchema = z.object({
-  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
-  DATABASE_URL: z.string().min(1),
-  PORT: z.coerce.number().int().default(3340),
-  HOST: z.string().default('0.0.0.0'),
-  WEB_ORIGIN: z.string().url().default('http://localhost:5173'),
-  BETTER_AUTH_SECRET: z.string().min(32, 'BETTER_AUTH_SECRET precisa ter ao menos 32 caracteres'),
-  BETTER_AUTH_URL: z.string().url().default('http://localhost:3340'),
-  GOOGLE_CLIENT_ID: optionalString,
-  GOOGLE_CLIENT_SECRET: optionalString,
-  RESEND_API_KEY: optionalString,
-  EMAIL_FROM: z.string().default('freenem <onboarding@resend.dev>'),
-  DEEPSEEK_API_KEY: optionalString,
-  DEEPSEEK_MODEL: z.string().default('deepseek-chat'),
-  DEEPSEEK_BASE_URL: z.string().url().default('https://api.deepseek.com'),
-  FEATHERLESS_API_KEY: optionalString,
-  FEATHERLESS_MODEL: z.string().default('Qwen/Qwen3-VL-32B-Instruct'),
-  FEATHERLESS_BASE_URL: z.string().url().default('https://api.featherless.ai/v1'),
-  ANTHROPIC_API_KEY: optionalString,
-  ANTHROPIC_MODEL: z.string().default('claude-sonnet-5-5'),
-  ANTHROPIC_EFFORT: z.enum(['low', 'medium', 'high']).default('low'),
-  STORAGE_DRIVER: z.enum(['local', 'r2']).default('local'),
-  STORAGE_DIR: z.string().default('./storage'),
-  R2_ACCOUNT_ID: optionalString,
-  R2_ACCESS_KEY_ID: optionalString,
-  R2_SECRET_ACCESS_KEY: optionalString,
-  R2_BUCKET: optionalString,
-  R2_PUBLIC_URL: optionalString,
-  ADMIN_EMAIL: z.string().email().default('admin@freenem.local'),
-  ADMIN_PASSWORD: optionalString,
-  RATE_LIMIT_ENABLED: z
-    .enum(['true', 'false'])
-    .default('true')
-    .transform((v) => v === 'true'),
-});
+const EXAMPLE_SECRET = 'dev-secret-change-me-dev-secret-change-me';
+
+export const envSchema = z
+  .object({
+    NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+    DATABASE_URL: z.string().min(1),
+    PORT: z.coerce.number().int().default(3340),
+    HOST: z.string().default('0.0.0.0'),
+    WEB_ORIGIN: z.string().url().default('http://localhost:5173'),
+    BETTER_AUTH_SECRET: z.string().min(32, 'BETTER_AUTH_SECRET precisa ter ao menos 32 caracteres'),
+    BETTER_AUTH_URL: z.string().url().default('http://localhost:3340'),
+    GOOGLE_CLIENT_ID: optionalString,
+    GOOGLE_CLIENT_SECRET: optionalString,
+    RESEND_API_KEY: optionalString,
+    EMAIL_FROM: z.string().default('freenem <onboarding@resend.dev>'),
+    DEEPSEEK_API_KEY: optionalString,
+    DEEPSEEK_MODEL: z.string().default('deepseek-chat'),
+    DEEPSEEK_BASE_URL: z.string().url().default('https://api.deepseek.com'),
+    FEATHERLESS_API_KEY: optionalString,
+    FEATHERLESS_MODEL: z.string().default('Qwen/Qwen3-VL-32B-Instruct'),
+    FEATHERLESS_BASE_URL: z.string().url().default('https://api.featherless.ai/v1'),
+    ANTHROPIC_API_KEY: optionalString,
+    ANTHROPIC_MODEL: z.string().default('claude-sonnet-5-5'),
+    ANTHROPIC_EFFORT: z.enum(['low', 'medium', 'high']).default('low'),
+    STORAGE_DRIVER: z.enum(['local', 'r2']).default('local'),
+    STORAGE_DIR: z.string().default('./storage'),
+    R2_ACCOUNT_ID: optionalString,
+    R2_ACCESS_KEY_ID: optionalString,
+    R2_SECRET_ACCESS_KEY: optionalString,
+    R2_BUCKET: optionalString,
+    R2_PUBLIC_URL: optionalString,
+    ADMIN_EMAIL: z.string().email().default('admin@freenem.local'),
+    ADMIN_PASSWORD: optionalString,
+    /** Nº de proxies reversos confiáveis à frente da API (Railway = 1). 0 = ignora X-Forwarded-For. */
+    TRUST_PROXY_HOPS: z.coerce.number().int().min(0).default(1),
+    RATE_LIMIT_ENABLED: z
+      .enum(['true', 'false'])
+      .default('true')
+      .transform((v) => v === 'true'),
+  })
+  .superRefine((v, ctx) => {
+    if (
+      v.NODE_ENV === 'production' &&
+      (v.BETTER_AUTH_SECRET.startsWith('dev-secret') || v.BETTER_AUTH_SECRET === EXAMPLE_SECRET)
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['BETTER_AUTH_SECRET'],
+        message:
+          'BETTER_AUTH_SECRET é o valor de exemplo do .env.example; gere um segredo próprio em produção (ex.: openssl rand -base64 48)',
+      });
+    }
+  });
 
 const parsed = envSchema.safeParse(process.env);
 if (!parsed.success) {
