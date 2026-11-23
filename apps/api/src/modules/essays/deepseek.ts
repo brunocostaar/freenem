@@ -4,6 +4,7 @@ import { OUTPUT_JSON_SCHEMA, SYSTEM_PROMPT, buildUserMessage } from './prompt.js
 
 const MAX_OUTPUT_TOKENS = 4000;
 const REQUEST_TIMEOUT_MS = 90_000;
+const DEFAULT_TEMPERATURE = 0.2;
 
 /**
  * Sem saída estruturada por schema na API do DeepSeek (só `json_object`): o schema vai no
@@ -16,11 +17,15 @@ Responda com um único objeto JSON válido que siga exatamente este JSON Schema 
 ${JSON.stringify(OUTPUT_JSON_SCHEMA)}`;
 
 /** Corpo da requisição (função pura, testável). A redação vai só na mensagem do usuário. */
-export function buildDeepSeekRequest(input: CorrectorInput, model: string) {
+export function buildDeepSeekRequest(
+  input: CorrectorInput,
+  model: string,
+  temperature = DEFAULT_TEMPERATURE,
+) {
   return {
     model,
     max_tokens: MAX_OUTPUT_TOKENS,
-    temperature: 0.2,
+    temperature,
     response_format: { type: 'json_object' as const },
     messages: [
       { role: 'system' as const, content: DEEPSEEK_SYSTEM_PROMPT },
@@ -43,13 +48,14 @@ export class DeepSeekCorrector implements EssayCorrector {
     private apiKey: string,
     private model: string,
     private baseUrl = 'https://api.deepseek.com',
+    private temperature = DEFAULT_TEMPERATURE,
   ) {}
 
   async correct(input: CorrectorInput): Promise<CorrectorResult> {
     const res = await fetch(`${this.baseUrl.replace(/\/$/, '')}/chat/completions`, {
       method: 'POST',
       headers: { authorization: `Bearer ${this.apiKey}`, 'content-type': 'application/json' },
-      body: JSON.stringify(buildDeepSeekRequest(input, this.model)),
+      body: JSON.stringify(buildDeepSeekRequest(input, this.model, this.temperature)),
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
     if (!res.ok) {
